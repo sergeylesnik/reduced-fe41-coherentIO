@@ -2023,9 +2023,6 @@ void Foam::polyhedralRefinement::setUnrefinementInstruction
         }
     }
 
-    Info<< "pointRegionMaster: " << pointRegionMaster << nl
-        << " cellRegionMaster: " << cellRegionMaster << endl;   
-
     // Insert all commands to combine cells
     faceRemover_.setRefinement
     (
