@@ -174,9 +174,8 @@ public:
         inline autoPtr<List<T> > clone() const;
 
 
-    // Destructor
-
-        ~List();
+    //- Destructor
+    ~List();
 
 
     // Related types
