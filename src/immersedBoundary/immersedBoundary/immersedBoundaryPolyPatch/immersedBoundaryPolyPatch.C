@@ -617,14 +617,17 @@ void Foam::immersedBoundaryPolyPatch::calcImmersedBoundary() const
             }
             else
             {
-                WarningIn
-                (
-                    "void immersedBoundaryPolyPatch::"
-                    "calcImmersedBoundary() const"
-                )   << "Non-processor coupled patch detected for "
-                    << "immersed boundary.  "
-                    << "Direct face cut may not be detected"
-                    << endl;
+                // Possible code missing: reconsider Immersed boundary
+                // cutting non-matching coupled patches.
+                // HJ and HN, 20/Mar/2020
+                // WarningIn
+                // (
+                //     "void immersedBoundaryPolyPatch::"
+                //     "calcImmersedBoundary() const"
+                // )   << "Non-processor coupled patch detected for "
+                //     << "immersed boundary.  "
+                //     << "Direct face cut may not be detected"
+                //     << endl;
             }
         }
     }
