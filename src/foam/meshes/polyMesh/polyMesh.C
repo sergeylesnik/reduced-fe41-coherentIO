@@ -895,6 +895,10 @@ Foam::polyMesh::~polyMesh()
 {
     clearOut();
     resetMotion();
+
+    // Clear mesh objects.  See clearGeom()
+    // HJ, 12/Feb/2020
+    meshObjectBase::allDelete(*this);
 }
 
 

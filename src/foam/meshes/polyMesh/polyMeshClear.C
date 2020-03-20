@@ -91,9 +91,9 @@ void Foam::polyMesh::clearGeom()
     solutionD_ = Vector<label>::zero;
 
     // Move points all mesh objects.  HJ, 13/Oct/2010
-    // This is a problem, because it is called in a destructor.
-    meshObjectBase::allDelete(*this);
-//     meshObjectBase::allMovePoints(*this);
+    // Functionality update: losing mesh objects on topo change, which should
+    // not happen.  HJ, 12/Feb/2020
+    meshObjectBase::allMovePoints(*this);
 }
 
 
@@ -116,6 +116,10 @@ void Foam::polyMesh::clearAddressing()
     // Reset valid directions
     geometricD_ = Vector<label>::zero;
     solutionD_ = Vector<label>::zero;
+
+    // Update mesh objects?
+    // HJ, 12/Feb/2020
+    meshObjectBase::allMovePoints(*this);
 }
 
 
@@ -129,6 +133,10 @@ void Foam::polyMesh::clearPrimitives()
     neighbour_.setSize(0);
 
     clearedPrimitives_ = true;
+
+    // Clear mesh objects.  See clearGeom()
+    // HJ, 12/Feb/2020
+    meshObjectBase::allDelete(*this);
 }
 
 
