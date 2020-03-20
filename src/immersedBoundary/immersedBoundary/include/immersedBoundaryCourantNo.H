@@ -25,8 +25,11 @@ Global
     CourantNo
 
 Description
-    Calculates and outputs the mean and maximum Courant Numbers with
-    immersed boundary correction.
+    Calculates and outputs the mean and maximum Courant Numbers for
+    incompressible flow with immersed boundary correction.
+
+Author
+    Hrvoje Jasak, Wikki Ltd.  All rights reserved
 
 \*---------------------------------------------------------------------------*/
 
