@@ -58,7 +58,7 @@ constantProperties
     f0              f0 [ 0 0 0 0 0 ] 0.5;
     Pr              Pr [ 0 0 0 0 0 ] 0.7;
     Tvap            Tvap [ 0 0 0 1 0 ] 400;
-    Tbp             Tvap [ 0 0 0 1 0 ] 400;
+    Tbp             Tbp [ 0 0 0 1 0 ] 400;
     LDevol          LDevol [ 0 0 0 0 0 ] 0;
     hRetentionCoeff hRetentionCoeff [ 0 0 0 0 0 ] 1;
     constantVolume  true;
