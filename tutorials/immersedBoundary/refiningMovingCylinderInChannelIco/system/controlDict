@@ -21,7 +21,7 @@ DebugSwitches
     // fvMesh   2;
 }
 
-application     pimpleDyMFoam;
+application     pimpleDyMIbFoam;
 
 startFrom       startTime;
 

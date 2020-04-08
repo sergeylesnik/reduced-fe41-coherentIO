@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     4.0                                |
+|  \\    /   O peration     | Version:     4.1                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -19,16 +19,11 @@ dynamicFvMesh   immersedBoundarySolidBodyMotionFvMesh;
 
 immersedBoundarySolidBodyMotionFvMeshCoeffs
 {
+    // Immersed boundary controls
     motionFunctions
     (
         ibCylinder
         {
-//             solidBodyMotionFunction     translation;
-//             translationCoeffs
-//             {
-//                 velocity (0.1 0 0);
-//             }
-
             solidBodyMotionFunction     linearOscillation;
             linearOscillationCoeffs
             {

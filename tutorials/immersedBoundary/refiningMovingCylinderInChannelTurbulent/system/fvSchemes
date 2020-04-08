@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     4.0                                |
+|  \\    /   O peration     | Version:     4.1                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -27,7 +27,7 @@ gradSchemes
 divSchemes
 {
     default none;
-    div(phi,U) Gauss upwind;
+    div(phi,U) Gauss GammaVDC 0.5;
     div(phi,k) Gauss upwind;
     div(phi,epsilon) Gauss upwind;
     div(phi,omega) Gauss upwind;

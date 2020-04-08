@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     4.0                                |
+|  \\    /   O peration     | Version:     4.1                                |
 |   \\  /    A nd           | Web:         http://www.foam-extend.org         |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -49,7 +49,7 @@ PIMPLE
 {
     nOuterCorrectors 4;
     nCorrectors     2;
-    nNonOrthogonalCorrectors 0;
+    nNonOrthogonalCorrectors 1;
 
     pRefPoint (0 -0.45 0.05);
     pRefValue 0;

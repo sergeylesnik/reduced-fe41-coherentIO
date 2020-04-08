@@ -71,7 +71,6 @@ relaxationFactors
     }
     fields
     {
-        // p         0.8;
     }
 }
 
