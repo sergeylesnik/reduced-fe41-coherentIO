@@ -63,7 +63,7 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-               Class flowRateInletVelocityFvPatch Declaration
+         Class flowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class flowRateInletVelocityFvPatchVectorField
