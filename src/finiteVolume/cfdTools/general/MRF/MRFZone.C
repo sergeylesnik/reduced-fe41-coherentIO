@@ -149,9 +149,9 @@ void Foam::MRFZone::setMRFFaces()
 
     label faceI;
 
-    forAll (patches, patchi)
+    forAll (patches, patchI)
     {
-        const polyPatch& pp = patches[patchi];
+        const polyPatch& pp = patches[patchI];
 
         forAll (pp, patchFaceI)
         {
@@ -159,11 +159,11 @@ void Foam::MRFZone::setMRFFaces()
 
             if (faceType[faceI] == 1)
             {
-                nIncludedFaces[patchi]++;
+                nIncludedFaces[patchI]++;
             }
             else if (faceType[faceI] == 2)
             {
-                nExcludedFaces[patchi]++;
+                nExcludedFaces[patchI]++;
             }
         }
     }
@@ -553,8 +553,8 @@ void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn) const
 
     forAll (cells, i)
     {
-        label celli = cells[i];
-        Usource[celli] -= V[celli]*(rotVel ^ U[celli]);
+        label cellI = cells[i];
+        Usource[cellI] -= V[cellI]*(rotVel ^ U[cellI]);
     }
 }
 
@@ -578,8 +578,8 @@ void Foam::MRFZone::addCoriolis
 
     forAll (cells, i)
     {
-        label celli = cells[i];
-        Usource[celli] -= V[celli]*rho[celli]*(rotVel ^ U[celli]);
+        label cellI = cells[i];
+        Usource[cellI] -= V[cellI]*rho[cellI]*(rotVel ^ U[cellI]);
     }
 }
 
@@ -609,28 +609,28 @@ void Foam::MRFZone::relativeVelocity(volVectorField& U) const
 
     forAll (cells, i)
     {
-        label celli = cells[i];
-        U[celli] -= (rotVel ^ (C[celli] - origin));
+        label cellI = cells[i];
+        U[cellI] -= (rotVel ^ (C[cellI] - origin));
     }
 
     // Included faces
-    forAll (includedFaces_, patchi)
+    forAll (includedFaces_, patchI)
     {
-        forAll (includedFaces_[patchi], i)
+        forAll (includedFaces_[patchI], i)
         {
-            label patchFaceI = includedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFaceI] = vector::zero;
+            label patchFaceI = includedFaces_[patchI][i];
+            U.boundaryField()[patchI][patchFaceI] = vector::zero;
         }
     }
 
     // Excluded faces
-    forAll (excludedFaces_, patchi)
+    forAll (excludedFaces_, patchI)
     {
-        forAll (excludedFaces_[patchi], i)
+        forAll (excludedFaces_[patchI], i)
         {
-            label patchFaceI = excludedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFaceI] -=
-                (rotVel ^ (C.boundaryField()[patchi][patchFaceI] - origin));
+            label patchFaceI = excludedFaces_[patchI][i];
+            U.boundaryField()[patchI][patchFaceI] -=
+                (rotVel ^ (C.boundaryField()[patchI][patchFaceI] - origin));
         }
     }
 }
@@ -647,29 +647,45 @@ void Foam::MRFZone::absoluteVelocity(volVectorField& U) const
 
     forAll (cells, i)
     {
-        label celli = cells[i];
-        U[celli] += (rotVel ^ (C[celli] - origin));
+        label cellI = cells[i];
+        U[cellI] += (rotVel ^ (C[cellI] - origin));
     }
 
+    // For precision and consistency, normal component of the
+    // absolute velocity must match the mesh flux exactly
+    // HJ, 3/Jul/2020
+
+    const surfaceScalarField& meshVel = meshVelocity();
+    const surfaceScalarField& magSf = mesh_.magSf();
+
     // Included faces
-    forAll (includedFaces_, patchi)
+    forAll (includedFaces_, patchI)
     {
-        forAll (includedFaces_[patchi], i)
+        vectorField n = mesh_.boundary()[patchI].nf();
+
+        forAll (includedFaces_[patchI], i)
         {
-            label patchFaceI = includedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFaceI] =
-                (rotVel ^ (C.boundaryField()[patchi][patchFaceI] - origin));
+            label patchFaceI = includedFaces_[patchI][i];
+
+            vector Up =
+                rotVel ^ (C.boundaryField()[patchI][patchFaceI] - origin);
+
+            scalar Un = meshVel.boundaryField()[patchI][patchFaceI]/
+                magSf.boundaryField()[patchI][patchFaceI];
+
+            U.boundaryField()[patchI][patchFaceI] =
+                (Up + n[patchFaceI]*(Un - (n[patchFaceI] & Up)));
         }
     }
 
     // Excluded faces
-    forAll (excludedFaces_, patchi)
+    forAll (excludedFaces_, patchI)
     {
-        forAll (excludedFaces_[patchi], i)
+        forAll (excludedFaces_[patchI], i)
         {
-            label patchFaceI = excludedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFaceI] +=
-                (rotVel ^ (C.boundaryField()[patchi][patchFaceI] - origin));
+            label patchFaceI = excludedFaces_[patchI][i];
+            U.boundaryField()[patchI][patchFaceI] +=
+                (rotVel ^ (C.boundaryField()[patchI][patchFaceI] - origin));
         }
     }
 }
