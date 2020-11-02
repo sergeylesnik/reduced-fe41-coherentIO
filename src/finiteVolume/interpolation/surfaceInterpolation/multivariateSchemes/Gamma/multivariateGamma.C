@@ -37,6 +37,15 @@ namespace Foam
         Gamma,
         GammaLimiter
     )
+
+    makeLLimitedMultivariateSurfaceInterpolationScheme
+    (
+        Gamma01,
+        Limited01Limiter,
+        GammaLimiter,
+        NVDTVD,
+        magSqr
+    )
 }
 
 // ************************************************************************* //

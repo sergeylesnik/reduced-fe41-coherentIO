@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class multivariateScheme Declaration
+                   Class multivariateScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class Scheme>

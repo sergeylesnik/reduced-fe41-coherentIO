@@ -170,8 +170,8 @@ void SRFTotalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
         return;
     }
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const fvsPatchScalarField& phip =
+        lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
     if (psiName_ == "none" && rhoName_ == "none")
     {
