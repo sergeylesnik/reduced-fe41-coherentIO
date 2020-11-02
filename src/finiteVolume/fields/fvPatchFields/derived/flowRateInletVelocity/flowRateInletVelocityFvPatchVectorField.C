@@ -117,6 +117,18 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
+    if (!this->db().objectRegistry::found(phiName_))
+    {
+        // Flux not available, do not update
+        InfoInFunction
+            << "Flux field " << phiName_ << " not found.  "
+            << "Performing fixed value update" << endl;
+
+        fixedValueFvPatchVectorField::updateCoeffs();
+
+        return;
+    }
+
 //     if (patch().boundaryMesh().mesh().moving())
 //     {
 //         WarningIn
@@ -159,7 +171,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
             << nl << exit(FatalError);
     }
 
-    fixedValueFvPatchField<vector>::updateCoeffs();
+    fixedValueFvPatchVectorField::updateCoeffs();
 }
 
 
