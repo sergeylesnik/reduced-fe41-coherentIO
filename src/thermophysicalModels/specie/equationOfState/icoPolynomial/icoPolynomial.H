@@ -117,9 +117,6 @@ public:
         //- Construct from Istream
         icoPolynomial(Istream&);
 
-        //- Construct as copy
-        inline icoPolynomial(const icoPolynomial&);
-
         //- Construct as named copy
         inline icoPolynomial(const word& name, const icoPolynomial&);
 
@@ -144,7 +141,6 @@ public:
 
     // Member operators
 
-        inline icoPolynomial& operator=(const icoPolynomial&);
         inline void operator+=(const icoPolynomial&);
         inline void operator-=(const icoPolynomial&);
 

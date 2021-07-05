@@ -148,8 +148,6 @@ public:
 
         Istream& operator>>(Istream&);
 
-        void operator=(const processorBoundaryPatch&);
-
         bool operator!=(const processorBoundaryPatch&) const;
 };
 

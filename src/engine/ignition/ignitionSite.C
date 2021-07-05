@@ -124,20 +124,6 @@ bool ignitionSite::ignited() const
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void ignitionSite::operator=(const ignitionSite& is)
-{
-    location_ = is.location_;
-    diameter_ = is.diameter_;
-    time_ = is.time_;
-    duration_ = is.duration_;
-    strength_ = is.strength_;
-    cells_ = is.cells_;
-    cellVolumes_ = is.cellVolumes_;
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

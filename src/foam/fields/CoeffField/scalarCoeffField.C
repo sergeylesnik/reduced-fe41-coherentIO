@@ -294,6 +294,12 @@ void Foam::CoeffField<Foam::scalar>::addSubset
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
+void Foam::CoeffField<Foam::scalar>::operator=(const CoeffField<scalar>& f)
+{
+    scalarField::operator=(f.asScalar());
+}
+
+
 void Foam::CoeffField<Foam::scalar>::operator=(const scalarField& f)
 {
     scalarField::operator=(f);

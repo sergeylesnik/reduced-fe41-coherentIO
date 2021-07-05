@@ -188,6 +188,7 @@ public:
 
     // Member operators
 
+        void operator=(const CoeffField<scalar>&);
         void operator=(const scalarField&);
         void operator=(const tmp<scalarField>&);
 

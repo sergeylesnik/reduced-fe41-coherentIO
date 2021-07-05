@@ -331,7 +331,7 @@ SYSTEMOPENMPI)
 
     export MPI_HOME=`dirname $OPENMPI_BIN_DIR`
     export MPI_ARCH_PATH=$MPI_HOME
-    export OPAL_PREFIX=$MPI_ARCH_PATH
+    #HJ export OPAL_PREFIX=$MPI_ARCH_PATH
 
     # We initialize the rest of the environment using mpicc --showme:
     [ ! -n "${OPENMPI_INCLUDE_DIR}" ]   && export OPENMPI_INCLUDE_DIR="`mpicc --showme:incdirs`"
@@ -616,6 +616,13 @@ export MPI_BUFFER_SIZE
 
 # Load Metis library
 # ~~~~~~~~~~~~~~~~~~
+[ ! -z "$METIS_SYSTEM" ] && {
+    export METIS_DIR=/usr
+    export METIS_BIN_DIR=/usr/bin
+    export METIS_LIB_DIR=/lib
+    export METIS_INCLUDE_DIR=/usr/include
+}
+
 [ -z "$METIS_SYSTEM" ] && [ ! -z $WM_THIRD_PARTY_USE_METIS_510 ] && [ -e $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS ] && {
     _foamSource $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS/etc/metis-5.1.0.sh
 }
@@ -624,6 +631,13 @@ export MPI_BUFFER_SIZE
 
 # Load ParMetis library
 # ~~~~~~~~~~~~~~~~~~~~~
+[ ! -z "$PARMETIS_SYSTEM" ] && {
+    export PARMETIS_DIR=/usr
+    export PARMETIS_BIN_DIR=/usr/bin
+    export PARMETIS_LIB_DIR=/lib
+    export PARMETIS_INCLUDE_DIR=/usr/include
+}
+
 [ -z "$PARMETIS_SYSTEM" ] && [ ! -z $WM_THIRD_PARTY_USE_PARMETIS_403 ] && [ -e $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS ] && {
     _foamSource $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS/etc/parmetis-4.0.3.sh
 }
@@ -648,6 +662,13 @@ export MPI_BUFFER_SIZE
 
 # Load Scotch library
 # ~~~~~~~~~~~~~~~~~~~
+[ ! -z "$SCOTCH_SYSTEM" ] && {
+    export SCOTCH_DIR=/usr
+    export SCOTCH_BIN_DIR=/usr/bin
+    export SCOTCH_LIB_DIR=/lib
+    export SCOTCH_INCLUDE_DIR=/usr/include/scotch
+}
+
 [ -z "$SCOTCH_SYSTEM" ] && [ ! -z $WM_THIRD_PARTY_USE_SCOTCH_604 ] && [ -e $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS ] && {
     _foamSource $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS/etc/scotch-6.0.4.sh
 }

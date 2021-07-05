@@ -197,21 +197,6 @@ inline scalar sutherlandTransport<thermo>::alpha
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class thermo>
-inline sutherlandTransport<thermo>& sutherlandTransport<thermo>::operator=
-(
-    const sutherlandTransport<thermo>& st
-)
-{
-    thermo::operator=(st);
-
-    As = st.As;
-    Ts = st.Ts;
-
-    return *this;
-}
-
-
-template<class thermo>
 inline void Foam::sutherlandTransport<thermo>::operator+=
 (
     const sutherlandTransport<thermo>& st

@@ -251,6 +251,9 @@ public:
             bool registerObject = true
         );
 
+        //- Copy construct
+        IOobject(const IOobject&) = default;
+
         //- Clone
         Foam::autoPtr<IOobject> clone() const
         {

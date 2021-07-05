@@ -44,8 +44,86 @@ SourceFiles
 namespace Foam
 {
 
+class interfaceThetaProps;
+
+// Forward declaration of friend functions and operators
+Istream& operator>>
+(
+    Istream&,
+    interfaceThetaProps&
+);
+Ostream& operator<<
+(
+    Ostream&,
+    const interfaceThetaProps&
+);
+
 /*---------------------------------------------------------------------------*\
-            Class multiphaseAlphaContactAngleFvPatch Declaration
+                     Class interfaceThetaProps Declaration
+\*---------------------------------------------------------------------------*/
+
+class interfaceThetaProps
+{
+    //- Equilibrium contact angle
+    scalar theta0_;
+
+    //- Dynamic contact angle velocity scale
+    scalar uTheta_;
+
+    //- Limiting advancing contact angle
+    scalar thetaA_;
+
+    //- Limiting receeding contact angle
+    scalar thetaR_;
+
+
+public:
+
+    // Constructors
+        interfaceThetaProps()
+        {}
+
+        interfaceThetaProps(Istream&);
+
+
+    // Member functions
+
+        //- Return the equilibrium contact angle theta0
+        scalar theta0(bool matched=true) const
+        {
+            if (matched) return theta0_;
+            else return 180.0 - theta0_;
+        }
+
+        //- Return the dynamic contact angle velocity scale
+        scalar uTheta() const
+        {
+            return uTheta_;
+        }
+
+        //- Return the limiting advancing contact angle
+        scalar thetaA(bool matched=true) const
+        {
+            if (matched) return thetaA_;
+            else return 180.0 - thetaA_;
+        }
+
+        //- Return the limiting receeding contact angle
+        scalar thetaR(bool matched=true) const
+        {
+            if (matched) return thetaR_;
+            else return 180.0 - thetaR_;
+        }
+
+
+    // IO functions
+
+        friend Istream& operator>>(Istream&, interfaceThetaProps&);
+        friend Ostream& operator<<(Ostream&, const interfaceThetaProps&);
+};
+
+/*---------------------------------------------------------------------------*\
+              Class multiphaseAlphaContactAngleFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class multiphaseAlphaContactAngleFvPatchScalarField
@@ -54,66 +132,7 @@ class multiphaseAlphaContactAngleFvPatchScalarField
 {
 public:
 
-    class interfaceThetaProps
-    {
-        //- Equilibrium contact angle
-        scalar theta0_;
-
-        //- Dynamic contact angle velocity scale
-        scalar uTheta_;
-
-        //- Limiting advancing contact angle
-        scalar thetaA_;
-
-        //- Limiting receeding contact angle
-        scalar thetaR_;
-
-
-    public:
-
-        // Constructors
-            interfaceThetaProps()
-            {}
-
-            interfaceThetaProps(Istream&);
-
-
-        // Member functions
-
-            //- Return the equilibrium contact angle theta0
-            scalar theta0(bool matched=true) const
-            {
-                if (matched) return theta0_;
-                else return 180.0 - theta0_;
-            }
-
-            //- Return the dynamic contact angle velocity scale
-            scalar uTheta() const
-            {
-                return uTheta_;
-            }
-
-            //- Return the limiting advancing contact angle
-            scalar thetaA(bool matched=true) const
-            {
-                if (matched) return thetaA_;
-                else return 180.0 - thetaA_;
-            }
-
-            //- Return the limiting receeding contact angle
-            scalar thetaR(bool matched=true) const
-            {
-                if (matched) return thetaR_;
-                else return 180.0 - thetaR_;
-            }
-
-
-        // IO functions
-
-            friend Istream& operator>>(Istream&, interfaceThetaProps&);
-            friend Ostream& operator<<(Ostream&, const interfaceThetaProps&);
-    };
-
+    // Public typedef
     typedef HashTable
     <
         interfaceThetaProps,

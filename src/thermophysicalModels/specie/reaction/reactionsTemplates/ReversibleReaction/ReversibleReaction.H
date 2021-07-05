@@ -57,12 +57,6 @@ class ReversibleReaction
         ReactionRate k_;
 
 
-    // Private Member Functions
-
-        //- Disallow default bitwise assignment
-        void operator=(const ReversibleReaction<ReactionThermo, ReactionRate>&);
-
-
 public:
 
     //- Runtime type information
@@ -119,10 +113,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~ReversibleReaction()
-        {}
+    //- Destructor
+    virtual ~ReversibleReaction() = default;
 
 
     // Member Functions

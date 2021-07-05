@@ -147,21 +147,6 @@ inline scalar constTransport<thermo>::alpha
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class thermo>
-inline constTransport<thermo>& constTransport<thermo>::operator=
-(
-    const constTransport<thermo>& ct
-)
-{
-    thermo::operator=(ct);
-
-    Mu = ct.Mu;
-    rPr = ct.rPr;
-
-    return *this;
-}
-
-
-template<class thermo>
 inline void Foam::constTransport<thermo>::operator+=
 (
     const constTransport<thermo>& st

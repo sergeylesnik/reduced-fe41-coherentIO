@@ -62,12 +62,6 @@ patchRefinement::patchRefinement(Istream& is)
 {
 }
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-patchRefinement::~patchRefinement()
-{
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 word patchRefinement::patchName() const
@@ -97,12 +91,6 @@ scalar patchRefinement::cellSize() const
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void patchRefinement::operator=(const patchRefinement& pr)
-{
-    patchName_ = pr.patchName_;
-    cellSize_ = pr.cellSize_;
-}
 
 Istream& operator>>(Istream& is, patchRefinement& pr)
 {

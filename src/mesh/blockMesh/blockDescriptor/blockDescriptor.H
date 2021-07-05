@@ -79,7 +79,7 @@ class blockDescriptor
         Vector<label> meshDensity_;
 
         //- Block edge points
-        List< List<point> > edgePoints_;
+        List<List<point> > edgePoints_;
 
         //- Block edge weighting factors
         scalarListList edgeWeights_;
@@ -97,12 +97,6 @@ class blockDescriptor
 
         //- Set the edge points/weights
         void setEdge(label edgeI, label start, label end, label dim);
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise assignment
-        void operator=(const blockDescriptor&);
 
 
 public:
@@ -137,7 +131,7 @@ public:
 
 
     //- Destructor
-    ~blockDescriptor();
+    ~blockDescriptor() = default;
 
 
     // Member Functions

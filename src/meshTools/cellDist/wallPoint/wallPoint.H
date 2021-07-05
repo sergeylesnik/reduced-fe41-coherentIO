@@ -106,12 +106,6 @@ public:
             const scalar distSqr
         );
 
-        //- Construct as copy
-        inline wallPoint
-        (
-            const wallPoint&
-        );
-
 
     // Member Functions
 

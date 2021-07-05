@@ -68,10 +68,10 @@ class NamedEnum
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        NamedEnum(const NamedEnum&);
+        NamedEnum(const NamedEnum&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const NamedEnum&);
+        void operator=(const NamedEnum&) = delete;
 
 
 public:

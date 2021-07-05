@@ -127,9 +127,6 @@ private:
         void setLRhs(Istream&);
         void setThermo(const HashPtrTable<ReactionThermo>& thermoDatabase);
 
-        //- Disallow default bitwise assignment
-        void operator=(const Reaction<ReactionThermo>&);
-
 
 public:
 

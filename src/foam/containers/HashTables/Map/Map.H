@@ -91,6 +91,13 @@ public:
             HashTable<T, label, Hash<label> >(map)
         {}
 
+
+    // Member Operators
+
+        void operator=(const Map<T>& map)
+        {
+            HashTable<T, label, Hash<label>>::operator=(map);
+        }
 };
 
 

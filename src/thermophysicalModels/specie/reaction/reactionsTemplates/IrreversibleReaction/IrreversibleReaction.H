@@ -57,15 +57,6 @@ class IrreversibleReaction
         ReactionRate k_;
 
 
-    // Private Member Functions
-
-        //- Disallow default bitwise assignment
-        void operator=
-        (
-            const IrreversibleReaction<ReactionThermo, ReactionRate>&
-        );
-
-
 public:
 
     //- Runtime type information

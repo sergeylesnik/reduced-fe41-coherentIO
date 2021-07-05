@@ -22,7 +22,7 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::janafThermo
+    Foam::absorptionCoeffs
 
 Description
     Absorption coefficients class used in greyMeanAbsorptionEmission and
@@ -109,9 +109,6 @@ public:
 
         // Initialise from a dictionary
         void initialise(const dictionary&);
-
-        // Initialise from an Istream
-        void initialise(Istream&);
 
 
     // Access Functions

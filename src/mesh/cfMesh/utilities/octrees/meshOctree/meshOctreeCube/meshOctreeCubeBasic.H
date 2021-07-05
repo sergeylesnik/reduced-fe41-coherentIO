@@ -51,9 +51,11 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class meshOctreeCubeBasic
-: public meshOctreeCubeCoordinates
+:
+    public meshOctreeCubeCoordinates
 {
     // Private data
+
         //- cube type
         direction cubeType_;
 
@@ -80,10 +82,9 @@ public:
             const short procNo = ALLPROCS
         );
 
-    // Destructor
+    //- Destructor
+    ~meshOctreeCubeBasic() = default;
 
-        ~meshOctreeCubeBasic()
-        {}
 
     // Enumerators
 
@@ -98,6 +99,7 @@ public:
         };
 
     // Member functions
+
         //- return type
         inline direction cubeType() const;
 
@@ -112,10 +114,6 @@ public:
 
         //- return coordinates in the octree
         inline const meshOctreeCubeCoordinates& coordinates() const;
-
-        // Member operators
-
-        inline void operator=(const meshOctreeCubeBasic&);
 
         // Friend operators
 

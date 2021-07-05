@@ -44,7 +44,7 @@ inline bool Foam::cellInfo::update
      || (w2.type() == cellClassification::CUT)
     )
     {
-        FatalErrorIn("cellInfo::update(const cellInfo&)")
+        FatalErrorInFunction
             << "Problem: trying to propagate NOTSET or CUT type:" << w2.type()
             << " into cell/face with type:" << type() << endl
             << "thisFaceI:" << thisFaceI
@@ -52,6 +52,7 @@ inline bool Foam::cellInfo::update
             << "  neighbourFaceI:" << neighbourFaceI
             << "  neighbourCellI:" << neighbourCellI
             << abort(FatalError);
+
         return false;
     }
 
@@ -75,7 +76,7 @@ inline bool Foam::cellInfo::update
     }
 
     // Two conflicting types
-    FatalErrorIn("cellInfo::update(const cellInfo&)")
+    FatalErrorInFunction
         << "Problem: trying to propagate conflicting types:" << w2.type()
         << " into cell/face with type:" << type() << endl
         << "thisFaceI:" << thisFaceI
@@ -101,13 +102,6 @@ inline Foam::cellInfo::cellInfo()
 inline Foam::cellInfo::cellInfo(const label type)
 :
     type_(type)
-{}
-
-
-// Construct as copy
-inline Foam::cellInfo::cellInfo(const cellInfo& w2)
-:
-    type_(w2.type())
 {}
 
 

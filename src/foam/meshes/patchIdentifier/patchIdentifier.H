@@ -102,7 +102,7 @@ public:
 
 
     //- Destructor
-    virtual ~patchIdentifier();
+    virtual ~patchIdentifier() = default;
 
 
     // Member Functions

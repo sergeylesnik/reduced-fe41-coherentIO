@@ -29,8 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::multiphaseAlphaContactAngleFvPatchScalarField::
-interfaceThetaProps::interfaceThetaProps
+Foam::interfaceThetaProps::interfaceThetaProps
 (
     Istream& is
 )
@@ -45,7 +44,7 @@ interfaceThetaProps::interfaceThetaProps
 Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    multiphaseAlphaContactAngleFvPatchScalarField::interfaceThetaProps& tp
+    interfaceThetaProps& tp
 )
 {
     is >> tp.theta0_ >> tp.uTheta_ >> tp.thetaA_ >> tp.thetaR_;
@@ -56,8 +55,7 @@ Foam::Istream& Foam::operator>>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const
-    multiphaseAlphaContactAngleFvPatchScalarField::interfaceThetaProps& tp
+    const interfaceThetaProps& tp
 )
 {
     os  << tp.theta0_ << token::SPACE

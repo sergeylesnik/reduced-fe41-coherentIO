@@ -76,9 +76,9 @@ class refLabelledPoint
             p_(p)
         {}
 
-    // Destructor
-        ~refLabelledPoint()
-        {}
+    //- Destructor
+    ~refLabelledPoint() = default;
+
 
     // Member functions
         //- return label of the object it is associated to
@@ -94,12 +94,6 @@ class refLabelledPoint
         }
 
     // Member operators
-
-        inline void operator=(const refLabelledPoint& lp)
-        {
-            objectLabel_ = lp.objectLabel_;
-            p_ = lp.p_;
-        }
 
         inline bool operator==(const refLabelledPoint& lp) const
         {

@@ -126,9 +126,9 @@ Foam::scalar Foam::chemkinReader::molecularWeight
         }
         else
         {
-            FatalErrorIn("chemkinReader::lex()")
+            FatalErrorInFunction
                 << "Unknown element " << elementName
-                << " on line " << lineNo_-1 << nl
+                << " on line " << lineNo_ - 1 << nl
                 << "    specieComposition: " << specieComposition
                 << exit(FatalError);
         }
@@ -147,10 +147,10 @@ void Foam::chemkinReader::checkCoeffs
 {
     if (reactionCoeffs.size() != nCoeffs)
     {
-        FatalErrorIn("chemkinReader::checkCoeffs")
+        FatalErrorInFunction
             << "Wrong number of coefficients for the " << reactionRateName
             << " rate expression on line "
-            << lineNo_-1 << ", should be "
+            << lineNo_ - 1 << ", should be "
             << nCoeffs << " but " << reactionCoeffs.size() << " supplied." << nl
             << "Coefficients are "
             << reactionCoeffs << nl
@@ -211,17 +211,17 @@ void Foam::chemkinReader::addReactionType
 
             if (rType < 3)
             {
-                FatalErrorIn("chemkinReader::addReactionType")
+                FatalErrorInFunction
                     << "Reaction type " << reactionTypeNames[rType]
-                    << " on line " << lineNo_-1
+                    << " on line " << lineNo_ - 1
                     << " not handled by this function"
                     << exit(FatalError);
             }
             else
             {
-                FatalErrorIn("chemkinReader::addReactionType")
+                FatalErrorInFunction
                     << "Unknown reaction type " << rType
-                    << " on line " << lineNo_-1
+                    << " on line " << lineNo_ - 1
                     << exit(FatalError);
             }
     }
@@ -285,9 +285,9 @@ void Foam::chemkinReader::addPressureDependentReaction
 
             if (TroeCoeffs.size() != 4 && TroeCoeffs.size() != 3)
             {
-                FatalErrorIn("chemkinReader::addPressureDependentReaction")
+                FatalErrorInFunction
                     << "Wrong number of coefficients for Troe rate expression"
-                       " on line " << lineNo_-1 << ", should be 3 or 4 but "
+                       " on line " << lineNo_ - 1 << ", should be 3 or 4 but "
                     << TroeCoeffs.size() << " supplied." << nl
                     << "Coefficients are "
                     << TroeCoeffs << nl
@@ -341,9 +341,9 @@ void Foam::chemkinReader::addPressureDependentReaction
 
             if (SRICoeffs.size() != 5 && SRICoeffs.size() != 3)
             {
-                FatalErrorIn("chemkinReader::addPressureDependentReaction")
+                FatalErrorInFunction
                     << "Wrong number of coefficients for SRI rate expression"
-                       " on line " << lineNo_-1 << ", should be 3 or 5 but "
+                       " on line " << lineNo_ - 1 << ", should be 3 or 5 but "
                     << SRICoeffs.size() << " supplied." << nl
                     << "Coefficients are "
                     << SRICoeffs << nl
@@ -392,22 +392,12 @@ void Foam::chemkinReader::addPressureDependentReaction
 
         default:
         {
-            if (fofType < unknownFallOffFunctionType)
-            {
-                FatalErrorIn("chemkinReader::addPressureDependentReaction")
-                    << "Fall-off function type "
-                    << fallOffFunctionNames[fofType]
-                    << " on line " << lineNo_-1
-                    << " not implemented"
-                    << exit(FatalError);
-            }
-            else
-            {
-                FatalErrorIn("chemkinReader::addPressureDependentReaction")
-                    << "Unknown fall-off function type " << fofType
-                    << " on line " << lineNo_-1
-                    << exit(FatalError);
-            }
+            FatalErrorInFunction
+                << "Fall-off function type "
+                << fallOffFunctionNames[fofType]
+                << " on line " << lineNo_ - 1
+                << " not implemented"
+                << exit(FatalError);
         }
     }
 }
@@ -742,8 +732,8 @@ void Foam::chemkinReader::addReaction
 
         case unknownReactionRateType:
         {
-            FatalErrorIn("chemkinReader::addReaction")
-                << "Internal error on line " << lineNo_-1
+            FatalErrorInFunction
+                << "Internal error on line " << lineNo_ - 1
                 << ": reaction rate type has not been set"
                 << exit(FatalError);
         }
@@ -753,17 +743,17 @@ void Foam::chemkinReader::addReaction
         {
             if (rrType < 9)
             {
-                FatalErrorIn("chemkinReader::addReaction")
+                FatalErrorInFunction
                     << "Reaction rate type " << reactionRateTypeNames[rrType]
-                    << " on line " << lineNo_-1
+                    << " on line " << lineNo_ - 1
                     << " not implemented"
                     << exit(FatalError);
             }
             else
             {
-                FatalErrorIn("chemkinReader::addReaction")
+                FatalErrorInFunction
                     << "Unknown reaction rate type " << rrType
-                    << " on line " << lineNo_-1
+                    << " on line " << lineNo_ - 1
                     << exit(FatalError);
             }
         }
@@ -774,11 +764,11 @@ void Foam::chemkinReader::addReaction
     {
         if (mag(nAtoms[i]) > SMALL)
         {
-            FatalErrorIn("chemkinReader::addReaction")
+            FatalErrorInFunction
                 << "Elemental imbalance in " << elementNames_[i]
                 << " in reaction" << nl
                 << reactions_.last() << nl
-                << " on line " << lineNo_-1
+                << " on line " << lineNo_ - 1
                 << exit(FatalError);
         }
     }

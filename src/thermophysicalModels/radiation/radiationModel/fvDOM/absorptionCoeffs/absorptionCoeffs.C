@@ -88,12 +88,6 @@ Foam::radiation::absorptionCoeffs::coeffs
 }
 
 
-void Foam::radiation::absorptionCoeffs::initialise(Istream&)
-{
-    absorptionCoeffs(Istream);
-}
-
-
 void Foam::radiation::absorptionCoeffs::initialise(const dictionary& dict)
 {
     dict.lookup("Tcommon") >> Tcommon_;

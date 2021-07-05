@@ -168,11 +168,6 @@ public:
             bool igniting() const;
 
             bool ignited() const;
-
-
-    // Member Operators
-
-        void operator=(const ignitionSite&);
 };
 
 

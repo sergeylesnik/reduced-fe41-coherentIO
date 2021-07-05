@@ -95,15 +95,6 @@ inline const meshOctreeCubeCoordinates& meshOctreeCubeBasic::coordinates() const
     return *this;
 }
 
-inline void meshOctreeCubeBasic::operator=(const meshOctreeCubeBasic& ocb)
-{
-    cubeType_ = ocb.cubeType_;
-    procNo_ = ocb.procNo_;
-
-    static_cast<meshOctreeCubeCoordinates&>(*this) =
-        static_cast<const meshOctreeCubeCoordinates&>(ocb);
-}
-
 inline Ostream& operator<<
 (
     Ostream& os,

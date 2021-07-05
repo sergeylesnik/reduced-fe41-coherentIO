@@ -201,7 +201,7 @@ case SYSTEMOPENMPI:
 
     # make sure not the "old" mpi is used
     # Not sure if this is necessary anymore.
-    # export OPAL_PREFIX=
+    # unsetenv OPAL_PREFIX
 
     # Make sure OPENMPI_BIN_DIR is set and valid
     if ($?OPENMPI_BIN_DIR != 0 ) then
@@ -242,7 +242,7 @@ case SYSTEMOPENMPI:
 
     setenv MPI_HOME `dirname $OPENMPI_BIN_DIR`
     setenv MPI_ARCH_PATH $MPI_HOME
-    setenv OPAL_PREFIX $MPI_ARCH_PATH
+#HJ    setenv OPAL_PREFIX $MPI_ARCH_PATH
 
     # We initialize the rest of the environment using mpicc --showme:
     if ($?OPENMPI_INCLUDE_DIR == 0) then
@@ -513,12 +513,24 @@ endif
 
 # Metis library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+if ( $?METIS_SYSTEM) then
+    setenv METIS_DIR /usr
+    setenv METIS_BIN_DIR /usr/bin
+    setenv METIS_LIB_DIR /lib
+    setenv METIS_INCLUDE_DIR /usr/include
+endif
 if ( $?METIS_SYSTEM == 0 && $?WM_THIRD_PARTY_USE_METIS_510 != 0 && -e $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS ) then
     _foamSource $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS/etc/metis-5.1.0.csh
 endif
 
 # ParMetis library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if ( $?PARMETIS_SYSTEM) then
+    setenv PARMETIS_DIR /usr
+    setenv PARMETIS_BIN_DIR /usr/bin
+    setenv PARMETIS_LIB_DIR /lib
+    setenv PARMETIS_INCLUDE_DIR /usr/include
+endif
 if ( $?PARMETIS_SYSTEM == 0 && $?WM_THIRD_PARTY_USE_PARMETIS_403 != 0 && -e $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS ) then
     _foamSource $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS/etc/parmetis-4.0.3.csh
 endif
@@ -538,6 +550,12 @@ endif
 
 # Scotch library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if ( $?SCOTCH_SYSTEM) then
+    setenv SCOTCH_DIR /usr
+    setenv SCOTCH_BIN_DIR /usr/bin
+    setenv SCOTCH_LIB_DIR /lib
+    setenv SCOTCH_INCLUDE_DIR /usr/include/scotch
+endif
 if ( $?SCOTCH_SYSTEM == 0 && $?WM_THIRD_PARTY_USE_SCOTCH_604 != 0 && -e $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS ) then
     _foamSource $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS/etc/scotch-6.0.4.csh
 endif

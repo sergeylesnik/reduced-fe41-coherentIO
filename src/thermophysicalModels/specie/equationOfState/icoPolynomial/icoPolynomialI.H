@@ -44,17 +44,6 @@ inline Foam::icoPolynomial<PolySize>::icoPolynomial
 template<int PolySize>
 inline Foam::icoPolynomial<PolySize>::icoPolynomial
 (
-    const icoPolynomial<PolySize>& ip
-)
-:
-    specie(ip),
-    rhoPolynomial_(ip.rhoPolynomial_)
-{}
-
-
-template<int PolySize>
-inline Foam::icoPolynomial<PolySize>::icoPolynomial
-(
     const word& name,
     const icoPolynomial<PolySize>& ip
 )
@@ -107,20 +96,6 @@ inline Foam::scalar Foam::icoPolynomial<PolySize>::Z(scalar, scalar) const
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<int PolySize>
-inline Foam::icoPolynomial<PolySize>& Foam::icoPolynomial<PolySize>::operator=
-(
-    const icoPolynomial<PolySize>& ip
-)
-{
-    specie::operator=(ip);
-
-    rhoPolynomial_ = ip.rhoPolynomial_;
-
-    return *this;
-}
-
 
 template<int PolySize>
 inline void Foam::icoPolynomial<PolySize>::operator+=

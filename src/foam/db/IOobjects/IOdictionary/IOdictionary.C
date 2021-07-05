@@ -180,6 +180,14 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, Istream& is)
 }
 
 
+Foam::IOdictionary::IOdictionary(const IOdictionary& dict)
+:
+    regIOobject(dict),
+    dictionary(dict)
+{
+}
+
+
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 Foam::IOdictionary::~IOdictionary()

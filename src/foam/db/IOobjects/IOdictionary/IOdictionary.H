@@ -83,6 +83,9 @@ public:
         //- Construct given an IOobject and Istream
         IOdictionary(const IOobject&, Istream&);
 
+        //- Copy constructor
+        IOdictionary(const IOdictionary&);
+
 
     //- Destructor
     virtual ~IOdictionary();

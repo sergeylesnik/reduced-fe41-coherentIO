@@ -160,16 +160,6 @@ inline Foam::pointData::pointData
 {}
 
 
-// Construct as copy
-inline Foam::pointData::pointData(const pointData& wpt)
-:
-    origin_(wpt.origin()),
-    distSqr_(wpt.distSqr()),
-    s_(wpt.s()),
-    v_(wpt.v())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::point& Foam::pointData::origin() const

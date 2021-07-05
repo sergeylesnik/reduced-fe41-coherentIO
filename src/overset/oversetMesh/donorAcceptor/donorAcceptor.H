@@ -171,10 +171,12 @@ public:
             withinBB_(is)
         {}
 
-        //- Copy constructor - default
+        //- Copy constructor
+        donorAcceptor(const donorAcceptor&) = default;
 
 
-    //- Destructor - default
+    //- Destructor
+    ~donorAcceptor() = default;
 
 
     // Member Functions
@@ -385,25 +387,6 @@ public:
                 donorProcNo_ = -1;
                 donorPoint_ = vector::zero;
             }
-
-
-    // Member Operators
-
-        void operator=(const donorAcceptor& rd)
-        {
-            acceptorCell_ = rd.acceptorCell_;
-            acceptorProcNo_ = rd.acceptorProcNo_;
-            acceptorPoint_ = rd.acceptorPoint_;
-
-            donorCell_ = rd.donorCell_;
-            donorProcNo_ = rd.donorProcNo_;
-            donorPoint_ = rd.donorPoint_;
-
-            extendedDonorCells_ = rd.extendedDonorCells_;
-            extendedDonorPoints_ = rd.extendedDonorPoints_;
-
-            withinBB_ = rd.withinBB_;
-        }
 
 
     // Friend Operators

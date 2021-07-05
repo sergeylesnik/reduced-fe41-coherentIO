@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class labelledPair Declaration
+                       Class labelledPair Declaration
 \*---------------------------------------------------------------------------*/
 
 class labelledPair
@@ -81,8 +81,7 @@ class labelledPair
         {}
 
     // Destructor
-        ~labelledPair()
-        {}
+    ~labelledPair() = default;
 
     // Member functions
         //- return pair label
@@ -99,13 +98,7 @@ class labelledPair
 
     // Member operators
 
-        inline void operator=(const labelledPair& lpp)
-        {
-            pLabel_ = lpp.pLabel_;
-            pair_ = lpp.pair_;
-        }
-
-        inline bool operator==
+    inline bool operator==
         (
             const labelledPair& lpp
         ) const
@@ -115,10 +108,23 @@ class labelledPair
 
             const labelPair& op = lpp.pair_;
 
-            if( (pair_.first() == op.first()) && (pair_.second() == op.second()) )
+            if
+            (
+                (pair_.first() == op.first())
+             && (pair_.second() == op.second())
+            )
+            {
                 return true;
-            if( (pair_.first() == op.second()) && (pair_.second() == op.first()) )
+            }
+
+            if
+            (
+                (pair_.first() == op.second())
+             && (pair_.second() == op.first())
+            )
+            {
                 return true;
+            }
 
             return false;
         }

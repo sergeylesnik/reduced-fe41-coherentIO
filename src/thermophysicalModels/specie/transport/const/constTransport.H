@@ -149,8 +149,6 @@ public:
 
     // Member operators
 
-        inline constTransport& operator=(const constTransport&);
-
         inline void operator+=(const constTransport&);
 
         inline void operator-=(const constTransport&);

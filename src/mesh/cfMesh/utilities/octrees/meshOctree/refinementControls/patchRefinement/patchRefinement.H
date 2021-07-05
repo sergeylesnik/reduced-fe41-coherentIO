@@ -76,9 +76,8 @@ public:
         //- contruct from stream
         patchRefinement(Istream&);
 
-    // Destructor
-
-        ~patchRefinement();
+    //- Destructor
+    ~patchRefinement() = default;
 
 
     // Member Functions
@@ -90,7 +89,6 @@ public:
 
     // Operators
 
-        void operator=(const patchRefinement&);
         friend Istream& operator>>(Istream&, patchRefinement&);
         friend Ostream& operator<<(Ostream&, const patchRefinement&);
         friend bool operator==(const patchRefinement&, const patchRefinement&);

@@ -77,9 +77,8 @@ class labelledPoint
             coords_(p)
         {}
 
-    // Destructor
-        ~labelledPoint()
-        {}
+    //- Destructor
+    ~labelledPoint() = default;
 
     // Member functions
         //- return point label
@@ -105,12 +104,6 @@ class labelledPoint
         }
 
     // Member operators
-
-        inline void operator=(const labelledPoint& lp)
-        {
-            pLabel_ = lp.pLabel_;
-            coords_ = lp.coords_;
-        }
 
         inline bool operator==(const labelledPoint& lp) const
         {

@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class NonEquilibriumReversibleReaction Declaration
+               Class NonEquilibriumReversibleReaction Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ReactionThermo, class ReactionRate>
@@ -56,16 +56,6 @@ class NonEquilibriumReversibleReaction
 
         ReactionRate fk_;
         ReactionRate rk_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise assignment
-        void operator=
-        (
-            const NonEquilibriumReversibleReaction
-                <ReactionThermo, ReactionRate>&
-        );
 
 
 public:

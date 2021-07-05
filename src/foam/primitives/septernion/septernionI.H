@@ -87,12 +87,6 @@ inline Foam::vector Foam::septernion::invTransform(const vector& v) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::septernion::operator=(const septernion& tr)
-{
-    t_ = tr.t_;
-    r_ = tr.r_;
-}
-
 inline void Foam::septernion::operator*=(const septernion& tr)
 {
     t_ += r().transform(tr.t());

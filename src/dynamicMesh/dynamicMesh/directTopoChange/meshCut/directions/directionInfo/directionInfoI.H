@@ -50,14 +50,6 @@ inline Foam::directionInfo::directionInfo
 {}
 
 
-// Construct as copy
-inline Foam::directionInfo::directionInfo(const directionInfo& w2)
-:
-    index_(w2.index()),
-    n_(w2.n())
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline bool Foam::directionInfo::valid() const

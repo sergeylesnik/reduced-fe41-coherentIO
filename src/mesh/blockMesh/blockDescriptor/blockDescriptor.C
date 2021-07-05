@@ -172,12 +172,6 @@ Foam::blockDescriptor::blockDescriptor
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::blockDescriptor::~blockDescriptor()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::pointField& Foam::blockDescriptor::blockPointField() const

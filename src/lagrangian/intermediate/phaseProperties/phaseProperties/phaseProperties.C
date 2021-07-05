@@ -171,23 +171,6 @@ Foam::phaseProperties::phaseProperties()
 {}
 
 
-Foam::phaseProperties::phaseProperties(const phaseProperties& pp)
-:
-    phase_(pp.phase_),
-    stateLabel_(pp.stateLabel_),
-    names_(pp.names_),
-    Y_(pp.Y_),
-    globalIds_(pp.globalIds_),
-    globalCarrierIds_(pp.globalCarrierIds_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::phaseProperties::~phaseProperties()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::phaseProperties::initialiseGlobalIds
