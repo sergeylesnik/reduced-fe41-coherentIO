@@ -19,7 +19,9 @@
         (
             "rho",
             runTime.timeName(),
-            mesh
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
         ),
         thermo.rho()
     );
