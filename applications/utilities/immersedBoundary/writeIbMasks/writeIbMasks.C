@@ -39,6 +39,24 @@ Description
 
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
+    bool foundImmersedBoundaryPatch = false;
+
+    forAll (mesh.boundary(), patchI)
+    {
+        if (isA<immersedBoundaryFvPatch>(mesh.boundary()[patchI]))
+        {
+            foundImmersedBoundaryPatch = true;
+        }
+    }
+
+    if (!foundImmersedBoundaryPatch)
+    {
+        InfoInFunction
+            << "Cannot find immersed boundary patch.  Exiting" << endl;
+
+        return;
+    }
+
     Info<< nl << "Calculating gamma" << endl;
     volScalarField gamma
     (
@@ -62,7 +80,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
     // Collect dead cells
     labelHashSet deadCellsHash;
-    
+
     forAll (mesh.boundary(), patchI)
     {
         if (isA<immersedBoundaryFvPatch>(mesh.boundary()[patchI]))
@@ -133,6 +151,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
 
     // Create dead cells set
+    if (!deadCellsHash.empty())
     {
         cellSet
         (
@@ -141,7 +160,12 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             deadCellsHash
         ).write();
     }
-    
+    else
+    {
+        InfoInFunction
+            << "Dead cells not found" << endl;
+    }
+
     // Check consistency of face area vectors
 
     Info<< nl << "Calculating divSf" << endl;
