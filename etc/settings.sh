@@ -602,6 +602,14 @@ export MPI_BUFFER_SIZE
 # appropriate XXX_SYSTEM environment variable for a given package in your prefs.sh
 # file in order to disable the activation of the ThirdParty version of the same package.
 
+# Default locations for pre-installed version of the ThirdParty packages
+# Use prefs.sh to pre-initialize to different default values, accordingly to
+# your Linux/Unix flavour
+: ${WM_SYSTEM_DIR:=/usr};                           export WM_SYSTEM_DIR
+: ${WM_SYSTEM_BIN_DIR:=$WM_SYSTEM_DIR/bin};         export WM_SYSTEM_BIN_DIR
+: ${WM_SYSTEM_LIB_DIR:=$WM_SYSTEM_DIR/lib};         export WM_SYSTEM_LIB_DIR
+: ${WM_SYSTEM_INCLUDE_DIR:=$WM_SYSTEM_DIR/include}; export WM_SYSTEM_INCLUDE_DIR
+
 # Load Mesquite library
 # ~~~~~~~~~~~~~~~~~~~~~~
 [ -z "$MESQUITE_SYSTEM" ] && [ ! -z $WM_THIRD_PARTY_USE_MESQUITE_212 ] && [ -e $WM_THIRD_PARTY_DIR/packages/mesquite-2.1.2/platforms/$WM_OPTIONS ] && {
@@ -616,31 +624,41 @@ export MPI_BUFFER_SIZE
 
 # Load Metis library
 # ~~~~~~~~~~~~~~~~~~
-[ ! -z "$METIS_SYSTEM" ] && {
-    export METIS_DIR=/usr
-    export METIS_BIN_DIR=/usr/bin
-    export METIS_LIB_DIR=/lib
-    export METIS_INCLUDE_DIR=/usr/include
-}
-
-[ -z "$METIS_SYSTEM" ] && [ ! -z $WM_THIRD_PARTY_USE_METIS_510 ] && [ -e $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS ] && {
+if [ ! -z "$METIS_SYSTEM" ]
+then
+    # Using system libraries.
+    # Some values might already be pre-initialized in prefs.sh
+    # If not, use the default WM_SYSTEM_XXX values
+    : ${METIS_DIR:=$WM_SYSTEM_DIR};                 export METIS_DIR
+    : ${METIS_BIN_DIR:=$WM_SYSTEM_BIN_DIR};         export METIS_BIN_DIR
+    : ${METIS_LIB_DIR:=$WM_SYSTEM_LIB_DIR};         export METIS_LIB_DIR
+    : ${METIS_INCLUDE_DIR:=$WM_SYSTEM_INCLUDE_DIR}; export METIS_INCLUDE_DIR
+else
+    # Using ThirdParty package for Metis
+    [ ! -z $WM_THIRD_PARTY_USE_METIS_510 ] && [ -e $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS ] && {
     _foamSource $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS/etc/metis-5.1.0.sh
-}
+    }
+fi
 [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "    METIS_DIR is initialized to: $METIS_DIR"
 
 
 # Load ParMetis library
 # ~~~~~~~~~~~~~~~~~~~~~
-[ ! -z "$PARMETIS_SYSTEM" ] && {
-    export PARMETIS_DIR=/usr
-    export PARMETIS_BIN_DIR=/usr/bin
-    export PARMETIS_LIB_DIR=/lib
-    export PARMETIS_INCLUDE_DIR=/usr/include
-}
-
-[ -z "$PARMETIS_SYSTEM" ] && [ ! -z $WM_THIRD_PARTY_USE_PARMETIS_403 ] && [ -e $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS ] && {
-    _foamSource $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS/etc/parmetis-4.0.3.sh
-}
+if [ ! -z "$PARMETIS_SYSTEM" ]
+then
+    # Using system libraries
+    # Some values might already be pre-initialized in prefs.sh
+    # If not, use the default WM_SYSTEM_XXX values
+    : ${PARMETIS_DIR:=$WM_SYSTEM_DIR};                 export PARMETIS_DIR
+    : ${PARMETIS_BIN_DIR:=$WM_SYSTEM_BIN_DIR};         export PARMETIS_BIN_DIR
+    : ${PARMETIS_LIB_DIR:=$WM_SYSTEM_LIB_DIR};         export PARMETIS_LIB_DIR
+    : ${PARMETIS_INCLUDE_DIR:=$WM_SYSTEM_INCLUDE_DIR}; export PARMETIS_INCLUDE_DIR
+else
+    # Using ThirdParty package for ParMetis
+    [ ! -z $WM_THIRD_PARTY_USE_PARMETIS_403 ] && [ -e $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS ] && {
+	_foamSource $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS/etc/parmetis-4.0.3.sh
+    }
+fi
 [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "    PARMETIS_DIR is initialized to: $PARMETIS_DIR"
 
 
@@ -662,21 +680,24 @@ export MPI_BUFFER_SIZE
 
 # Load Scotch library
 # ~~~~~~~~~~~~~~~~~~~
-[ ! -z "$SCOTCH_SYSTEM" ] && {
-    export SCOTCH_DIR=/usr
-    export SCOTCH_BIN_DIR=/usr/bin
-    export SCOTCH_LIB_DIR=/lib
-    export SCOTCH_INCLUDE_DIR=/usr/include/scotch
+if [ ! -z "$SCOTCH_SYSTEM" ]
+then
+    # Using system libraries
+    # Some values might already be pre-initialized in prefs.sh
+    # If not, use the default WM_SYSTEM_XXX values
+    : ${SCOTCH_DIR:=$WM_SYSTEM_DIR};                 export SCOTCH_DIR
+    : ${SCOTCH_BIN_DIR:=$WM_SYSTEM_BIN_DIR};         export SCOTCH_BIN_DIR
+    : ${SCOTCH_LIB_DIR:=$WM_SYSTEM_LIB_DIR};         export SCOTCH_LIB_DIR
+    : ${SCOTCH_INCLUDE_DIR:=$WM_SYSTEM_INCLUDE_DIR}; export SCOTCH_INCLUDE_DIR
+else
+    # Using ThirdParty package for Scotch
+    [ ! -z $WM_THIRD_PARTY_USE_SCOTCH_604 ] && [ -e $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS ] && {
+	_foamSource $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS/etc/scotch-6.0.4.sh
+    }
+    [ ! -z $WM_THIRD_PARTY_USE_SCOTCH_600 ] && [ -e $WM_THIRD_PARTY_DIR/packages/scotch-6.0.0/platforms/$WM_OPTIONS ] && {
+	_foamSource $WM_THIRD_PARTY_DIR/packages/scotch-6.0.0/platforms/$WM_OPTIONS/etc/scotch-6.0.0.sh
 }
-
-[ -z "$SCOTCH_SYSTEM" ] && [ ! -z $WM_THIRD_PARTY_USE_SCOTCH_604 ] && [ -e $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS ] && {
-    _foamSource $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS/etc/scotch-6.0.4.sh
-}
-[ "$FOAM_VERBOSE" -a "$PS1" ] && echo "    SCOTCH_DIR is initialized to: $SCOTCH_DIR"
-
-[ -z "$SCOTCH_SYSTEM" ] && [ ! -z $WM_THIRD_PARTY_USE_SCOTCH_600 ] && [ -e $WM_THIRD_PARTY_DIR/packages/scotch-6.0.0/platforms/$WM_OPTIONS ] && {
-    _foamSource $WM_THIRD_PARTY_DIR/packages/scotch-6.0.0/platforms/$WM_OPTIONS/etc/scotch-6.0.0.sh
-}
+fi
 [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "    SCOTCH_DIR is initialized to: $SCOTCH_DIR"
 
 

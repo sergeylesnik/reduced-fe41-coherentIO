@@ -502,6 +502,21 @@ if ( $?CGAL_LIB_DIR ) then
     _foamAddLib $CGAL_LIB_DIR
 endif
 
+# Third party packages
+#
+# In order to use a pre-installed version of the ThirdParty packages, just set the
+# appropriate XXX_SYSTEM environment variable for a given package in your prefs.sh
+# file in order to disable the activation of the ThirdParty version of the same package.
+
+# Default locations for pre-installed version of the ThirdParty packages
+# Use prefs.sh to pre-initialize to different default values, accordingly to
+# your Linux/Unix flavour
+if ( ! $?WM_SYSTEM_DIR )         setenv WM_SYSTEM_DIR         /usr
+if ( ! $?WM_SYSTEM_BIN_DIR )     setenv WM_SYSTEM_BIN_DIR     $WM_SYSTEM_DIR/bin
+if ( ! $?WM_SYSTEM_LIB_DIR )     setenv WM_SYSTEM_LIB_DIR     $WM_SYSTEM_DIR/lib
+if ( ! $?WM_SYSTEM_INCLUDE_DIR ) setenv WM_SYSTEM_INCLUDE_DIR $WM_SYSTEM_DIR/include
+
+
 # Mesquite library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( $?MESQUITE_SYSTEM == 0 && $?WM_THIRD_PARTY_USE_MESQUITE_212 != 0 && -e $WM_THIRD_PARTY_DIR/packages/mesquite-2.1.2/platforms/$WM_OPTIONS ) then
@@ -514,24 +529,32 @@ endif
 # Metis library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( $?METIS_SYSTEM) then
-    setenv METIS_DIR /usr
-    setenv METIS_BIN_DIR /usr/bin
-    setenv METIS_LIB_DIR /lib
-    setenv METIS_INCLUDE_DIR /usr/include
+    # Using system libraries.
+    # Some values might already be pre-initialized in prefs.sh
+    # If not, use the default WM_SYSTEM_XXX values
+    if ( ! $?METIS_DIR )         setenv METIS_DIR         $WM_SYSTEM_DIR
+    if ( ! $?METIS_BIN_DIR )     setenv METIS_BIN_DIR     $WM_SYSTEM_BIN_DIR
+    if ( ! $?METIS_LIB_DIR )     setenv METIS_LIB_DIR     $WM_SYSTEM_LIB_DIR
+    if ( ! $?METIS_INCLUDE_DIR ) setenv METIS_INCLUDE_DIR $WM_SYSTEM_INCLUDE_DIR
 endif
 if ( $?METIS_SYSTEM == 0 && $?WM_THIRD_PARTY_USE_METIS_510 != 0 && -e $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS ) then
+    # Using ThirdParty package for Metis
     _foamSource $WM_THIRD_PARTY_DIR/packages/metis-5.1.0/platforms/$WM_OPTIONS/etc/metis-5.1.0.csh
 endif
 
 # ParMetis library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( $?PARMETIS_SYSTEM) then
-    setenv PARMETIS_DIR /usr
-    setenv PARMETIS_BIN_DIR /usr/bin
-    setenv PARMETIS_LIB_DIR /lib
-    setenv PARMETIS_INCLUDE_DIR /usr/include
+    # Using system libraries.
+    # Some values might already be pre-initialized in prefs.sh
+    # If not, use the default WM_SYSTEM_XXX values
+    if ( ! $?PARMETIS_DIR )         setenv PARMETIS_DIR         $WM_SYSTEM_DIR
+    if ( ! $?PARMETIS_BIN_DIR )     setenv PARMETIS_BIN_DIR     $WM_SYSTEM_BIN_DIR
+    if ( ! $?PARMETIS_LIB_DIR )     setenv PARMETIS_LIB_DIR     $WM_SYSTEM_LIB_DIR
+    if ( ! $?PARMETIS_INCLUDE_DIR ) setenv PARMETIS_INCLUDE_DIR $WM_SYSTEM_INCLUDE_DIR
 endif
 if ( $?PARMETIS_SYSTEM == 0 && $?WM_THIRD_PARTY_USE_PARMETIS_403 != 0 && -e $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS ) then
+    # Using ThirdParty package for ParMetis
     _foamSource $WM_THIRD_PARTY_DIR/packages/parmetis-4.0.3/platforms/$WM_OPTIONS/etc/parmetis-4.0.3.csh
 endif
 
@@ -551,12 +574,16 @@ endif
 # Scotch library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( $?SCOTCH_SYSTEM) then
-    setenv SCOTCH_DIR /usr
-    setenv SCOTCH_BIN_DIR /usr/bin
-    setenv SCOTCH_LIB_DIR /lib
-    setenv SCOTCH_INCLUDE_DIR /usr/include/scotch
+    # Using system libraries.
+    # Some values might already be pre-initialized in prefs.sh
+    # If not, use the default WM_SYSTEM_XXX values
+    if ( ! $?SCOTCH_DIR )         setenv SCOTCH_DIR         $WM_SYSTEM_DIR
+    if ( ! $?SCOTCH_BIN_DIR )     setenv SCOTCH_BIN_DIR     $WM_SYSTEM_BIN_DIR
+    if ( ! $?SCOTCH_LIB_DIR )     setenv SCOTCH_LIB_DIR     $WM_SYSTEM_LIB_DIR
+    if ( ! $?SCOTCH_INCLUDE_DIR ) setenv SCOTCH_INCLUDE_DIR $WM_SYSTEM_INCLUDE_DIR
 endif
 if ( $?SCOTCH_SYSTEM == 0 && $?WM_THIRD_PARTY_USE_SCOTCH_604 != 0 && -e $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS ) then
+    # Using ThirdParty package for Scotch
     _foamSource $WM_THIRD_PARTY_DIR/packages/scotch-6.0.4/platforms/$WM_OPTIONS/etc/scotch-6.0.4.csh
 endif
 if ( $?SCOTCH_SYSTEM == 0 && $?WM_THIRD_PARTY_USE_SCOTCH_600 != 0 && -e $WM_THIRD_PARTY_DIR/packages/scotch-6.0.0/platforms/$WM_OPTIONS ) then
