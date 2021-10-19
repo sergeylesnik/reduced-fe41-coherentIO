@@ -1,3 +1,0 @@
-transientDyMFoam.C
-
-EXE = $(FOAM_APPBIN)/transientDyMFoam

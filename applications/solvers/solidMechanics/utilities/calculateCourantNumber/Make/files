@@ -1,3 +1,0 @@
-calculateCourantNumber.C
-
-EXE = $(FOAM_APPBIN)/calculateCourantNumber

@@ -1,3 +1,0 @@
-makeTriSurfaceMesh.C
-
-EXE = $(FOAM_APPBIN)/makeTriSurfaceMesh

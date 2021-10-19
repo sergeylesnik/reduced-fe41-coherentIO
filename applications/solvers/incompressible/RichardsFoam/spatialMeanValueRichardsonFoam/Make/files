@@ -1,3 +1,0 @@
-spatialMeanValueRichardsonFoam.C
-
-EXE = $(FOAM_APPBIN)/spatialMeanValueRichardsonFoam

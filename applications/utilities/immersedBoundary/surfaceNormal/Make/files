@@ -1,3 +1,0 @@
-surfaceNormal.C
-
-EXE = $(FOAM_APPBIN)/surfaceNormal

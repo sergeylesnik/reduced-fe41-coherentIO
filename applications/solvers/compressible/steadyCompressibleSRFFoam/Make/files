@@ -1,3 +1,0 @@
-steadyCompressibleSRFFoam.C
-
-EXE = $(FOAM_APPBIN)/steadyCompressibleSRFFoam

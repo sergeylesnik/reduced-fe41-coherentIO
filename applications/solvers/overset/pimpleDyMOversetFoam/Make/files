@@ -1,3 +1,0 @@
-pimpleDyMOversetFoam.C
-
-EXE = $(FOAM_APPBIN)/pimpleDyMOversetFoam

@@ -1,3 +1,0 @@
-analyticalPlateHole.C
-
-EXE = $(FOAM_APPBIN)/analyticalPlateHole

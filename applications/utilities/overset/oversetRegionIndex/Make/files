@@ -1,3 +1,0 @@
-oversetRegionIndex.C
-
-EXE = $(FOAM_APPBIN)/oversetRegionIndex

@@ -1,3 +1,0 @@
-elasticIncrSolidFoam.C
-
-EXE = $(FOAM_APPBIN)/elasticIncrSolidFoam

@@ -1,3 +1,0 @@
-setInitialDroplet.C
-
-EXE = $(FOAM_APPBIN)/setInitialDroplet

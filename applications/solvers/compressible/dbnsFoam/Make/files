@@ -1,3 +1,0 @@
-dbnsFoam.C
-
-EXE = $(FOAM_APPBIN)/dbnsFoam

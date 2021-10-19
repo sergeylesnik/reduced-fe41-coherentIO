@@ -1,3 +1,0 @@
-convertPhi.C
-
-EXE = $(FOAM_APPBIN)/convertPhi

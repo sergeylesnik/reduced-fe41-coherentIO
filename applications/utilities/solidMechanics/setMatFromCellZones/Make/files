@@ -1,3 +1,0 @@
-setMatFromCellZones.C
-
-EXE = $(FOAM_APPBIN)/setMatFromCellZones

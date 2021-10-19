@@ -1,3 +1,0 @@
-pUCoupledFoam.C
-
-EXE = $(FOAM_APPBIN)/pUCoupledFoam

@@ -1,3 +1,0 @@
-foamMeshToElmer.C
-
-EXE = $(FOAM_APPBIN)/foamMeshToElmer

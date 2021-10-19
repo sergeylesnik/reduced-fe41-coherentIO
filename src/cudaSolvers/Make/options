@@ -1,5 +1,0 @@
-EXE_INC = \
-    -I$(CUDA_INCLUDE_DIR)
-
-LIB_LIBS = \
-    -L$(CUDA_LIB_DIR) -lcudart

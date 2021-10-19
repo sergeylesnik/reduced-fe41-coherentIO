@@ -31,62 +31,62 @@ decompositionMethods/AllwmakeLnInclude
 decompositionMethods/Allwmake
 
 wmake libso lagrangian/basic
-
-wmake libso edgeMesh
-wmake libso surfMesh
-
+#
+#wmake libso edgeMesh
+#wmake libso surfMesh
+#
 wmake libso meshTools
 wmake libso finiteVolume
-wmake libso finiteArea
-
-conversion/Allwmake
-wmake libso lduSolvers
-
-wmake libso tetFiniteElement
-
-# We can now compile this library from decompositionMethods
-wmake libso decompositionMethods/decomposeReconstruct
-
-# Make dynamicMesh tools
-dynamicMesh/AllwmakeLnInclude
-dynamicMesh/Allwmake
-
-wmake libso coupledMatrix
-wmake libso sampling
-
-wmake libso ODE
-wmake libso POD
-wmake libso randomProcesses
-mesh/Allwmake
-
-thermophysicalModels/Allwmake
-transportModels/Allwmake
-turbulenceModels/Allwmake
-lagrangian/Allwmake
-wmake libso conjugateHeatTransfer
-
-postProcessing/Allwmake
-
-wmake libso errorEstimation
-
-fvAgglomerationMethods/Allwmake
-
-wmake libso engine
-
-wmake libso equationReader
-wmake libso multiSolver
-
-wmake libso solidModels
-wmake libso dbns
-
-wmake libso immersedBoundary/immersedBoundary
-wmake libso immersedBoundary/immersedBoundaryTurbulence/incompressible
-wmake libso immersedBoundary/immersedBoundaryTurbulence/compressible
-wmake libso immersedBoundary/immersedBoundaryDynamicMesh
-
-wmake libso overset/oversetMesh
-wmake libso overset/oversetDynamicFvMesh
-
-( cd cudaSolvers ; ./Allwmake )
+#wmake libso finiteArea
+#
+#conversion/Allwmake
+#wmake libso lduSolvers
+#
+#wmake libso tetFiniteElement
+#
+## We can now compile this library from decompositionMethods
+#wmake libso decompositionMethods/decomposeReconstruct
+#
+## Make dynamicMesh tools
+#dynamicMesh/AllwmakeLnInclude
+#dynamicMesh/Allwmake
+#
+#wmake libso coupledMatrix
+#wmake libso sampling
+#
+#wmake libso ODE
+#wmake libso POD
+#wmake libso randomProcesses
+#mesh/Allwmake
+#
+#thermophysicalModels/Allwmake
+#transportModels/Allwmake
+#turbulenceModels/Allwmake
+#lagrangian/Allwmake
+#wmake libso conjugateHeatTransfer
+#
+#postProcessing/Allwmake
+#
+#wmake libso errorEstimation
+#
+#fvAgglomerationMethods/Allwmake
+#
+#wmake libso engine
+#
+#wmake libso equationReader
+#wmake libso multiSolver
+#
+#wmake libso solidModels
+#wmake libso dbns
+#
+#wmake libso immersedBoundary/immersedBoundary
+#wmake libso immersedBoundary/immersedBoundaryTurbulence/incompressible
+#wmake libso immersedBoundary/immersedBoundaryTurbulence/compressible
+#wmake libso immersedBoundary/immersedBoundaryDynamicMesh
+#
+#wmake libso overset/oversetMesh
+#wmake libso overset/oversetDynamicFvMesh
+#
+#( cd cudaSolvers ; ./Allwmake )
 
 # ----------------------------------------------------------------- end-of-file

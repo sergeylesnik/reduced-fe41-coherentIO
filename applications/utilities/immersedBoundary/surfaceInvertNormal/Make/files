@@ -1,3 +1,0 @@
-surfaceInvertNormal.C
-
-EXE = $(FOAM_APPBIN)/surfaceInvertNormal

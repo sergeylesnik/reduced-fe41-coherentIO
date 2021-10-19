@@ -1,3 +1,0 @@
-faceSet bottomBrickUpFaceZone new patchToFace bottomBrickUp
-faceSet topBrickDownFaceZone new patchToFace topBrickDown
-quit

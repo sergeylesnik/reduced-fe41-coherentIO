@@ -1,3 +1,0 @@
-steadyCompressibleFoam.C
-
-EXE = $(FOAM_APPBIN)/steadyCompressibleFoam

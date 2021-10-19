@@ -1,3 +1,0 @@
-laplacianOversetFoam.C
-
-EXE = $(FOAM_APPBIN)/laplacianOversetFoam

@@ -1,3 +1,0 @@
-icoOversetFoam.C
-
-EXE = $(FOAM_APPBIN)/icoOversetFoam

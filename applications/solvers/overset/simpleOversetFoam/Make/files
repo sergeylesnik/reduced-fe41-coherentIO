@@ -1,3 +1,0 @@
-simpleOversetFoam.C
-
-EXE = $(FOAM_APPBIN)/simpleOversetFoam
