@@ -182,9 +182,14 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
 
         return good;
     }
-    else
+    else if (fmt == IOstream::BINARY)
     {
         return regIOobject::writeObject(fmt, ver, cmp);
+    }
+    else if (fmt == IOstream::PARALLEL)
+    {
+        cout << "Parallel IO not yet implemented in CompactIOList.C\n";
+        return false;
     }
 }
 
@@ -260,7 +265,7 @@ Foam::Ostream& Foam::operator<<
     {
         os << static_cast<const List<T>&>(L);
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         // Convert to compact format
         labelList start(L.size()+1);
@@ -285,6 +290,8 @@ Foam::Ostream& Foam::operator<<
         }
         os << start << elems;
     }
+    else if (os.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in CompactIOList.C\n"; }
 
     return os;
 }

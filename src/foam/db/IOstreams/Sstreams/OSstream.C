@@ -234,6 +234,25 @@ Foam::Ostream& Foam::OSstream::write(const char* buf, std::streamsize count)
 }
 
 
+Foam::Ostream& Foam::OSstream::parwrite(const char* buf, std::streamsize count)
+{
+    if (format() != PARALLEL)
+    {
+        FatalIOErrorIn("Ostream::parwrite(const char*, std::streamsize)", *this)
+            << "stream format not parallel"
+            << abort(FatalIOError);
+    }
+
+    paros_ << token::BEGIN_LIST;
+    paros_.write(buf, count);
+    paros_ << token::END_LIST;
+
+    setState(paros_.rdstate());
+
+    return *this;
+}
+
+
 void Foam::OSstream::indent()
 {
     for (unsigned short i = 0; i < indentLevel_*indentSize_; i++)

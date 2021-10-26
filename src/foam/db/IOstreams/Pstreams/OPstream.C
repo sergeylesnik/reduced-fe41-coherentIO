@@ -237,6 +237,14 @@ Foam::Ostream& Foam::OPstream::write(const char* data, std::streamsize count)
 }
 
 
+Foam::Ostream& Foam::OPstream::parwrite(const char* data, std::streamsize count)
+{
+    notImplemented("Ostream& OPstream::parwrite(const char*, std::streamsize)");
+    setBad();
+    return *this;
+}
+
+
 void Foam::OPstream::print(Ostream& os) const
 {
     os  << "Writing from processor " << toProcNo_

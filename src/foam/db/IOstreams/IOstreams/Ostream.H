@@ -137,6 +137,9 @@ public:
             //- Write binary block
             virtual Ostream& write(const char*, std::streamsize) = 0;
 
+            //- Write binary block into second stream
+            virtual Ostream& parwrite(const char*, std::streamsize) = 0;
+
             //- Add indentation characters
             virtual void indent() = 0;
 

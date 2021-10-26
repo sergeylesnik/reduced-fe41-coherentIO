@@ -122,12 +122,20 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             os << nl << token::END_LIST << nl;
         }
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         os << nl << L.size() << nl;
         if (L.size())
         {
             os.write(reinterpret_cast<const char*>(L.v_), L.byteSize());
+        }
+    }
+    else if (os.format() == IOstream::PARALLEL)
+    {
+        os << nl << L.size() << nl;
+        if (L.size())
+        {
+            os.parwrite(reinterpret_cast<const char*>(L.v_), L.byteSize());
         }
     }
 
@@ -227,7 +235,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
             // Read end of contents
             is.readEndList("List");
         }
-        else
+        else if (is.format() == IOstream::BINARY)
         {
             if (s)
             {
@@ -239,6 +247,8 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
                 );
             }
         }
+        else if (is.format() == IOstream::PARALLEL)
+        { cout << "Parallel IO not yet implemented in UListIO.C\n"; }
     }
     else if (firstToken.isPunctuation())
     {

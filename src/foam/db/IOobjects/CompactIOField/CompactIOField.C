@@ -181,9 +181,14 @@ bool Foam::CompactIOField<T, BaseType>::writeObject
 
         return good;
     }
-    else
+    else if (fmt == IOstream::BINARY)
     {
         return regIOobject::writeObject(fmt, ver, cmp);
+    }
+    else if (fmt == IOstream::PARALLEL)
+    {
+        cout << "Parallel IO not yet implemented in CompactIOField.C\n";
+        return false;
     }
 }
 
@@ -259,7 +264,7 @@ Foam::Ostream& Foam::operator<<
     {
         os << static_cast<const Field<T>&>(L);
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         // Convert to compact format
         labelList start(L.size()+1);
@@ -284,6 +289,8 @@ Foam::Ostream& Foam::operator<<
         }
         os << start << elems;
     }
+    else if (os.format() == IOstream::BINARY)
+    { cout << "Parallel IO not yet implemented in CompactIOField.C\n"; }
 
     return os;
 }

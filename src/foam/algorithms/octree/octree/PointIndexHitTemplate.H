@@ -204,7 +204,7 @@ public:
                 os  << pHit.hit_ << token::SPACE << pHit.hitPoint_
                     << token::SPACE << pHit.index_;
             }
-            else
+            else if (os.format() == IOstream::BINARY)
             {
                 os.write
                 (
@@ -212,6 +212,8 @@ public:
                     sizeof(PointIndexHit)
                 );
             }
+            else if (os.format() == IOstream::PARALLEL)
+            { cout << "Parallel IO not yet implemented in PointIndexHitTemplate.H"; }
 
             // Check state of Ostream
             os.check("Ostream& operator<<(Ostream&, const PointIndexHit&)");
@@ -225,7 +227,7 @@ public:
             {
                 return is >> pHit.hit_ >> pHit.hitPoint_ >> pHit.index_;
             }
-            else
+            else if (is.format() == IOstream::BINARY)
             {
                 is.read
                 (
@@ -233,6 +235,8 @@ public:
                     sizeof(PointIndexHit)
                 );
             }
+            else if (is.format() == IOstream::PARALLEL)
+            { cout << "Parallel IO not yet implemented in PointIndexHitTemplate.H"; }
 
             // Check state of Istream
             is.check("Istream& operator>>(Istream&, PointIndexHit&)");

@@ -97,7 +97,7 @@ Foam::Ostream& Foam::operator<<
             os << nl << token::END_LIST << nl;
         }
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         // this is annoying, and wasteful, but there's currently no alternative
 
@@ -114,6 +114,8 @@ Foam::Ostream& Foam::operator<<
             );
         }
     }
+    else if (os.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in UIndirectedListIO.C\n"; }
 
     // Check state of IOstream
     os.check("Ostream& operator<<(Ostream&, const UIndirectList&)");

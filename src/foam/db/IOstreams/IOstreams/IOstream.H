@@ -93,7 +93,8 @@ public:
         enum streamFormat
         {
             ASCII,
-            BINARY
+            BINARY,
+            PARALLEL
         };
 
         //- Ostream operator

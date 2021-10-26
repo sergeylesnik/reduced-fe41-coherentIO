@@ -59,6 +59,7 @@ class OFstreamAllocator
     friend class OFstream;
 
     ostream* ofPtr_;
+    ostream* parofPtr_;
 
     // Constructors
 
@@ -67,6 +68,7 @@ class OFstreamAllocator
         (
             const fileName& pathname,
             ios_base::openmode mode,
+            IOstream::streamFormat format = IOstream::ASCII,
             IOstream::compressionType compression = IOstream::UNCOMPRESSED
 
         );

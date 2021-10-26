@@ -117,7 +117,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
     {
         os << bb.min_ << token::SPACE << bb.max_;
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         os.write
         (
@@ -125,6 +125,8 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
             sizeof(boundBox)
         );
     }
+    else if (os.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in boundBox.C\n"; }
 
     // Check state of Ostream
     os.check("Ostream& operator<<(Ostream&, const boundBox&)");
@@ -138,7 +140,7 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
     {
         return is >> bb.min_ >> bb.max_;
     }
-    else
+    else if (is.format() == IOstream::BINARY)
     {
         is.read
         (
@@ -146,6 +148,8 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
             sizeof(boundBox)
         );
     }
+    else if (is.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in boundBox.C\n"; }
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, boundBox&)");

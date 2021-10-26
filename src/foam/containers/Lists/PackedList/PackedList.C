@@ -320,7 +320,7 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
             // Read end of contents
             is.readEndList("PackedList<nBits>");
         }
-        else
+        else if (is.format() == IOstream::BINARY)
         {
             if (sz)
             {
@@ -337,6 +337,8 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
                 );
             }
         }
+        else if (is.format() == IOstream::PARALLEL)
+        { cout << "Parallel IO not yet implemented in PackedList.C\n"; }
     }
     else if (firstTok.isPunctuation())
     {
@@ -485,7 +487,7 @@ Foam::Ostream& Foam::PackedList<nBits>::write
             os  << nl << token::END_LIST << nl;
         }
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         os  << nl << sz << nl;
         if (sz)
@@ -497,6 +499,8 @@ Foam::Ostream& Foam::PackedList<nBits>::write
             );
         }
     }
+    else if (os.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in PackedList.C\n"; }
 
     return os;
 }

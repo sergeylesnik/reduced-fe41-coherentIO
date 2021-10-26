@@ -73,7 +73,7 @@ Foam::Ostream& Foam::FaceCellWave<Type>::writeFaces
             os << ' ' << faceInfo[i];
         }
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         os << nFaces;
 
@@ -86,6 +86,9 @@ Foam::Ostream& Foam::FaceCellWave<Type>::writeFaces
             os << faceInfo[i];
         }
     }
+    else if (os.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in FaceCellWave.C\n"; }
+
     return os;
 }
 

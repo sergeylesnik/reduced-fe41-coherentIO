@@ -60,7 +60,7 @@ Foam::Particle<ParticleType>::Particle
             is >> origProc_ >> origId_;
         }
     }
-    else
+    else if (is.format() == IOstream::BINARY)
     {
         // In binary read all particle data - needed for parallel transfer
         if (readFields)
@@ -88,6 +88,8 @@ Foam::Particle<ParticleType>::Particle
             );
         }
     }
+    else if (is.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in ParticleIO.C\n"; }
 
     if (celli_ == -1)
     {
@@ -187,7 +189,7 @@ void Foam::Particle<ParticleType>::write(Ostream& os, bool writeFields) const
                << token::SPACE << celli_;
         }
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         // In binary write both celli_ and facei_, needed for parallel transfer
         if (writeFields)
@@ -215,6 +217,8 @@ void Foam::Particle<ParticleType>::write(Ostream& os, bool writeFields) const
             );
         }
     }
+    else if (os.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in ParticleIO.C\n"; }
 
     // Check state of Ostream
     os.check("Particle<ParticleType>::write(Ostream& os, bool) const");

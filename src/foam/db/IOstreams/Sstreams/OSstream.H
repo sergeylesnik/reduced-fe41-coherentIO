@@ -57,6 +57,7 @@ class OSstream
 
         fileName name_;
         ostream& os_;
+        ostream& paros_;
 
 
     // Private Member Functions
@@ -90,6 +91,17 @@ public:
             ostream& os,
             const string& name,
             streamFormat format = ASCII,
+            versionNumber version = currentVersion,
+            compressionType compression=UNCOMPRESSED
+        );
+
+        //- Set stream status
+        OSstream
+        (
+            ostream& os,
+            ostream& paros,
+            const string& name,
+            streamFormat format = PARALLEL,
             versionNumber version = currentVersion,
             compressionType compression=UNCOMPRESSED
         );
@@ -159,6 +171,9 @@ public:
 
             //- Write binary block
             virtual Ostream& write(const char*, std::streamsize);
+
+            //- Write binary block into paros_
+            virtual Ostream& parwrite(const char*, std::streamsize);
 
             //- Add indentation characters
             virtual void indent();

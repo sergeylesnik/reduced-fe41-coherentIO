@@ -46,6 +46,10 @@ Foam::IOstream::formatEnum(const word& format)
     {
         return IOstream::BINARY;
     }
+    else if (format == "parallel")
+    {
+        return IOstream::PARALLEL;
+    }
     else
     {
         WarningIn("IOstream::formatEnum(const word&)")
@@ -140,6 +144,10 @@ void Foam::IOstream::print(Ostream& os) const
         case BINARY:
             os  << "BINARY";
         break;
+
+        case PARALLEL:
+            os  << "PARALLEL";
+        break;
     }
 
     os  << ", line "       << lineNumber();
@@ -211,9 +219,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const IOstream::streamFormat& sf)
     {
         os << "ascii";
     }
-    else
+    else if (sf == IOstream::BINARY)
     {
         os << "binary";
+    }
+    else if (sf == IOstream::PARALLEL)
+    {
+        os << "parallel";
     }
 
     return os;

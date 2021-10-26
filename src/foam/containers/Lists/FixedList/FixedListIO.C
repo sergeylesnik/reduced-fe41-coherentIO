@@ -116,7 +116,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
         // Read end of contents
         is.readEndList("FixedList");
     }
-    else
+    else if (is.format() == IOstream::BINARY)
     {
         is.read(reinterpret_cast<char*>(L.data()), Size*sizeof(T));
 
@@ -126,6 +126,8 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
             "reading the binary block"
         );
     }
+    else if (is.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in FixedListIO.C\n"; }
 
     return is;
 }
@@ -228,10 +230,12 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
             os << nl << token::END_LIST << nl;
         }
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         os.write(reinterpret_cast<const char*>(L.cdata()), Size*sizeof(T));
     }
+    else if (os.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not yet implemented in FixedListIO.C\n"; }
 
     // Check state of IOstream
     os.check("Ostream& operator<<(Ostream&, const FixedList&)");

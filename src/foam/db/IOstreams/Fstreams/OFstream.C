@@ -38,10 +38,12 @@ Foam::OFstreamAllocator::OFstreamAllocator
 (
     const fileName& pathname,
     ios_base::openmode mode,
+    IOstream::streamFormat format,
     IOstream::compressionType compression
 )
 :
-    ofPtr_(nullptr)
+    ofPtr_(nullptr),
+    parofPtr_(nullptr)
 {
     if (pathname.empty())
     {
@@ -71,6 +73,13 @@ Foam::OFstreamAllocator::OFstreamAllocator
         }
 
         ofPtr_ = new ofstream(pathname.c_str(), mode);
+
+        // create an extra file with extension .dat to split off the field values
+        if (format == IOstream::PARALLEL)
+        {
+            fileName parpathname = pathname + ".dat";
+            parofPtr_ = new ofstream(parpathname.c_str(), mode);
+        }
     }
 }
 
@@ -78,6 +87,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
 Foam::OFstreamAllocator::~OFstreamAllocator()
 {
     delete ofPtr_;
+    delete parofPtr_;
 }
 
 
@@ -92,8 +102,8 @@ Foam::OFstream::OFstream
     compressionType compression
 )
 :
-    OFstreamAllocator(pathname, mode, compression),
-    OSstream(*ofPtr_, "OFstream.sinkFile_", format, version, compression),
+    OFstreamAllocator(pathname, mode, format, compression),
+    OSstream(*ofPtr_, *parofPtr_, "OFstream.sinkFile_", format, version, compression),
     pathname_(pathname)
 {
     setClosed();

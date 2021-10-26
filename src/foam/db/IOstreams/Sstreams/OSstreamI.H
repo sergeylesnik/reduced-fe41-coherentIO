@@ -38,7 +38,8 @@ inline Foam::OSstream::OSstream
 :
     Ostream(format, version, compression),
     name_(name),
-    os_(os)
+    os_(os),
+    paros_(os)
 {
     if (os_.good())
     {
@@ -51,6 +52,37 @@ inline Foam::OSstream::OSstream
         setState(os_.rdstate());
     }
 }
+
+
+inline Foam::OSstream::OSstream
+(
+    ostream& os,
+    ostream& paros,
+    const string& name,
+    streamFormat format,
+    versionNumber version,
+    compressionType compression
+)
+:
+    Ostream(format, version, compression),
+    name_(name),
+    os_(os),
+    paros_(paros)
+{
+// TODO: Implement checks on paros_, depending on final stream type, i.e. MPI-IO, ADIOS2 etc.
+    if (os_.good())
+    {
+        setOpened();
+        setGood();
+        os_.precision(precision_());
+    }
+    else
+    {
+        setState(os_.rdstate());
+    }
+}
+
+
 
 
 // ************************************************************************* //

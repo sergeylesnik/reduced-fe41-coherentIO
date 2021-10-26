@@ -120,7 +120,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
             // Read end of contents
             is.readEndList("List");
         }
-        else if (len)
+        else if (len && is.format() == IOstream::BINARY)
         {
             // Non-empty, binary, contiguous
 
@@ -132,6 +132,8 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 "reading the binary block"
             );
         }
+        else if (len && is.format() == IOstream::BINARY)
+        { cout << "Parallel IO not yet implemented in ListIO.C\n"; }
 
         return is;
     }

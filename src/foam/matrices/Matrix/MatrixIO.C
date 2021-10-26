@@ -116,7 +116,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
             // Read end of contents
             is.readEndList("Matrix");
         }
-        else
+        else if (is.format() == IOstream::BINARY)
         {
             if (nm)
             {
@@ -132,6 +132,8 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
                 );
             }
         }
+        else if (is.format() == IOstream::PARALLEL)
+        { cout << "Parallel IO not implemented in MatrixIO.C.\n"; }
     }
     else
     {
@@ -243,13 +245,15 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
             os  << token::BEGIN_LIST << token::END_LIST << nl;
         }
     }
-    else
+    else if (os.format() == IOstream::BINARY)
     {
         if (nm)
         {
             os.write(reinterpret_cast<const char*>(M.v_[0]), nm*sizeof(Type));
         }
     }
+    else if (os.format() == IOstream::PARALLEL)
+    { cout << "Parallel IO not implemented in MatrixIO.C.\n"; }
 
     // Check state of IOstream
     os.check("Ostream& operator<<(Ostream&, const Matrix&)");
