@@ -132,8 +132,10 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 "reading the binary block"
             );
         }
-        else if (len && is.format() == IOstream::BINARY)
-        { cout << "Parallel IO not yet implemented in ListIO.C\n"; }
+        else if (len && is.format() == IOstream::PARALLEL)
+        { 
+            is.parread(reinterpret_cast<char*>(list.data()), len*sizeof(T));
+        }
 
         return is;
     }

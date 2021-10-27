@@ -61,6 +61,7 @@ class IFstreamAllocator
     // Private data
 
         istream* ifPtr_;
+        istream* parifPtr_;
         IOstream::compressionType compression_;
 
 

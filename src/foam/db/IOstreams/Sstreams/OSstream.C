@@ -243,9 +243,9 @@ Foam::Ostream& Foam::OSstream::parwrite(const char* buf, std::streamsize count)
             << abort(FatalIOError);
     }
 
-    paros_ << token::BEGIN_LIST;
+    //paros_ << token::BEGIN_LIST;
     paros_.write(buf, count);
-    paros_ << token::END_LIST;
+    //paros_ << token::END_LIST;
 
     setState(paros_.rdstate());
 

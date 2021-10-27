@@ -38,7 +38,35 @@ inline Foam::ISstream::ISstream
 :
     Istream(format, version, compression),
     name_(name),
-    is_(is)
+    is_(is),
+    paris_(is)
+{
+    if (is_.good())
+    {
+        setOpened();
+        setGood();
+    }
+    else
+    {
+        setState(is_.rdstate());
+    }
+}
+
+
+inline Foam::ISstream::ISstream
+(
+    istream& is,
+    istream& paris,
+    const string& name,
+    streamFormat format,
+    versionNumber version,
+    compressionType compression
+)
+:
+    Istream(format, version, compression),
+    name_(name),
+    is_(is),
+    paris_(paris)
 {
     if (is_.good())
     {

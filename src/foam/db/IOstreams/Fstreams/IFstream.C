@@ -37,6 +37,7 @@ defineTypeNameAndDebug(Foam::IFstream, 0);
 Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
 :
     ifPtr_(nullptr),
+    parifPtr_(nullptr),
     compression_(IOstream::UNCOMPRESSED)
 {
     if (pathname.empty())
@@ -68,6 +69,13 @@ Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
             compression_ = IOstream::COMPRESSED;
         }
     }
+
+    // If second field data file is present, set the parifPtr_.
+    if (isFile(pathname + ".dat", false))
+    {
+        fileName parpathname = pathname + ".dat";
+        parifPtr_ = new ifstream(parpathname.c_str());
+    }
 }
 
 
@@ -90,6 +98,7 @@ Foam::IFstream::IFstream
     ISstream
     (
         *ifPtr_,
+        *parifPtr_,
         "IFstream.sourceFile_",
         format,
         version,

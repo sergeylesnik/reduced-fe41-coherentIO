@@ -162,6 +162,13 @@ Foam::Istream& Foam::ITstream::read(char*, std::streamsize)
 }
 
 
+Foam::Istream& Foam::ITstream::parread(char*, std::streamsize)
+{
+    notImplemented("Istream& ITstream::parread(char*, std::streamsize)");
+    return *this;
+}
+
+
 Foam::Istream& Foam::ITstream::rewind()
 {
     tokenIndex_ = 0;

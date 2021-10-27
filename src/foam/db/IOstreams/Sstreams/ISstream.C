@@ -805,6 +805,26 @@ Foam::Istream& Foam::ISstream::read(char* buf, std::streamsize count)
 }
 
 
+// read binary block from second stream
+Foam::Istream& Foam::ISstream::parread(char* buf, std::streamsize count)
+{
+    if (format() != PARALLEL)
+    {
+        FatalIOErrorIn("ISstream::parread(char*, std::streamsize)", *this)
+            << "stream format not parallel"
+            << exit(FatalIOError);
+    }
+
+    //readBegin("binaryBlock");
+    paris_.read(buf, count);
+    //readEnd("binaryBlock");
+
+    setState(paris_.rdstate());
+
+    return *this;
+}
+
+
 Foam::Istream& Foam::ISstream::rewind()
 {
     stdStream().rdbuf()->pubseekpos(0);

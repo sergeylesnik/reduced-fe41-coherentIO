@@ -191,6 +191,9 @@ public:
             //- Read binary block
             virtual Istream& read(char*, std::streamsize);
 
+            //- Read binary block from second stream
+            virtual Istream& parread(char*, std::streamsize);
+
             //- Rewind and return the stream so that it may be read again
             virtual Istream& rewind();
 
