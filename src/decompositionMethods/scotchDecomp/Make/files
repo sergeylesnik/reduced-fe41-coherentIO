@@ -1,4 +1,0 @@
-scotchDecomp/scotchDecomp.C
-engineScotchDecomp/engineScotchDecomp.C
-
-LIB = $(FOAM_LIBBIN)/libscotchDecomp
