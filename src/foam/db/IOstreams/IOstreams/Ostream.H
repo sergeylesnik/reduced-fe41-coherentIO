@@ -39,7 +39,7 @@ SourceFiles
 #include "IOstream.H"
 #include "keyType.H"
 
-//#include "className.H"
+#include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +75,7 @@ protected:
 public:
 
     // Declare name of the class and its debug switch
-    //ClassName("Ostream");
+    ClassName("Ostream");
 
     // Constructors
 

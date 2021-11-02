@@ -104,7 +104,8 @@ Foam::Ostream& Foam::OSstream::write(const char c)
 
 Foam::Ostream& Foam::OSstream::write(const char* str)
 {
-    if (debug)
+    // Assign higher debug level since mostly file headers are written here
+    if (debug > 2)
     {
         std::cout 
         << "    From function " << __PRETTY_FUNCTION__ 
@@ -150,7 +151,6 @@ Foam::Ostream& Foam::OSstream::write(const string& str)
 
     os_ << token::BEGIN_STRING;
 
-    std::cout << "OSstream::write(const string& str): " << str << "\n";
     int backslash = 0;
     for (string::const_iterator iter = str.begin(); iter != str.end(); ++iter)
     {

@@ -32,7 +32,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//defineTypeNameAndDebug(Foam::Ostream, 0);
+defineTypeNameAndDebug(Foam::Ostream, 0);
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -63,7 +63,7 @@ Foam::Ostream& Foam::Ostream::write(const keyType& kw)
 // Write the keyword followed by appropriate indentation
 Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 {
-    //if (Ostream::debug)
+    if (Ostream::debug)
     {
         std::cout 
         << "    From function " << __PRETTY_FUNCTION__ 
