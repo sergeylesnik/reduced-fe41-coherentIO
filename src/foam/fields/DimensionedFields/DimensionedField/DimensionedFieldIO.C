@@ -25,6 +25,7 @@ License
 
 #include "DimensionedField.H"
 #include "IOstreams.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,6 +76,11 @@ bool DimensionedField<Type, GeoMesh>::writeData
     const word& fieldDictEntry
 ) const
 {
+    if (debug)
+    {
+        Pout<< "dimensions = " << endl;
+    }
+
     os.writeKeyword("dimensions") << dimensions() << token::END_STATEMENT
         << nl << nl;
 

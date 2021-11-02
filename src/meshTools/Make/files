@@ -22,7 +22,6 @@ PointEdgeWave/pointEdgePoint.C
 regionSplit/regionSplit.C
 
 searchableSurface = searchableSurface
-$(searchableSurface)/distributedTriSurfaceMesh.C
 $(searchableSurface)/searchableBox.C
 $(searchableSurface)/searchableCylinder.C
 $(searchableSurface)/searchablePlane.C
@@ -33,7 +32,6 @@ $(searchableSurface)/searchableSurfaceCollection.C
 $(searchableSurface)/searchableSurfaces.C
 $(searchableSurface)/searchableSurfacesQueries.C
 $(searchableSurface)/searchableSurfaceWithGaps.C
-$(searchableSurface)/triSurfaceMesh.C
 
 topoSets = sets/topoSets
 $(topoSets)/cellSet.C
@@ -99,8 +97,6 @@ triSurface/triSurface/geometricSurfacePatch/geometricSurfacePatch.C
 triSurface/triSurface/surfacePatch/surfacePatch.C
 triSurface/triSurface/surfacePatch/surfacePatchIOList.C
 triSurface/tools/labelledTri/sortLabelledTri.C
-triSurface/triSurfaceFields/triSurfaceFields.C
-triSurface/triSurfaceFields/triSurfacePointFields/triSurfacePointFields.C
 triSurface/orientedSurface/orientedSurface.C
 triSurface/surfaceLocation/surfaceLocation.C
 $(triSurfaceInterfaces)/STL/writeSTL.C

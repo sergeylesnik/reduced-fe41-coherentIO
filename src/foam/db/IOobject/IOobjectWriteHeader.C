@@ -28,6 +28,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"
+#include "IOstreams.H"
+#include "messageStream.H"
 #include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,6 +44,14 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 
         return false;
     }
+    
+    DebugIO2
+        << "    version     " << os.version() << ";\n"
+        << "    format      " << os.format() << ";\n"
+        << "    class       " << type << ";\n"
+        << "    location    " << instance()/local() << ";\n"
+        << "    object      " << name() << ";\n"
+        << endl;
 
     writeBanner(os, false, true)
         << "FoamFile\n{\n"

@@ -25,12 +25,46 @@ License
 
 #include "error.H"
 #include "OSstream.H"
+#include "messageStream.H"
 #include "token.H"
+#include <iostream>
+
+// Pout won't work since it's an Ostream
+/*
+#include "prefixOSstream.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam {
+    extern prefixOSstream Pout;
+}
+*/
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(Foam::OSstream, 0);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::OSstream::write(const token& t)
 {
+    if (debug)
+    {
+        std::cout 
+        << "    From function " << __PRETTY_FUNCTION__ 
+        << "    in file " << __FILE__ 
+        << " at line " << __LINE__ 
+        << " Token: " << t.stringToken() << "\n";
+    }
+
+    if (t.isPunctuation())
+    {
+        if (t.pToken() == token::punctuationToken::BEGIN_BLOCK)
+        {
+            std::cout << "OSstream::write(token): BEGIN_BLOCK\n";
+        }
+    }
+
     if (t.type() == token::VERBATIMSTRING)
     {
         write(char(token::HASH));
@@ -49,6 +83,15 @@ Foam::Ostream& Foam::OSstream::write(const token& t)
 
 Foam::Ostream& Foam::OSstream::write(const char c)
 {
+    if (debug > 1)
+    {
+        std::cout 
+        << "    From function " << __PRETTY_FUNCTION__ 
+        << "    in file " << __FILE__ 
+        << " at line " << __LINE__ 
+        << ": " << c << "\n";
+    }
+
     os_ << c;
     if (c == token::NL)
     {
@@ -61,6 +104,15 @@ Foam::Ostream& Foam::OSstream::write(const char c)
 
 Foam::Ostream& Foam::OSstream::write(const char* str)
 {
+    if (debug)
+    {
+        std::cout 
+        << "    From function " << __PRETTY_FUNCTION__ 
+        << "    in file " << __FILE__ 
+        << " at line " << __LINE__ 
+        << ": " << str << "\n";
+    }
+
     lineNumber_ += string(str).count(token::NL);
     os_ << str;
     setState(os_.rdstate());
@@ -70,6 +122,15 @@ Foam::Ostream& Foam::OSstream::write(const char* str)
 
 Foam::Ostream& Foam::OSstream::write(const word& str)
 {
+    if (debug)
+    {
+        std::cout 
+        << "    From function " << __PRETTY_FUNCTION__ 
+        << "    in file " << __FILE__ 
+        << " at line " << __LINE__ 
+        << ": " << str << "\n";
+    }
+
     os_ << str;
     setState(os_.rdstate());
     return *this;
@@ -78,8 +139,18 @@ Foam::Ostream& Foam::OSstream::write(const word& str)
 
 Foam::Ostream& Foam::OSstream::write(const string& str)
 {
+    if (debug)
+    {
+        std::cout 
+        << "    From function " << __PRETTY_FUNCTION__ 
+        << "    in file " << __FILE__ 
+        << " at line " << __LINE__ 
+        << ": " << str << "\n";
+    }
+
     os_ << token::BEGIN_STRING;
 
+    std::cout << "OSstream::write(const string& str): " << str << "\n";
     int backslash = 0;
     for (string::const_iterator iter = str.begin(); iter != str.end(); ++iter)
     {
@@ -127,6 +198,15 @@ Foam::Ostream& Foam::OSstream::writeQuoted
     const bool quoted
 )
 {
+    if (debug > 2)
+    {
+        std::cout 
+        << "    From function " << __PRETTY_FUNCTION__ 
+        << "    in file " << __FILE__ 
+        << " at line " << __LINE__ 
+        << ": " << str << "\n";
+    }
+
     if (quoted)
     {
         os_ << token::BEGIN_STRING;

@@ -51,6 +51,8 @@ SourceFiles
 
 namespace Foam
 {
+    
+TemplateName(DebugIOField);
 
 // Forward declaration of friend functions and operators
 
@@ -77,6 +79,7 @@ class dictionary;
 template<class Type>
 class Field
 :
+    public DebugIOFieldName,
     public refCount,
     public List<Type>
 {

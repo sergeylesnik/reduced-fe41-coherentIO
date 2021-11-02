@@ -387,7 +387,9 @@ $(convectionSchemes)/convectionScheme/convectionSchemes.C
 $(convectionSchemes)/gaussConvectionScheme/gaussConvectionSchemes.C
 $(convectionSchemes)/noConvectionScheme/noConvectionSchemes.C
 $(convectionSchemes)/explicitConvectionScheme/explicitConvectionSchemes.C
+/*
 $(convectionSchemes)/multivariateGaussConvectionScheme/multivariateGaussConvectionSchemes.C
+*/
 
 adjConvectionSchemes = finiteVolume/adjConvectionSchemes
 $(adjConvectionSchemes)/adjConvectionScheme/adjConvectionSchemes.C

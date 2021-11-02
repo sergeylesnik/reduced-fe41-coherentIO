@@ -305,6 +305,21 @@ extern messageStream Info;
 #define DebugInFunction                                                        \
     if (debug) InfoInFunction
 
+//- Report an information message using Foam::Info
+//  for FUNCTION_NAME in file __FILE__ at line __LINE__
+//  if the local debug switch is true
+#define DebugIO2 \
+    if (debug >= 2) ::Foam::Pout<< "From function " << FUNCTION_NAME << nl \
+    << " in file " << __FILE__ << " at line " << __LINE__ << nl
+
+//- Report an information message using Foam::Info
+//  for FUNCTION_NAME in file __FILE__ at line __LINE__
+//  if the local debug switch is true
+#define DebugRegIO2 \
+    if (::Foam::regIOobject::debug >= 2) ::Foam::Pout<< "From function " \
+    << FUNCTION_NAME << nl \
+    << " in file " << __FILE__ << " at line " << __LINE__ << nl
+
 //- Report a variable name and value
 //  using Foam::Pout in file __FILE__ at line __LINE__
 #define DebugVar(var)                                                          \

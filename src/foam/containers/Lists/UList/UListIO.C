@@ -28,12 +28,23 @@ License
 #include "token.H"
 #include "SLList.H"
 #include "contiguous.H"
+#include <iostream>
+
+#include "prefixOSstream.H"
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
+
+namespace Foam {
+    extern prefixOSstream Pout;
+}
 
 template<class T>
 void Foam::UList<T>::writeEntry(Ostream& os) const
 {
+    if (debug)
+    {
+        Pout<< "UList<T>::writeEntry(Ostream&): List< ... >" << endl;
+    }
     if
     (
         size()
@@ -53,6 +64,14 @@ void Foam::UList<T>::writeEntry(Ostream& os) const
 template<class T>
 void Foam::UList<T>::writeEntry(const word& keyword, Ostream& os) const
 {
+    // DebugIO
+    //if (debug)
+    //{
+    //    std::cout << "keyword = " << keyword << nl
+    //        << "size = " << size()
+    //        << endl;
+    //}
+Info << "keyword = " << keyword << endl;
     os.writeKeyword(keyword);
     writeEntry(os);
     os << token::END_STATEMENT << endl;
@@ -124,6 +143,7 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
     }
     else if (os.format() == IOstream::BINARY)
     {
+        Info<< "Writing to ADIOS field of size " << L.byteSize() << endl;
         os << nl << L.size() << nl;
         if (L.size())
         {

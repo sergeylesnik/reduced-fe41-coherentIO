@@ -47,10 +47,14 @@ SourceFiles
 #include "uLabel.H"
 #include "nullObject.H"
 
+#include "className.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+TemplateName(DebugIOUList);
 
 // Forward declaration of friend classes
 template<class T> class List;
@@ -69,6 +73,8 @@ typedef UList<label> labelUList;
 
 template<class T>
 class UList
+:
+    public DebugIOUListName
 {
     // Private data
 

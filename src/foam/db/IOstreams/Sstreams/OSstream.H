@@ -40,6 +40,8 @@ SourceFiles
 #include "fileName.H"
 #include <iostream>
 
+#include "className.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -82,6 +84,9 @@ protected:
 
 
 public:
+
+    // Declare name of the class and its debug switch
+    ClassName("OSstream");
 
     // Constructors
 
