@@ -58,6 +58,7 @@ class OSstream
     // Private data
 
         fileName name_;
+        // FIFOStack<word> blockNamesStack_;
         ostream& os_;
         ostream& paros_;
 
@@ -182,6 +183,9 @@ public:
 
             //- Add indentation characters
             virtual void indent();
+
+            //- Incrememt the indent level and add new block with name
+            virtual word incrBlock(const word);
 
 
         // Stream state functions

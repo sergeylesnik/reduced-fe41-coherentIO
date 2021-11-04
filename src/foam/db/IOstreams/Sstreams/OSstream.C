@@ -342,6 +342,12 @@ void Foam::OSstream::indent()
 }
 
 
+Foam::word Foam::OSstream::incrBlock(const word name)
+{
+    return name;
+}
+
+
 void Foam::OSstream::flush()
 {
     os_.flush();

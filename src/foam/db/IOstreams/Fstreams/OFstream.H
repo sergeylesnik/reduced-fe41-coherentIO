@@ -42,6 +42,9 @@ SourceFiles
 #include <fstream>
 using std::ofstream;
 
+template<class T> class SLList;
+#include "LIFOStack.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -91,6 +94,7 @@ class OFstream
     // Private data
 
         fileName pathname_;
+        LIFOStack<word> blockNamesStack_;
 
 
 public:
@@ -132,6 +136,9 @@ public:
             {
                 return pathname_;
             }
+            
+            //- Get block identifier
+            virtual word getBlockId();
 
 
         // STL stream
@@ -147,6 +154,14 @@ public:
 
             //- Print description of IOstream to Ostream
             void print(Ostream&) const;
+            
+        // Write
+
+            //- Incrememt the indent level and add a new block with name
+            virtual word incrBlock(const word);
+
+            //- Decrememt the indent level and close the current block
+            virtual void decrBlock();
 };
 
 

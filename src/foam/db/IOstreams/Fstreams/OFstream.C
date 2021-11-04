@@ -25,7 +25,9 @@ License
 
 #include "OFstream.H"
 #include "OSspecific.H"
+#include "UList.H"
 #include "gzstream.h"
+#include <iostream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -104,7 +106,8 @@ Foam::OFstream::OFstream
 :
     OFstreamAllocator(pathname, mode, format, compression),
     OSstream(*ofPtr_, *parofPtr_, "OFstream.sinkFile_", format, version, compression),
-    pathname_(pathname)
+    pathname_(pathname),
+    blockNamesStack_()
 {
     setClosed();
     setState(ofPtr_->rdstate());
@@ -138,6 +141,27 @@ Foam::OFstream::~OFstream()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+            
+Foam::word Foam::OFstream::getBlockId()
+{
+    word id = "";
+    id = word(blockNamesStack_.size());
+
+    forAllConstIter(SLList<word>, blockNamesStack_, iter)
+    {
+        id = '/' + iter() + id;
+    }
+
+    if(debug)
+    {
+        std::cout 
+            << "Block id = " << id << "blockNamesStack_.size() = "
+            << blockNamesStack_.size() << '\n';
+    }
+
+    return id;
+}
+
 
 std::ostream& Foam::OFstream::stdStream()
 {
@@ -165,6 +189,46 @@ void Foam::OFstream::print(Ostream& os) const
 {
     os  << "    OFstream: ";
     OSstream::print(os);
+}
+
+
+Foam::word Foam::OFstream::incrBlock(const word name)
+{
+    blockNamesStack_.push(name);
+    
+    if(debug)
+    {
+        std::cout 
+            << "Add to the block name LIFO stack: "
+            << blockNamesStack_.last() << '\n';
+    }
+
+    this->indent();
+    this->write(name);
+    this->write(nl);
+    this->indent();
+    this->write(char(token::BEGIN_BLOCK));
+    this->write(nl);
+    this->incrIndent();
+
+    return name;
+}
+
+
+void Foam::OFstream::decrBlock()
+{
+    if(debug)
+    {
+        std::cout 
+            << "Pop block name LIFO stack: "
+            << blockNamesStack_.first() << '\n';
+    }
+
+    blockNamesStack_.pop();
+    
+    this->decrIndent();
+    this->indent();
+    this->write(char(token::END_BLOCK));
 }
 
 

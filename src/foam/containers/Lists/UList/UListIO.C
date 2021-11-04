@@ -81,6 +81,13 @@ Info << "keyword = " << keyword << endl;
 template<class T>
 Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
 {
+    if (UList<T>::debug)
+    {
+        Pout<< "UListIO: operator<<(): "
+            << os.name() << ": "
+            << os.getBlockId() << endl;
+    }
+
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
@@ -143,7 +150,6 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
     }
     else if (os.format() == IOstream::BINARY)
     {
-        Info<< "Writing to ADIOS field of size " << L.byteSize() << endl;
         os << nl << L.size() << nl;
         if (L.size())
         {
@@ -152,6 +158,12 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
     }
     else if (os.format() == IOstream::PARALLEL)
     {
+        if(UList<T>::debug)
+        {
+            Pout<< "Writing to PARALLEL a field of size "
+                << L.byteSize() << endl;
+        }
+
         os << nl << L.size() << nl;
         if (L.size())
         {

@@ -166,8 +166,24 @@ public:
                 indentLevel_++;
             }
 
+            //- Incrememt the indent level and add new block with name
+            virtual word incrBlock(const word name)
+            {
+                return name;
+            }
+
             //- Decrememt the indent level
-            void decrIndent();
+            virtual void decrIndent();
+
+            //- Decrememt the indent level and close the current block
+            virtual void decrBlock()
+            {}
+            
+            //- Get block identifier
+            virtual word getBlockId()
+            {
+                return "none (called Ostream Member)";
+            }
 
             //- Write the keyword followed by an appropriate indentation
             Ostream& writeKeyword(const keyType&);
@@ -240,6 +256,16 @@ inline Ostream& incrIndent(Ostream& os)
     return os;
 }
 
+//- Increment the indent level
+// inline Ostream& incrBlock(Ostream& os, const word& name)
+// {
+//     os.incrBlock(name);
+//     // os  << indent << name << nl
+//     //     << indent << token::BEGIN_BLOCK << nl
+//     //     << incrIndent;
+//     return os;
+// }
+
 //- Decrement the indent level
 inline Ostream& decrIndent(Ostream& os)
 {
@@ -247,6 +273,13 @@ inline Ostream& decrIndent(Ostream& os)
     return os;
 }
 
+
+//- Decrement the indent level
+inline Ostream& decrBlock(Ostream& os)
+{
+    os.decrBlock();
+    return os;
+}
 
 //- Flush stream
 inline Ostream& flush(Ostream& os)

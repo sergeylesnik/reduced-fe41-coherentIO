@@ -27,6 +27,8 @@ License
 #include "commSchedule.H"
 #include "globalMeshData.H"
 
+#include "IOmanip.H"
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -523,14 +525,20 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
 writeEntry(const word& keyword, Ostream& os) const
 {
-    os  << keyword << nl << token::BEGIN_BLOCK << incrIndent << nl;
+    // os  << keyword << nl << token::BEGIN_BLOCK << incrIndent << nl;
+    os  << incrBlock(keyword) << nl;
 
     forAll(*this, patchi)
     {
-        os  << indent << this->operator[](patchi).patch().name() << nl
-            << indent << token::BEGIN_BLOCK << nl
-            << incrIndent << this->operator[](patchi) << decrIndent
-            << indent << token::END_BLOCK << endl;
+        // os.incrBlock(this->operator[](patchi).patch().name());
+        // os << setw(4)
+        os  << incrBlock(this->operator[](patchi).patch().name())
+            << this->operator[](patchi)
+            << decrBlock << endl;
+        // os  << indent << this->operator[](patchi).patch().name() << nl
+        //     << indent << token::BEGIN_BLOCK << nl
+        //     << incrIndent << this->operator[](patchi) << decrIndent
+        //     << indent << token::END_BLOCK << endl;
     }
 
     os  << decrIndent << token::END_BLOCK << endl;

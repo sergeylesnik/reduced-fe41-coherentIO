@@ -207,6 +207,10 @@ inline Omanip<int> setprecision(const int i)
     return Omanip<int>(&Ostream::precision, i);
 }
 
+inline Omanip<word> incrBlock(const word name)
+{
+    return Omanip<word>(&Ostream::incrBlock, name);
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
