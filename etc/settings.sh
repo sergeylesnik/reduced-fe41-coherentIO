@@ -850,6 +850,23 @@ fi
 }
 [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "    MESA_DIR is initialized to: $MESA_DIR"
 
+# Load ADIOS2 library
+# ~~~~~~~~~~~~~~~~~~
+if [ ! -z "$ADIOS2_SYSTEM" ]
+then
+    # Using system libraries.
+    export ADIOS2_LIBS=$(adios2-config --cxx-libs)
+    export ADIOS2_FLAGS=$(adios2-config --cxx-flags)
+    # TODO: System ADIOS2 is not sufficiently configured. 
+else
+    # Using ThirdParty package for Scotch
+    [ -z $WM_THIRD_PARTY_USE_ADIOS_271 ] && [ -e $WM_THIRD_PARTY_DIR/packages/ADIOS2-2.7.1/platforms/$WM_OPTIONS ] && {
+	_foamSource $WM_THIRD_PARTY_DIR/packages/ADIOS2-2.7.1/platforms/$WM_OPTIONS/etc/ADIOS2-2.7.1.sh
+    }
+fi
+[ "$FOAM_VERBOSE" -a "$PS1" ] && echo "    ADIOS2_LIBS is initialized to: $ADIOS2_LIBS"
+
+
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~

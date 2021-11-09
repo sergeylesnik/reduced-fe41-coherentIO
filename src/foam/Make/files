@@ -161,6 +161,10 @@ $(Pstreams)/OPstream.C
 $(Pstreams)/IPread.C
 $(Pstreams)/OPwrite.C
 
+A2streams = $(Streams)/A2streams
+$(A2streams)/adiosCoreWrite.C
+$(A2streams)/adiosWrite.C
+
 dictionary = db/dictionary
 $(dictionary)/dictionary.C
 $(dictionary)/dictionaryIO.C

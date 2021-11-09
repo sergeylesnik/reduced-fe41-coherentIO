@@ -1,7 +1,11 @@
 include $(RULES)/mplib$(WM_MPLIB)
 
 EXE_INC = $(PFLAGS) $(PINC) \
-    -I$(WM_THIRD_PARTY_DIR)/zlib-1.2.3
+    -I$(WM_THIRD_PARTY_DIR)/zlib-1.2.3 \
+    $(ADIOS2_FLAGS) \
+    -I$(ADIOS2_INCLUDE_DIR) \
+    -I$(ADIOS2_INCLUDE_CXX11_DIR) \
+    -I$(ADIOS2_INCLUDE_COMMON_DIR)
 
 #if defined(mingw)
 
@@ -12,13 +16,17 @@ LIB_LIBS = $(PLIBS)\
     -ldl \
     -lpsapi \
     -lpthread \
-    -lws2_32
+    -lws2_32 \
+    $(ADIOS2_LIBS) \
+    -L$(ADIOS2_LIB_DIR)
 
 #else
 
 LIB_LIBS = $(PLIBS)\
     $(FOAM_LIBBIN)/libOSspecific.o \
-    -lz
+    -lz \
+    $(ADIOS2_LIBS) \
+    -L$(ADIOS2_LIB_DIR)
 
 #endif
 

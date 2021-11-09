@@ -42,6 +42,8 @@ SourceFiles
 
 #include "className.H"
 
+#include "adiosWrite.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
