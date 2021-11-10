@@ -162,6 +162,11 @@ public:
 
             //- Decrememt the indent level and close the current block
             virtual void decrBlock();
+
+            //- Write the keyword followed by an appropriate indentation
+            virtual Ostream& writeKeyword(const keyType&);
+            
+            virtual void popBlockNamesStack();
 };
 
 

@@ -121,6 +121,15 @@ ostream& Foam::operator<<(ostream& os, const token::punctuationToken& pt)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const token::punctuationToken& pt)
 {
+    if (pt == token::END_STATEMENT)
+    {
+        if (Ostream::debug)
+        {
+            std::cout << "Found token END_STATEMENT."
+                << " Poping stack with block names.\n";
+        }
+        os.popBlockNamesStack();
+    }
     return os << char(pt);
 }
 

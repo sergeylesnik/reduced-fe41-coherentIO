@@ -186,8 +186,11 @@ public:
             }
 
             //- Write the keyword followed by an appropriate indentation
-            Ostream& writeKeyword(const keyType&);
+            virtual Ostream& writeKeyword(const keyType&);
 
+            virtual void popBlockNamesStack()
+            {}
+            
 
         // Stream state functions
 
@@ -256,15 +259,6 @@ inline Ostream& incrIndent(Ostream& os)
     return os;
 }
 
-//- Increment the indent level
-// inline Ostream& incrBlock(Ostream& os, const word& name)
-// {
-//     os.incrBlock(name);
-//     // os  << indent << name << nl
-//     //     << indent << token::BEGIN_BLOCK << nl
-//     //     << incrIndent;
-//     return os;
-// }
 
 //- Decrement the indent level
 inline Ostream& decrIndent(Ostream& os)

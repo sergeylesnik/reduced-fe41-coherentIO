@@ -27,6 +27,7 @@ License
 #include "OSspecific.H"
 #include "UList.H"
 #include "gzstream.h"
+#include "messageStream.H"
 #include <iostream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -145,17 +146,29 @@ Foam::OFstream::~OFstream()
 Foam::word Foam::OFstream::getBlockId()
 {
     word id = "";
+    bool firstEntry = true;
     id = word(blockNamesStack_.size());
 
     forAllConstIter(SLList<word>, blockNamesStack_, iter)
     {
-        id = '/' + iter() + id;
+        if (firstEntry)
+        {
+            id = iter();
+            firstEntry = false;
+        }
+        else
+        {
+            id = iter() + '/' + id;
+        }
     }
+    
+    id = pathname_.caseName("") + '/' + id;
 
-    if(debug)
+
+    if(debug > 1)
     {
         std::cout 
-            << "Block id = " << id << "blockNamesStack_.size() = "
+            << "Block id = " << id << "; blockNamesStack_.size() = "
             << blockNamesStack_.size() << '\n';
     }
 
@@ -199,8 +212,7 @@ Foam::word Foam::OFstream::incrBlock(const word name)
     if(debug)
     {
         std::cout 
-            << "Add to the block name LIFO stack: "
-            << blockNamesStack_.last() << '\n';
+            << "Add to the block name LIFO stack: " << name << '\n';
     }
 
     this->indent();
@@ -217,18 +229,46 @@ Foam::word Foam::OFstream::incrBlock(const word name)
 
 void Foam::OFstream::decrBlock()
 {
-    if(debug)
-    {
-        std::cout 
-            << "Pop block name LIFO stack: "
-            << blockNamesStack_.first() << '\n';
-    }
-
-    blockNamesStack_.pop();
+    popBlockNamesStack();
     
     this->decrIndent();
     this->indent();
     this->write(char(token::END_BLOCK));
+}
+
+
+Foam::Ostream& Foam::OFstream::writeKeyword(const keyType& kw)
+{
+    if (debug)
+    {
+        std::cout
+            << "Add to the block name LIFO stack: " << kw << "\n";
+    }
+
+    blockNamesStack_.push(kw);
+    
+    return this->Ostream::writeKeyword(kw);
+}
+
+
+void Foam::OFstream::popBlockNamesStack()
+{
+    if (blockNamesStack_.empty())
+    {
+        WarningInFunction 
+            << "Tried to pop the stack although its empty.\n";
+    }
+    else
+    {
+        if(debug)
+        {
+            std::cout 
+                << "Pop block name LIFO stack: "
+                << blockNamesStack_.first() << '\n';
+        }
+
+        blockNamesStack_.pop();
+    }
 }
 
 

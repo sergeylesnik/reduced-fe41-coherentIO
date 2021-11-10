@@ -64,14 +64,11 @@ void Foam::UList<T>::writeEntry(Ostream& os) const
 template<class T>
 void Foam::UList<T>::writeEntry(const word& keyword, Ostream& os) const
 {
-    // DebugIO
-    //if (debug)
-    //{
-    //    std::cout << "keyword = " << keyword << nl
-    //        << "size = " << size()
-    //        << endl;
-    //}
-Info << "keyword = " << keyword << endl;
+    if (debug)
+    {
+        Pout<< "UListIO::writeEntry keyword = " << keyword << endl;
+    }
+
     os.writeKeyword(keyword);
     writeEntry(os);
     os << token::END_STATEMENT << endl;
@@ -83,9 +80,7 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
 {
     if (UList<T>::debug)
     {
-        Pout<< "UListIO: operator<<(): "
-            << os.name() << ": "
-            << os.getBlockId() << endl;
+        Pout<< "UListIO: operator<<(); id = " << os.getBlockId() << endl;
     }
 
     // Write list contents depending on data format
@@ -170,7 +165,7 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             os.parwrite(reinterpret_cast<const char*>(L.v_), L.byteSize());
         }
     }
-
+    
     // Check state of IOstream
     os.check("Ostream& operator<<(Ostream&, const UList&)");
 

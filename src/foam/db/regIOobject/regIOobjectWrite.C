@@ -75,7 +75,7 @@ bool Foam::regIOobject::writeObject
     if (OFstream::debug)
     {
         Info<< "regIOobject::write() : "
-            << "writing file " << objectPath();
+            << "writing file " << objectPath() << " ..." << nl;
     }
 
 

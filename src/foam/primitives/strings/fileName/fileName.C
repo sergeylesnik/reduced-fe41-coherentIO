@@ -200,7 +200,7 @@ Foam::word Foam::fileName::name() const
 }
 
 
-Foam::string Foam::fileName::caseName() const
+Foam::string Foam::fileName::caseName(const string prefix) const
 {
     string cName = *this;
 
@@ -214,7 +214,15 @@ Foam::string Foam::fileName::caseName() const
     }
     else
     {
-        return cName.replace(i, caseStr.size(), string("$FOAM_CASE"));
+        if (prefix.empty())
+        {
+            // Additionaly remove the leading delimeter
+            return cName.erase(i, caseStr.size()+1);
+        }
+        else
+        {
+            return cName.replace(i, caseStr.size(), prefix);
+        }
     }
 }
 
