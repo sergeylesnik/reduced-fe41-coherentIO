@@ -62,7 +62,7 @@ class OFstreamAllocator
     friend class OFstream;
 
     ostream* ofPtr_;
-    ostream* parofPtr_;
+    std::shared_ptr<adiosWrite> adiosPtr_;
 
     // Constructors
 

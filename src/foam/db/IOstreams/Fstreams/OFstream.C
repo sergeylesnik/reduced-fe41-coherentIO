@@ -29,6 +29,7 @@ License
 #include "gzstream.h"
 #include "messageStream.H"
 #include <iostream>
+#include <memory>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,7 +47,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
 )
 :
     ofPtr_(nullptr),
-    parofPtr_(nullptr)
+    adiosPtr_(nullptr)
 {
     if (pathname.empty())
     {
@@ -81,7 +82,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
         if (format == IOstream::PARALLEL)
         {
             fileName parpathname = pathname + ".dat";
-            parofPtr_ = new ofstream(parpathname.c_str(), mode);
+            adiosPtr_.reset(new adiosWrite());
         }
     }
 }
@@ -90,7 +91,6 @@ Foam::OFstreamAllocator::OFstreamAllocator
 Foam::OFstreamAllocator::~OFstreamAllocator()
 {
     delete ofPtr_;
-    delete parofPtr_;
 }
 
 
@@ -106,7 +106,7 @@ Foam::OFstream::OFstream
 )
 :
     OFstreamAllocator(pathname, mode, format, compression),
-    OSstream(*ofPtr_, *parofPtr_, "OFstream.sinkFile_", format, version, compression),
+    OSstream(*ofPtr_, adiosPtr_, "OFstream.sinkFile_", format, version, compression),
     pathname_(pathname),
     blockNamesStack_()
 {

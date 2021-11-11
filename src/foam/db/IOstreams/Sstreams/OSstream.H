@@ -39,6 +39,7 @@ SourceFiles
 #include "Ostream.H"
 #include "fileName.H"
 #include <iostream>
+#include <memory>
 
 #include "className.H"
 
@@ -62,7 +63,7 @@ class OSstream
         fileName name_;
         // FIFOStack<word> blockNamesStack_;
         ostream& os_;
-        ostream& paros_;
+        std::shared_ptr<adiosWrite> adiosos_;
 
 
     // Private Member Functions
@@ -107,7 +108,7 @@ public:
         OSstream
         (
             ostream& os,
-            ostream& paros,
+            std::shared_ptr<adiosWrite> adiosos,
             const string& name,
             streamFormat format = PARALLEL,
             versionNumber version = currentVersion,

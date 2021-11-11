@@ -37,7 +37,7 @@ Foam::adiosCoreWrite::adiosCoreWrite()
     writeIOPtr_(nullptr),
     writeFilePtr_(nullptr)
 {
-    if (!(*adiosPtr_))
+    if (!instantiated)
     {
         if (Pstream::parRun())
         {
