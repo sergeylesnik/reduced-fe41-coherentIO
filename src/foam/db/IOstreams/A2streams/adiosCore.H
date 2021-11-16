@@ -23,11 +23,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef adiosCoreWrite_H
-#define adiosCoreWrite_H
+#ifndef adiosCore_H
+#define adiosCore_H
 
 #include "adios2.h"
+
+#include "word.H"
+#include "labelList.H"
 #include <memory>
+#include <map>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -35,9 +39,9 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class adiosCoreWrite Declaration
+                       Class adiosCore Declaration
 \*---------------------------------------------------------------------------*/
-class adiosCoreWrite
+class adiosCore
 {
 
         //- ADIOS instance
@@ -45,25 +49,46 @@ class adiosCoreWrite
 
         static bool instantiated;
 
-protected:
+        // Map to adios2::IO definitions - mirror of InquireIO(name)
+        std::map<word, std::unique_ptr<adios2::IO> > ioMap;
 
-    // Private/Protected Data
+        // Map to adios2::Engine definitions - inquiring Engine
+        std::map<word, std::unique_ptr<adios2::Engine> > engineMap;
 
         //- ADIOS output IO definitions - mirror of InquireIO("write")
-        std::unique_ptr<adios2::IO> writeIOPtr_;
+        std::unique_ptr<adios2::IO> ioPtr_;
 
         //- ADIOS file write - mirror of ...
-        std::unique_ptr<adios2::Engine> writeFilePtr_;
+        std::unique_ptr<adios2::Engine> enginePtr_;
+
+        std::unique_ptr<adios2::Variable<char> > variablePtr_;
 
 public:
 
     //- Constructor
-    adiosCoreWrite();
-
+    adiosCore();
 
     //- Destructor
-    ~adiosCoreWrite();
+    ~adiosCore();
 
+    bool defineVariable
+    (
+        const word name,
+        const label shape,
+        const label start,
+        const label count,
+        const bool constantDims = false
+    );
+
+    bool open(const fileName pathname);
+
+    void beginStep();
+
+    bool put(const char* buf);
+
+    void endStep();
+
+    void close();
 
 };
 

@@ -27,6 +27,7 @@ License
 #include "OSstream.H"
 #include "messageStream.H"
 #include "token.H"
+#include "Pstream.H"
 #include <iostream>
 
 // Pout won't work since it's an Ostream
@@ -314,21 +315,10 @@ Foam::Ostream& Foam::OSstream::write(const char* buf, std::streamsize count)
 }
 
 
-Foam::Ostream& Foam::OSstream::parwrite(const char* buf, std::streamsize count)
+Foam::Ostream& Foam::OSstream::parwrite(const char* buf, const label count)
 {
-    if (format() != PARALLEL)
-    {
-        FatalIOErrorIn("Ostream::parwrite(const char*, std::streamsize)", *this)
-            << "stream format not parallel"
-            << abort(FatalIOError);
-    }
-
-    os_ << token::BEGIN_LIST;
-    os_.write(buf, count);
-    os_ << token::END_LIST;
-
-    setState(os_.rdstate());
-
+    notImplemented("Ostream& OSstream::parwrite(const char*, const label)");
+    setBad();
     return *this;
 }
 

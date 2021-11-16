@@ -168,7 +168,7 @@ public:
             Ostream& write(const char*, std::streamsize);
 
             //- Write binary block into second stream
-            Ostream& parwrite(const char*, std::streamsize);
+            Ostream& parwrite(const char*, const label);
 
             //- Add indentation characters
             void indent()

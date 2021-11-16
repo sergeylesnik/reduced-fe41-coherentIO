@@ -24,13 +24,52 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "adiosWrite.H"
-#include "adiosCoreWrite.H"
+#include "adiosCore.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::adiosWrite::adiosWrite()
 :
-    adiosCoreWritePtr_(new adiosCoreWrite())
+    pathname_(),
+    adiosCorePtr_(new adiosCore())
+{}
+
+Foam::adiosWrite::adiosWrite(const fileName& pathname)
+:
+    pathname_(pathname),
+    adiosCorePtr_(new adiosCore())
 {}
 
 
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+
 Foam::adiosWrite::~adiosWrite() {}
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::fileName Foam::adiosWrite::pathname()
+{
+    return this->pathname_;
+}
+
+bool Foam::adiosWrite::write
+(
+    const Foam::word blockId,
+    const Foam::label shape,
+    const Foam::label start,
+    const Foam::label count,
+    const char* buf
+)
+{
+    adiosCorePtr_->defineVariable(blockId, shape, start, count, true);
+    adiosCorePtr_->open(this->pathname_);
+    adiosCorePtr_->beginStep();
+    adiosCorePtr_->put(buf);
+    adiosCorePtr_->endStep();
+    adiosCorePtr_->close();
+
+    return true;
+}
+
+// ************************************************************************* //

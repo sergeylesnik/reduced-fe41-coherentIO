@@ -182,7 +182,7 @@ public:
             virtual Ostream& write(const char*, std::streamsize);
 
             //- Write binary block into paros_
-            virtual Ostream& parwrite(const char*, std::streamsize);
+            virtual Ostream& parwrite(const char*, const label);
 
             //- Add indentation characters
             virtual void indent();

@@ -167,6 +167,8 @@ public:
             virtual Ostream& writeKeyword(const keyType&);
             
             virtual void popBlockNamesStack();
+
+            virtual Ostream& parwrite(const char*, const label);
 };
 
 

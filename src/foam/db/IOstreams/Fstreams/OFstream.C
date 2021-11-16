@@ -26,6 +26,7 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 #include "UList.H"
+#include "Pstream.H"
 #include "gzstream.h"
 #include "messageStream.H"
 #include <iostream>
@@ -81,8 +82,10 @@ Foam::OFstreamAllocator::OFstreamAllocator
         // create an extra file with extension .dat to split off the field values
         if (format == IOstream::PARALLEL)
         {
-            fileName parpathname = pathname + ".dat";
-            adiosPtr_.reset(new adiosWrite());
+            fileName parpathname = pathname;
+            parpathname.erase(parpathname.rfind("/")+1);
+            parpathname = parpathname + "data.bp";
+            adiosPtr_.reset(new adiosWrite(parpathname));
         }
     }
 }
@@ -271,5 +274,20 @@ void Foam::OFstream::popBlockNamesStack()
     }
 }
 
+
+Foam::Ostream& Foam::OFstream::parwrite(const char* buf, const label count)
+{
+    if (format() != PARALLEL)
+    {
+        FatalIOErrorIn("Ostream::parwrite(const char*, const label)", *this)
+            << "stream format not parallel"
+            << abort(FatalIOError);
+    }
+
+    word blockId = getBlockId();
+    adiosPtr_->write(blockId, count, 0, count, buf);
+
+    return *this;
+}
 
 // ************************************************************************* //

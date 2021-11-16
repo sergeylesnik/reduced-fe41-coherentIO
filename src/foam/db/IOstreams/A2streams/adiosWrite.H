@@ -26,6 +26,9 @@ License
 #ifndef adiosWrite_H
 #define adiosWrite_H
 
+#include "word.H"
+#include "label.H"
+#include "fileName.H"
 #include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,23 +37,37 @@ namespace Foam
 {
 
 //Forward declaration
-class adiosCoreWrite;
+class adiosCore;
 
 /*---------------------------------------------------------------------------*\
                        Class adiosWrite Declaration
 \*---------------------------------------------------------------------------*/
 class adiosWrite
 {
-   friend class adiosCoreWrite;
-   std::unique_ptr<adiosCoreWrite> adiosCoreWritePtr_;
+   fileName pathname_;
+
+   std::unique_ptr<adiosCore> adiosCorePtr_;
 
 public:
 
     //- Constructor
     adiosWrite();
 
+    adiosWrite(const fileName& pathname);
+
     //- Destructor
     ~adiosWrite();
+
+    fileName pathname();
+
+    bool write
+    (
+        const word name,
+        const label shape,
+        const label start,
+        const label count,
+        const char* buf
+    );
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
