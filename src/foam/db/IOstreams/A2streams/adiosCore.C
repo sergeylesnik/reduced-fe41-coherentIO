@@ -31,6 +31,8 @@ License
 
 std::unique_ptr<adios2::ADIOS> Foam::adiosCore::adiosPtr_ = nullptr;
 bool Foam::adiosCore::instantiated = false;
+std::map<Foam::word, std::unique_ptr<adios2::IO> > Foam::adiosCore::ioMap;
+std::map<Foam::word, std::shared_ptr<adios2::Engine> > Foam::adiosCore::engineMap;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -38,7 +40,8 @@ bool Foam::adiosCore::instantiated = false;
 Foam::adiosCore::adiosCore()
 :
     ioPtr_(nullptr),
-    enginePtr_(nullptr)
+    enginePtr_(nullptr),
+    variablePtr_(nullptr)
 {
     if (!instantiated)
     {
@@ -77,12 +80,32 @@ Foam::adiosCore::adiosCore()
     );
 }
 
+
+Foam::adiosCore::adiosCore(const Foam::adiosCore& other)
+:
+    ioPtr_( new adios2::IO(*other.ioPtr_) ),
+    enginePtr_(other.enginePtr_),
+    variablePtr_( new adios2::Variable<char>(*other.variablePtr_) )
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::adiosCore::~adiosCore(){}
+Foam::adiosCore::~adiosCore()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::adiosCore& Foam::adiosCore::operator=(const Foam::adiosCore& other)
+{
+    ioPtr_.reset( new adios2::IO(*other.ioPtr_) );
+    enginePtr_ = other.enginePtr_;
+    variablePtr_.reset( new adios2::Variable<char>(*other.variablePtr_) );
+
+    return *this;
+}
+
 
 bool Foam::adiosCore::defineVariable
 (
@@ -113,7 +136,19 @@ bool Foam::adiosCore::defineVariable
 
 bool Foam::adiosCore::open(const fileName pathname)
 {
-    enginePtr_.reset(new adios2::Engine(ioPtr_->Open(pathname, adios2::Mode::Write)));
+    if (engineMap.count(pathname) == 0)
+    {
+        engineMap.emplace
+        (
+            pathname, 
+            std::unique_ptr<adios2::Engine>
+            (
+                new adios2::Engine(ioPtr_->Open(pathname, adios2::Mode::Write))
+            )
+        );
+    }
+
+    enginePtr_ = engineMap.at(pathname);
 
     return true;
 }
@@ -141,7 +176,8 @@ void Foam::adiosCore::endStep()
 
 void Foam::adiosCore::close()
 {
-    enginePtr_->Close();
+    for (const auto& engine : engineMap)
+        engine.second->Close();
 }
 
 

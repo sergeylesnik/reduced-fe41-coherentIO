@@ -50,16 +50,16 @@ class adiosCore
         static bool instantiated;
 
         // Map to adios2::IO definitions - mirror of InquireIO(name)
-        std::map<word, std::unique_ptr<adios2::IO> > ioMap;
+        static std::map<word, std::unique_ptr<adios2::IO> > ioMap;
 
         // Map to adios2::Engine definitions - inquiring Engine
-        std::map<word, std::unique_ptr<adios2::Engine> > engineMap;
+        static std::map<word, std::shared_ptr<adios2::Engine> > engineMap;
 
         //- ADIOS output IO definitions - mirror of InquireIO("write")
         std::unique_ptr<adios2::IO> ioPtr_;
 
         //- ADIOS file write - mirror of ...
-        std::unique_ptr<adios2::Engine> enginePtr_;
+        std::shared_ptr<adios2::Engine> enginePtr_;
 
         std::unique_ptr<adios2::Variable<char> > variablePtr_;
 
@@ -68,8 +68,14 @@ public:
     //- Constructor
     adiosCore();
 
+    //- Copy constructor
+    adiosCore(const adiosCore&);
+
     //- Destructor
     ~adiosCore();
+
+    //- Copy assignment
+    adiosCore& operator=(const adiosCore&);
 
     bool defineVariable
     (

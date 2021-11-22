@@ -21,55 +21,51 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::adiosControl
+
+Description
+    Helper class for initializing ADIOS2 and globally closing IO engines/files.
+
 \*---------------------------------------------------------------------------*/
 
-#include "adiosWrite.H"
+#ifndef adiosControl_H
+#define adiosControl_H
+
 #include "adiosCore.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::adiosWrite::adiosWrite()
-:
-    pathname_(),
-    adiosCorePtr_(new adiosCore())
-{}
-
-Foam::adiosWrite::adiosWrite(const fileName& pathname)
-:
-    pathname_(pathname),
-    adiosCorePtr_(new adiosCore())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::adiosWrite::~adiosWrite() {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::fileName Foam::adiosWrite::pathname()
+namespace Foam
 {
-    return this->pathname_;
-}
 
-bool Foam::adiosWrite::write
-(
-    const Foam::word blockId,
-    const Foam::label shape,
-    const Foam::label start,
-    const Foam::label count,
-    const char* buf
-)
+/*---------------------------------------------------------------------------*\
+                           Class adiosControl Declaration
+\*---------------------------------------------------------------------------*/
+
+class adiosControl : adiosCore
 {
-    adiosCorePtr_->defineVariable(blockId, shape, start, count, true);
-    adiosCorePtr_->open(this->pathname_);
-    adiosCorePtr_->beginStep();
-    adiosCorePtr_->put(buf);
-    adiosCorePtr_->endStep();
-    //adiosCorePtr_->close();
+public:
 
-    return true;
-}
+    adiosControl()
+    :
+        adiosCore()
+    {}
 
-// ************************************************************************* //
+    ~adiosControl()
+    {
+        Info<< "Closing ADIOS2 files" << endl;
+        adiosCore::close();
+    }
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -83,6 +83,7 @@ SourceFiles
 #include "word.H"
 #include "fileName.H"
 #include "parRun.H"
+#include "adiosControl.H"
 #include "IStringStream.H"
 #include "OSspecific.H"
 
@@ -106,6 +107,9 @@ class argList
         //- Switch on/off parallel mode. Has to be first to be constructed
         //  so destructor is done last.
         ParRunControl parRunControl_;
+
+        //- Turn on ADIOS2
+        adiosControl adiosControl_;
 
         stringList args_;
         HashTable<string> options_;

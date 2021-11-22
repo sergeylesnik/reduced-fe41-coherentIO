@@ -492,6 +492,7 @@ Foam::argList::argList
 )
 :
     parRunControl_(args.parRunControl_),
+    adiosControl_(args.adiosControl_),
     args_(args.args_),
     options_(options),
     executable_(args.executable_),

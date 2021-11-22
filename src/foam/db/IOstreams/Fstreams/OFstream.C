@@ -82,9 +82,23 @@ Foam::OFstreamAllocator::OFstreamAllocator
         // create an extra file with extension .dat to split off the field values
         if (format == IOstream::PARALLEL)
         {
-            fileName parpathname = pathname;
-            parpathname.erase(parpathname.rfind("/")+1);
-            parpathname = parpathname + "data.bp";
+            fileName parpathname = pathname.path();
+
+            // Escape uniform folder if applicable
+            if (parpathname.name().find("uniform") != std::string::npos)
+            { parpathname = parpathname + "/../"; }
+
+            // Escape time folder
+            parpathname = parpathname + "/../";
+            parpathname.clean();
+
+            // Escape processor folder if applicable
+            if (parpathname.name().find("processor") != std::string::npos)
+            { parpathname = parpathname + "/../"; }
+
+            parpathname = parpathname + "/data.bp";
+            parpathname.clean();
+
             adiosPtr_.reset(new adiosWrite(parpathname));
         }
     }
