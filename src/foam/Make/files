@@ -1,6 +1,7 @@
 global/global.Cver
 global/dimensionedConstants/dimensionedConstants.C
 global/argList/argList.C
+global/argList/adiosControl.C
 global/clock/clock.C
 
 global/controlSwitches/debugSwitch.C

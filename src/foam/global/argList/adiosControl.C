@@ -21,49 +21,25 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::adiosControl
-
-Description
-    Helper class for initializing ADIOS2 and globally closing IO engines/files.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef adiosControl_H
-#define adiosControl_H
+#include "adiosControl.H"
+#include "adiosCore.H"
 
-#include <memory>
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::adiosControl::adiosControl()
+:
+    adiosCorePtr_(new adiosCore())
+{}
 
-namespace Foam
+
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+
+Foam::adiosControl::~adiosControl() 
 {
-
-//- Forward declaration
-class adiosCore;
-
-/*---------------------------------------------------------------------------*\
-                           Class adiosControl Declaration
-\*---------------------------------------------------------------------------*/
-
-class adiosControl
-{
-    std::unique_ptr<adiosCore> adiosCorePtr_;
-
-public:
-
-    adiosControl();
-    ~adiosControl();
-
-};
+    Info<< "Closing ADIOS2 files" << endl;
+    adiosCorePtr_->close();
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
