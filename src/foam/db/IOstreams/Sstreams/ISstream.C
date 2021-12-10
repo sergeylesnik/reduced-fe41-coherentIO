@@ -28,6 +28,10 @@ License
 #include "token.H"
 #include <cctype>
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(Foam::ISstream, 0);
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 char Foam::ISstream::nextValid()
@@ -119,7 +123,18 @@ void Foam::ISstream::readWordToken(token& t)
     }
     else if (token::compound::isCompound(*wPtr))
     {
+        if (debug)
+        {
+            Pout<< "Start constructing compound token" << endl;
+        }
+
         t = token::compound::New(*wPtr, *this).ptr();
+
+        if (debug)
+        {
+            Pout<< "End constructing compound token" << endl;
+        }
+
         delete wPtr;
     }
     else
@@ -137,6 +152,10 @@ Foam::Istream& Foam::ISstream::read(token& t)
     // Return the put back token if it exists
     if (Istream::getBack(t))
     {
+        if (debug)
+        {
+            Pout<< "ISstream returns put back token: " << t << endl;
+        }
         return *this;
     }
 
@@ -150,6 +169,12 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
     // Set the line number of this token to the current stream line number
     t.lineNumber() = lineNumber();
+
+    if (debug > 1)
+    {
+        Pout<< "ISstream::read(token& t) with next valid char c = "
+            << c << " on line number " << t.lineNumber() << "\n";
+    }
 
     // return on error
     if (!c)
@@ -178,6 +203,14 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case token::MULTIPLY :
         case token::DIVIDE :
         {
+            if (debug)
+            {
+                if (c == token::BEGIN_BLOCK || c == token::END_BLOCK)
+                {
+                    Pout<< "ISstream returns BLOCK token: " << c << endl;
+                }
+            }
+
             t = token::punctuationToken(c);
             return *this;
         }
@@ -197,6 +230,11 @@ Foam::Istream& Foam::ISstream::read(token& t)
             else
             {
                 t = sPtr;
+            }
+
+            if (debug)
+            {
+                Pout<< "ISstream returns string: " << t << endl;
             }
 
             return *this;
@@ -384,6 +422,11 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 }
             }
 
+            if (debug > 1)
+            {
+                Pout<< "ISstream returns number token: " << t << endl;
+            }
+
             return *this;
         }
 
@@ -393,6 +436,11 @@ Foam::Istream& Foam::ISstream::read(token& t)
         {
             putback(c);
             readWordToken(t);
+
+            if (debug)
+            {
+                Pout<< "ISstream returns word token: " << t << endl;
+            }
 
             return *this;
         }
@@ -473,6 +521,12 @@ Foam::Istream& Foam::ISstream::read(word& str)
     buf[nChar] = '\0';
     str = buf;
     putback(c);
+
+    if (debug > 1)
+    {
+        Pout<< "ISstream::read(word& str) returns word = "
+            << str << endl;
+    }
 
     return *this;
 }

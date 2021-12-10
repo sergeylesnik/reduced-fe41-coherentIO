@@ -65,11 +65,10 @@ Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 {
     if (Ostream::debug)
     {
-        std::cout 
-        << "    From function " << __PRETTY_FUNCTION__ 
-        << "    in file " << __FILE__ 
-        << " at line " << __LINE__ 
-        << " keyword: " << kw << "\n";
+        Pout<< "From function " << __PRETTY_FUNCTION__ << nl
+            << " in file " << __FILE__ << nl
+            << " at line " << __LINE__
+            << " keyword: " << kw << '\n';
     }
 
     indent();

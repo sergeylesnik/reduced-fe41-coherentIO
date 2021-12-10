@@ -101,8 +101,22 @@ bool Foam::dictionary::read(Istream& is, const bool keepHeader)
         is.putBack(currToken);
     }
 
+    if (debug)
+    {
+        Pout<< "Start loop for entries construction of dictionary " << name()
+            << endl;
+    }
+
     while (!is.eof() && entry::New(*this, is))
     {}
+
+    if (debug)
+    {
+        Pout<< "End loop for entries construction of dictionary " << name()
+            << nl
+            << "The dictionary TOC is " << nl
+            << this->toc() << endl;
+    }
 
     // normally remove the FoamFile header entry if it exists
     if (!keepHeader)

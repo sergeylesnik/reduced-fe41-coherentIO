@@ -125,9 +125,11 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token::punctuationToken& pt)
     {
         if (Ostream::debug)
         {
-            std::cout << "Found token END_STATEMENT."
+            Pout<< "Found token END_STATEMENT."
                 << " Poping stack with block names.\n";
         }
+        // ToDoIO Temporary hack. Will also pop if the END_STATEMENT is printed
+        // to the screen.
         os.popBlockNamesStack();
     }
     return os << char(pt);

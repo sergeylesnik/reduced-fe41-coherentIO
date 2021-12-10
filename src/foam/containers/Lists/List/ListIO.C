@@ -28,14 +28,27 @@ License
 #include "token.H"
 #include "SLList.H"
 #include "contiguous.H"
+#include <iostream>
+
+#include "Ostream.H"
+#include "prefixOSstream.H"
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+namespace Foam {
+    extern prefixOSstream Pout;
+}
 
 template<class T>
 Foam::List<T>::List(Istream& is)
 :
     UList<T>(nullptr, 0)
 {
+    if (List<T>::debug)
+    {
+        Pout<< "List<T>::List(Istream& is)" << endl;
+    }
+
     operator>>(is, *this);
 }
 
@@ -43,6 +56,11 @@ Foam::List<T>::List(Istream& is)
 template<class T>
 Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
 {
+    if (List<T>::debug)
+    {
+        Pout<< "ListIO: operator>>, start" << endl;
+    }
+
     // Anull list
     list.resize(0);
 
@@ -55,6 +73,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
     // Compound: simply transfer contents
     if (firstToken.isCompound())
     {
+        if (List<T>::debug)
+        {
+            Pout<< "ListIO: operator>>, transfering compound token" << endl;
+        }
+
         list.transfer
         (
             dynamicCast<token::Compound<List<T> > >
@@ -71,6 +94,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
     if (firstToken.isLabel())
     {
         const label len = firstToken.labelToken();
+
+        if (List<T>::debug)
+        {
+            Pout<< "ListIO: operator>>, reading a list of size " << len << endl;
+        }
 
         // Resize to length read
         list.resize(len);
@@ -133,7 +161,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
             );
         }
         else if (len && is.format() == IOstream::PARALLEL)
-        { 
+        {
             is.parread(reinterpret_cast<char*>(list.data()), len*sizeof(T));
         }
 

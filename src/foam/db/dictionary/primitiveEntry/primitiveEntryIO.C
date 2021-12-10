@@ -109,6 +109,15 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
      && currToken != token::END_STATEMENT
     )
     {
+        if (dictionary::debug)
+        {
+            Pout<< "primitiveEntry::read(const dictionary&, Istream&),"
+                << nl << "    1st append, token = '" << currToken
+                << nl
+                << "    to a primitiveEntry of dictionary " << dict.name()
+                << endl;
+        }
+
         append(currToken, dict, is);
 
         if
@@ -127,6 +136,15 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
          && !(currToken == token::END_STATEMENT && blockCount == 0)
         )
         {
+            if (dictionary::debug > 1)
+            {
+                Pout<< "primitiveEntry::read(const dictionary&, Istream&),"
+                    << nl << "    consecutive append, token = '"
+                    << currToken << "'" << nl
+                    << "    to a primitiveEntry of dictionary " << dict.name()
+                    << endl;
+            }
+
             if
             (
                 currToken == token::BEGIN_BLOCK
@@ -145,6 +163,13 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
             }
 
             append(currToken, dict, is);
+        }
+
+        if (dictionary::debug)
+        {
+            Pout<<
+                "End of primitiveEntry::readData(const dictionary&, Istream&)"
+                << endl;
         }
     }
 

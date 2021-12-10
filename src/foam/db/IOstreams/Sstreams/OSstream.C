@@ -30,17 +30,6 @@ License
 #include "Pstream.H"
 #include <iostream>
 
-// Pout won't work since it's an Ostream
-/*
-#include "prefixOSstream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam {
-    extern prefixOSstream Pout;
-}
-*/
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::OSstream, 0);
@@ -51,18 +40,18 @@ Foam::Ostream& Foam::OSstream::write(const token& t)
 {
     if (debug)
     {
-        std::cout 
-        << "    From function " << __PRETTY_FUNCTION__ 
-        << "    in file " << __FILE__ 
-        << " at line " << __LINE__ 
-        << " Token: " << t.stringToken() << "\n";
+        Pout
+        << "From function " << __PRETTY_FUNCTION__ << nl
+        << " in file " << __FILE__ << nl
+        << " at line " << __LINE__
+        << " Token: " << t.stringToken() << '\n';
     }
 
     if (t.isPunctuation())
     {
         if (t.pToken() == token::punctuationToken::BEGIN_BLOCK)
         {
-            std::cout << "OSstream::write(token): BEGIN_BLOCK\n";
+            Pout << "OSstream::write(token): BEGIN_BLOCK\n";
         }
     }
 
@@ -86,10 +75,10 @@ Foam::Ostream& Foam::OSstream::write(const char c)
 {
     if (debug > 1)
     {
-        std::cout 
-        << "    From function " << __PRETTY_FUNCTION__ 
-        << "    in file " << __FILE__ 
-        << " at line " << __LINE__ 
+        Pout
+        << "From function " << __PRETTY_FUNCTION__ << nl
+        << " in file " << __FILE__ << nl
+        << " at line " << __LINE__
         << ": " << c << "\n";
     }
 
@@ -108,10 +97,10 @@ Foam::Ostream& Foam::OSstream::write(const char* str)
     // Assign higher debug level since mostly file headers are written here
     if (debug > 2)
     {
-        std::cout 
-        << "    From function " << __PRETTY_FUNCTION__ 
-        << "    in file " << __FILE__ 
-        << " at line " << __LINE__ 
+        Pout
+        << "From function " << __PRETTY_FUNCTION__ << nl
+        << " in file " << __FILE__ << nl
+        << " at line " << __LINE__
         << ": " << str << "\n";
     }
 
@@ -126,10 +115,10 @@ Foam::Ostream& Foam::OSstream::write(const word& str)
 {
     if (debug)
     {
-        std::cout 
-        << "    From function " << __PRETTY_FUNCTION__ 
-        << "    in file " << __FILE__ 
-        << " at line " << __LINE__ 
+        Pout
+        << "From function " << __PRETTY_FUNCTION__ << nl
+        << " in file " << __FILE__ << nl
+        << " at line " << __LINE__
         << ": " << str << "\n";
     }
 
@@ -143,10 +132,10 @@ Foam::Ostream& Foam::OSstream::write(const string& str)
 {
     if (debug)
     {
-        std::cout 
-        << "    From function " << __PRETTY_FUNCTION__ 
-        << "    in file " << __FILE__ 
-        << " at line " << __LINE__ 
+        Pout
+        << "From function " << __PRETTY_FUNCTION__ << nl
+        << " in file " << __FILE__ << nl
+        << " at line " << __LINE__
         << ": " << str << "\n";
     }
 
@@ -201,10 +190,10 @@ Foam::Ostream& Foam::OSstream::writeQuoted
 {
     if (debug > 2)
     {
-        std::cout 
-        << "    From function " << __PRETTY_FUNCTION__ 
-        << "    in file " << __FILE__ 
-        << " at line " << __LINE__ 
+        Pout
+        << "From function " << __PRETTY_FUNCTION__ << nl
+        << " in file " << __FILE__ << nl
+        << " at line " << __LINE__
         << ": " << str << "\n";
     }
 

@@ -212,6 +212,14 @@ Field<Type>::Field
     const label s
 )
 {
+    if (debug)
+    {
+        Info<< "Field<Type>::Field"
+            << "(const word& keyword, const dictionary& dict, const label s)"
+            << " : keyword = " << keyword
+            << endl;
+    }
+
     if (s)
     {
         ITstream& is = dict.lookup(keyword);

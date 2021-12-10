@@ -232,6 +232,13 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 
             if (nextToken == token::BEGIN_BLOCK)
             {
+                if (dictionary::debug)
+                {
+                    Pout<< "entry::New(dictionary& parentDict, Istream& is):"
+                        << nl
+                        << "    Add dictionaryEntry (a subdict) with keyword: "
+                        << keyword << '\n';
+                }
                 return parentDict.add
                 (
                     new dictionaryEntry(keyword, parentDict, is),
@@ -240,6 +247,13 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             }
             else
             {
+                if (dictionary::debug)
+                {
+                    Pout<< "entry::New(dictionary& parentDict, Istream& is):"
+                        << nl
+                        << "    Add primitiveEntry with keyword: "
+                        << keyword << '\n';
+                }
                 return parentDict.add
                 (
                     new primitiveEntry(keyword, parentDict, is),

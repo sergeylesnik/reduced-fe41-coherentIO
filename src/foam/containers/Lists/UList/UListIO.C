@@ -165,7 +165,7 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             os.parwrite(reinterpret_cast<const char*>(L.v_), L.byteSize());
         }
     }
-    
+
     // Check state of IOstream
     os.check("Ostream& operator<<(Ostream&, const UList&)");
 
@@ -176,6 +176,12 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
 template<class T>
 Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
 {
+    if (UList<T>::debug)
+    {
+        Pout<< "UListIO: in operator>>(Istream& is, UList<T>& L), id = "
+            << endl;
+    }
+
     is.fatalCheck("operator>>(Istream&, UList<T>&)");
 
     token firstToken(is);
@@ -224,6 +230,12 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
 
         if (is.format() == IOstream::ASCII || !contiguous<T>())
         {
+            if(UList<T>::debug)
+            {
+                Pout<< "Writing a field as ASCII of size "
+                    << L.byteSize() << endl;
+            }
+
             // Read beginning of contents
             char delimiter = is.readBeginList("List");
 

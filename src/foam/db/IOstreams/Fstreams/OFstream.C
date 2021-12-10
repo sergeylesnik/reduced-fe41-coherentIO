@@ -159,7 +159,7 @@ Foam::OFstream::~OFstream()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-            
+
 Foam::word Foam::OFstream::getBlockId()
 {
     word id = "";
@@ -178,13 +178,13 @@ Foam::word Foam::OFstream::getBlockId()
             id = iter() + '/' + id;
         }
     }
-    
+
     id = pathname_.caseName("") + '/' + id;
 
 
     if(debug > 1)
     {
-        std::cout 
+        Pout
             << "Block id = " << id << "; blockNamesStack_.size() = "
             << blockNamesStack_.size() << '\n';
     }
@@ -225,10 +225,10 @@ void Foam::OFstream::print(Ostream& os) const
 Foam::word Foam::OFstream::incrBlock(const word name)
 {
     blockNamesStack_.push(name);
-    
+
     if(debug)
     {
-        std::cout 
+        Pout
             << "Add to the block name LIFO stack: " << name << '\n';
     }
 
@@ -247,7 +247,7 @@ Foam::word Foam::OFstream::incrBlock(const word name)
 void Foam::OFstream::decrBlock()
 {
     popBlockNamesStack();
-    
+
     this->decrIndent();
     this->indent();
     this->write(char(token::END_BLOCK));
@@ -258,12 +258,12 @@ Foam::Ostream& Foam::OFstream::writeKeyword(const keyType& kw)
 {
     if (debug)
     {
-        std::cout
+        Pout
             << "Add to the block name LIFO stack: " << kw << "\n";
     }
 
     blockNamesStack_.push(kw);
-    
+
     return this->Ostream::writeKeyword(kw);
 }
 
@@ -272,14 +272,14 @@ void Foam::OFstream::popBlockNamesStack()
 {
     if (blockNamesStack_.empty())
     {
-        WarningInFunction 
+        WarningInFunction
             << "Tried to pop the stack although its empty.\n";
     }
     else
     {
         if(debug)
         {
-            std::cout 
+            Pout
                 << "Pop block name LIFO stack: "
                 << blockNamesStack_.first() << '\n';
         }

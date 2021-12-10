@@ -44,10 +44,14 @@ SourceFiles
 #include "autoPtr.H"
 #include "Xfer.H"
 
+#include "className.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+TemplateName(DebugIOList);
 
 class Istream;
 class Ostream;
