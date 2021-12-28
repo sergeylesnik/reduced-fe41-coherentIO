@@ -43,8 +43,6 @@ SourceFiles
 
 #include "className.H"
 
-#include "adiosWrite.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -63,7 +61,6 @@ class OSstream
         fileName name_;
         // FIFOStack<word> blockNamesStack_;
         ostream& os_;
-        std::shared_ptr<adiosWrite> adiosos_;
 
 
     // Private Member Functions
@@ -100,17 +97,6 @@ public:
             ostream& os,
             const string& name,
             streamFormat format = ASCII,
-            versionNumber version = currentVersion,
-            compressionType compression=UNCOMPRESSED
-        );
-
-        //- Set stream status
-        OSstream
-        (
-            ostream& os,
-            std::shared_ptr<adiosWrite> adiosos,
-            const string& name,
-            streamFormat format = PARALLEL,
             versionNumber version = currentVersion,
             compressionType compression=UNCOMPRESSED
         );
@@ -182,7 +168,7 @@ public:
             virtual Ostream& write(const char*, std::streamsize);
 
             //- Write binary block into paros_
-            virtual Ostream& parwrite(const char*, const label);
+            virtual Ostream& parwrite(const double*, const label);
 
             //- Add indentation characters
             virtual void indent();

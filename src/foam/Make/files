@@ -1,7 +1,8 @@
 global/global.Cver
 global/dimensionedConstants/dimensionedConstants.C
 global/argList/argList.C
-global/argList/adiosControl.C
+global/argList/parRun.C
+/* global/argList/adiosControl.C */
 global/clock/clock.C
 
 global/controlSwitches/debugSwitch.C
@@ -101,6 +102,7 @@ coordinateSystems/coordinateRotation/axisCoordinateRotation.C
 primitives/random/Random.C
 
 containers/Lists/UList/DebugIOUList.C
+containers/Lists/List/DebugIOList.C
 
 containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C
@@ -165,6 +167,7 @@ $(Pstreams)/OPwrite.C
 A2streams = $(Streams)/A2streams
 $(A2streams)/adiosCore.C
 $(A2streams)/adiosWrite.C
+$(A2streams)/adiosRead.C
 
 dictionary = db/dictionary
 $(dictionary)/dictionary.C

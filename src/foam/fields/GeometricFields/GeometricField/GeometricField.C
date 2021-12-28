@@ -105,7 +105,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::readField(Istream& is)
     if (debug)
     {
         Info<< "Foam::GeometricField<Type, PatchField, GeoMesh>"
-            << "::readField(Istream& is)"
+            << "::readField(Istream& is) with stream format " << is.format()
             << endl;
     }
 

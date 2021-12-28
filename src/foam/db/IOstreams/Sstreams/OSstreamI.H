@@ -38,8 +38,7 @@ inline Foam::OSstream::OSstream
 :
     Ostream(format, version, compression),
     name_(name),
-    os_(os),
-    adiosos_(nullptr)
+    os_(os)
 {
     if (os_.good())
     {
@@ -52,37 +51,6 @@ inline Foam::OSstream::OSstream
         setState(os_.rdstate());
     }
 }
-
-
-inline Foam::OSstream::OSstream
-(
-    ostream& os,
-    std::shared_ptr<adiosWrite> adiosos,
-    const string& name,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression
-)
-:
-    Ostream(format, version, compression),
-    name_(name),
-    os_(os),
-    adiosos_(adiosos)
-{
-// TODO: Implement checks on adiosos_
-    if (os_.good())
-    {
-        setOpened();
-        setGood();
-        os_.precision(precision_());
-    }
-    else
-    {
-        setState(os_.rdstate());
-    }
-}
-
-
 
 
 // ************************************************************************* //

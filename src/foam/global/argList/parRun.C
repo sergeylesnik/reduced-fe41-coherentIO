@@ -23,23 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "adiosControl.H"
-#include "adiosCore.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::adiosControl::adiosControl()
-:
-    adiosCorePtr_(new adiosCore())
-{}
+#include "parRun.H"
+#include "adiosWrite.H"
 
 
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::adiosControl::~adiosControl()
+Foam::ParRunControl::~ParRunControl()
 {
-    Info<< "Closing ADIOS2 files" << endl;
-    adiosCorePtr_->close();
+    if (RunPar)
+    {
+        Info<< "Finalising parallel run" << endl;
+        adiosWrite::close();
+        Pstream::exit(0);
+    }
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

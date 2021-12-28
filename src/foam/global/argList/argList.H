@@ -108,9 +108,6 @@ class argList
         //  so destructor is done last.
         ParRunControl parRunControl_;
 
-        //- Turn on ADIOS2
-        adiosControl adiosControl_;
-
         stringList args_;
         HashTable<string> options_;
 

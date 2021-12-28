@@ -59,7 +59,6 @@ class ISstream
 
         fileName name_;
         istream& is_;
-        istream& paris_;
 
 
     // Private member functions
@@ -92,17 +91,6 @@ public:
         inline ISstream
         (
             istream& is,
-            const string& name,
-            streamFormat format = ASCII,
-            versionNumber version = currentVersion,
-            compressionType compression = UNCOMPRESSED
-        );
-
-        //- Construct as wrapper around istream
-        inline ISstream
-        (
-            istream& is,
-            istream& paris,
             const string& name,
             streamFormat format = ASCII,
             versionNumber version = currentVersion,
@@ -184,7 +172,10 @@ public:
             virtual Istream& read(char*, std::streamsize);
 
             //- Read binary block from second stream
-            virtual Istream& parread(char*, std::streamsize);
+            virtual Istream& parread(double*, const string&)
+            {
+                return *this;
+            }
 
             //- Rewind and return the stream so that it may be read again
             virtual Istream& rewind();

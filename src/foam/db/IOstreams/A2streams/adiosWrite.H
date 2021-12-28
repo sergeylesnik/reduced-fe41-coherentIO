@@ -26,10 +26,13 @@ License
 #ifndef adiosWrite_H
 #define adiosWrite_H
 
+#include "Engine.h"
 #include "word.H"
 #include "label.H"
 #include "fileName.H"
 #include <memory>
+#include "adiosCore.H"
+#include "adios2.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,30 +46,61 @@ class adiosCore;
                        Class adiosWrite Declaration
 \*---------------------------------------------------------------------------*/
 class adiosWrite
+:
+public adiosCore
 {
-   fileName pathname_;
+    static std::unique_ptr<adios2::IO> ioWritePtr_;
 
-   std::unique_ptr<adiosCore> adiosCorePtr_;
+    static std::unique_ptr<adios2::Engine> enginePtr_;
+
+    fileName pathname_;
+
+    std::unique_ptr<adios2::Variable<double> > variablePtr_;
 
 public:
 
-    //- Constructor
-    adiosWrite();
+    // Static Member Functions
 
+        //- Close adios engine if existent
+        static void close();
+
+
+    //- Constructor
     adiosWrite(const fileName& pathname);
 
     //- Destructor
     ~adiosWrite();
 
-    fileName pathname();
+    // Access
 
-    bool write
+        fileName pathname();
+
+        std::unique_ptr<adios2::IO>& ioWritePtr();
+
+        std::unique_ptr<adios2::Engine>& enginePtr();
+
+    void open();
+
+    void defineVariable
     (
-        const word name,
+        const string name,
         const label shape,
         const label start,
         const label count,
-        const char* buf
+        const bool constantDims = false
+    );
+
+    void put(const double* buf);
+
+    void performPuts();
+
+    void write
+    (
+        const string name,
+        const label shape,
+        const label start,
+        const label count,
+        const double* buf
     );
 };
 

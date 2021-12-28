@@ -26,6 +26,7 @@ License
 #ifndef adiosCore_H
 #define adiosCore_H
 
+#include "IO.h"
 #include "adios2.h"
 
 #include "word.H"
@@ -47,55 +48,30 @@ class adiosCore
         //- ADIOS instance
         static std::unique_ptr<adios2::ADIOS> adiosPtr_;
 
-        static bool instantiated;
-
-        // Map to adios2::IO definitions - mirror of InquireIO(name)
-        static std::map<word, std::unique_ptr<adios2::IO> > ioMap;
-
-        // Map to adios2::Engine definitions - inquiring Engine
-        static std::map<word, std::shared_ptr<adios2::Engine> > engineMap;
-
-        //- ADIOS output IO definitions - mirror of InquireIO("write")
-        std::unique_ptr<adios2::IO> ioPtr_;
-
-        //- ADIOS file write - mirror of ...
-        std::shared_ptr<adios2::Engine> enginePtr_;
-
-        std::unique_ptr<adios2::Variable<char> > variablePtr_;
 
 public:
 
-    //- Constructor
-    adiosCore();
+    // Declare name of the class and its debug switch
+    ClassName("adiosCore");
 
-    //- Copy constructor
-    adiosCore(const adiosCore&);
+
+    //- Constructors
+
+        adiosCore();
+
+    //- Disallow copy constructor
+    adiosCore(const adiosCore&) = delete;
 
     //- Destructor
     ~adiosCore();
 
-    //- Copy assignment
-    adiosCore& operator=(const adiosCore&);
+    //- Disallow copy assignment
+    adiosCore& operator=(const adiosCore&) = delete;
 
-    bool defineVariable
-    (
-        const word name,
-        const label shape,
-        const label start,
-        const label count,
-        const bool constantDims = false
-    );
+    // Access
 
-    bool open(const fileName pathname);
-
-    void beginStep();
-
-    bool put(const char* buf);
-
-    void endStep();
-
-    void close();
-
+        //- ADIOS instance
+        std::unique_ptr<adios2::ADIOS>& adiosPtr();
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

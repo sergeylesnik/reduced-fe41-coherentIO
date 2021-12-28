@@ -127,7 +127,10 @@ bool Foam::IOobject::readHeader(Istream& is)
 
     if (IOobject::debug)
     {
-        Info<< " .... read" << endl;
+        Info<< " .... read." << nl
+            << "    Istream format: " << is.format() << nl
+            << "    headerClassName: " << headerClassName_
+            << endl;
     }
 
     return true;

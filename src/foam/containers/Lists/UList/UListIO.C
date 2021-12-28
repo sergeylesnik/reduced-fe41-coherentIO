@@ -153,16 +153,26 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
     }
     else if (os.format() == IOstream::PARALLEL)
     {
+        const word id = os.getBlockId();
         if(UList<T>::debug)
         {
-            Pout<< "Writing to PARALLEL a field of size "
-                << L.byteSize() << endl;
+            Pout<< "Writing a field of size " << L.byteSize()
+                << " via PARALLEL IO with identifier:\n    "
+                << id << endl;
+            Pout<< "L = " << L << endl;
         }
 
-        os << nl << L.size() << nl;
+        os  << nl << L.size()
+            << token::BEGIN_STRING << id << token::END_STRING
+            << nl;
         if (L.size())
         {
-            os.parwrite(reinterpret_cast<const char*>(L.v_), L.byteSize());
+            // os.parwrite(reinterpret_cast<const char*>(L.v_), L.byteSize());
+            os.parwrite
+            (
+                reinterpret_cast<const double*>(L.v_),
+                L.byteSize()/sizeof(double)
+            );
         }
     }
 

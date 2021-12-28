@@ -143,7 +143,7 @@ public:
             virtual Ostream& write(const char*, std::streamsize) = 0;
 
             //- Write binary block into second stream
-            virtual Ostream& parwrite(const char*, const label) = 0;
+            virtual Ostream& parwrite(const double*, const label) = 0;
 
             //- Add indentation characters
             virtual void indent() = 0;
@@ -178,7 +178,7 @@ public:
             //- Decrememt the indent level and close the current block
             virtual void decrBlock()
             {}
-            
+
             //- Get block identifier
             virtual word getBlockId()
             {
@@ -190,7 +190,7 @@ public:
 
             virtual void popBlockNamesStack()
             {}
-            
+
 
         // Stream state functions
 

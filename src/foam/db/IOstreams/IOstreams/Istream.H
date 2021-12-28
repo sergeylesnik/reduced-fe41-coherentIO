@@ -135,7 +135,7 @@ public:
             virtual Istream& read(char*, std::streamsize) = 0;
 
             //- Read binary block from second stream
-            virtual Istream& parread(char*, std::streamsize) = 0;
+            virtual Istream& parread(double*, const string&) = 0;
 
             //- Rewind and return the stream so that it may be read again
             virtual Istream& rewind() = 0;

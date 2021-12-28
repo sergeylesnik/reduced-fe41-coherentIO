@@ -40,6 +40,7 @@ SourceFiles
 #include "className.H"
 
 #include <fstream>
+#include <memory>
 using std::ifstream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,6 +49,7 @@ namespace Foam
 {
 
 class IFstream;
+class adiosRead;
 
 /*---------------------------------------------------------------------------*\
                       Class IFstreamAllocator Declaration
@@ -61,18 +63,27 @@ class IFstreamAllocator
     // Private data
 
         istream* ifPtr_;
-        istream* parifPtr_;
+        std::unique_ptr<adiosRead> adiosPtr_;
         IOstream::compressionType compression_;
 
 
     // Constructors
 
         //- Construct from pathname
-        IFstreamAllocator(const fileName& pathname);
+        IFstreamAllocator
+        (
+            const fileName& pathname,
+            const IOstream::streamFormat format
+        );
 
 
     //- Destructor
     ~IFstreamAllocator();
+
+    // Member functions
+
+        //- Allocate ADIOS object if not already present
+        void allocateAdios(IOstream::streamFormat);
 };
 
 
@@ -126,6 +137,11 @@ public:
                 return pathname_;
             }
 
+
+        // Read functions
+
+            //- Read binary block from second stream
+            virtual Istream& parread(double*, const string&);
 
         // STL stream
 

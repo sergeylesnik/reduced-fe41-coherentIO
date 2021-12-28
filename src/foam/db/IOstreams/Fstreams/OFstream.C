@@ -31,6 +31,7 @@ License
 #include "messageStream.H"
 #include <iostream>
 #include <memory>
+#include "adiosWrite.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -123,7 +124,7 @@ Foam::OFstream::OFstream
 )
 :
     OFstreamAllocator(pathname, mode, format, compression),
-    OSstream(*ofPtr_, adiosPtr_, "OFstream.sinkFile_", format, version, compression),
+    OSstream(*ofPtr_, "OFstream.sinkFile_", format, version, compression),
     pathname_(pathname),
     blockNamesStack_()
 {
@@ -289,7 +290,7 @@ void Foam::OFstream::popBlockNamesStack()
 }
 
 
-Foam::Ostream& Foam::OFstream::parwrite(const char* buf, const label count)
+Foam::Ostream& Foam::OFstream::parwrite(const double* buf, const label count)
 {
     if (format() != PARALLEL)
     {

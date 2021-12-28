@@ -56,14 +56,7 @@ public:
         RunPar(false)
     {}
 
-    ~ParRunControl()
-    {
-        if (RunPar)
-        {
-            Info<< "Finalising parallel run" << endl;
-            Pstream::exit(0);
-        }
-    }
+    ~ParRunControl();
 
     void runPar(int& argc, char**& argv)
     {

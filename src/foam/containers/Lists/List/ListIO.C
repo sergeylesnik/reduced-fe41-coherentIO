@@ -162,7 +162,26 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
         }
         else if (len && is.format() == IOstream::PARALLEL)
         {
-            is.parread(reinterpret_cast<char*>(list.data()), len*sizeof(T));
+            string id;
+            is >> id;
+
+            if (List<T>::debug)
+            {
+                Pout<< "Reading via PARALLEL id = " << id << endl;
+            }
+
+            //ToDoIO Check the string read from the stream
+            is.parread
+            (
+                reinterpret_cast<double*>(list.data()),
+                id.replace("\"","")
+            );
+
+            if (UList<T>::debug > 1)
+            {
+                Pout<< "List read via PARALLEL = " << nl << list << endl;
+            }
+
         }
 
         return is;

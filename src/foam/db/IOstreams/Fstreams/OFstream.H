@@ -51,6 +51,7 @@ namespace Foam
 {
 
 class OFstream;
+class adiosWrite;
 
 /*---------------------------------------------------------------------------*\
                       Class OFstreamAllocator Declaration
@@ -136,7 +137,7 @@ public:
             {
                 return pathname_;
             }
-            
+
             //- Get block identifier
             virtual word getBlockId();
 
@@ -154,7 +155,7 @@ public:
 
             //- Print description of IOstream to Ostream
             void print(Ostream&) const;
-            
+
         // Write
 
             //- Incrememt the indent level and add a new block with name
@@ -165,10 +166,10 @@ public:
 
             //- Write the keyword followed by an appropriate indentation
             virtual Ostream& writeKeyword(const keyType&);
-            
+
             virtual void popBlockNamesStack();
 
-            virtual Ostream& parwrite(const char*, const label);
+            virtual Ostream& parwrite(const double*, const label);
 };
 
 

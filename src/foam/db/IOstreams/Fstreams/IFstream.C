@@ -23,9 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "ADIOS.h"
 #include "IFstream.H"
+#include "IOstream.H"
 #include "OSspecific.H"
+#include "debug.H"
 #include "gzstream.h"
+#include "adiosRead.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -34,10 +38,14 @@ defineTypeNameAndDebug(Foam::IFstream, 0);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
+Foam::IFstreamAllocator::IFstreamAllocator
+(
+    const fileName& pathname,
+    IOstream::streamFormat format
+)
 :
     ifPtr_(nullptr),
-    parifPtr_(nullptr),
+    adiosPtr_(nullptr),
     compression_(IOstream::UNCOMPRESSED)
 {
     if (pathname.empty())
@@ -70,18 +78,23 @@ Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
         }
     }
 
-    // If second field data file is present, set the parifPtr_.
-    if (isFile(pathname + ".dat", false))
-    {
-        fileName parpathname = pathname + ".dat";
-        parifPtr_ = new ifstream(parpathname.c_str());
-    }
+    allocateAdios(format);
 }
 
 
 Foam::IFstreamAllocator::~IFstreamAllocator()
 {
     delete ifPtr_;
+}
+
+
+void Foam::IFstreamAllocator::allocateAdios(IOstream::streamFormat format)
+{
+    if (format == IOstream::PARALLEL && !adiosPtr_)
+    {
+        fileName parpathname = getEnv("FOAM_CASE")/"data.bp";
+        adiosPtr_.reset(new adiosRead(parpathname));
+    }
 }
 
 
@@ -94,11 +107,10 @@ Foam::IFstream::IFstream
     versionNumber version
 )
 :
-    IFstreamAllocator(pathname),
+    IFstreamAllocator(pathname, format),
     ISstream
     (
         *ifPtr_,
-        *parifPtr_,
         "IFstream.sourceFile_",
         format,
         version,
@@ -132,7 +144,7 @@ Foam::IFstream::IFstream
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
 Foam::IFstream::~IFstream()
 {}
@@ -148,6 +160,27 @@ std::istream& Foam::IFstream::stdStream()
             << "No stream allocated" << abort(FatalError);
     }
     return *ifPtr_;
+}
+
+
+// read binary block from second stream
+Foam::Istream& Foam::IFstream::parread(double* buf, const string& blockId)
+{
+    if (format() != PARALLEL)
+    {
+        FatalIOErrorIn("ISstream::parread(double*, std::streamsize)", *this)
+            << "stream format not parallel"
+            << exit(FatalIOError);
+    }
+
+    if (!adiosPtr_)
+    {
+        allocateAdios(this->format());
+    }
+
+    adiosPtr_->read(buf, blockId);
+
+    return *this;
 }
 
 

@@ -23,69 +23,68 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Pstream.H"
+#ifndef adiosRead_H
+#define adiosRead_H
 
 #include "adiosCore.H"
-#include "fileName.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::adiosCore, 0);
-
-std::unique_ptr<adios2::ADIOS> Foam::adiosCore::adiosPtr_ = nullptr;
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::adiosCore::adiosCore()
+namespace Foam
 {
-    if (debug)
-    {
-        Pout<< "adiosCore::adiosCore()" << endl;
-    }
-}
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::adiosCore::~adiosCore()
+/*---------------------------------------------------------------------------*\
+                       Class adiosRead Declaration
+\*---------------------------------------------------------------------------*/
+class adiosRead
+:
+public adiosCore
 {
-    if (debug)
-    {
-        Pout<< "adiosCore::~adiosCore()" << endl;
-    }
-}
+    static std::unique_ptr<adios2::IO> ioReadPtr_;
 
+    static std::unique_ptr<adios2::Engine> enginePtr_;
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-std::unique_ptr<adios2::ADIOS>& Foam::adiosCore::adiosPtr()
-{
-    if (debug)
-    {
-        Pout<< "adiosCore::adiosPtr()" << endl;
-    }
+    fileName pathname_;
 
-    if(!adiosPtr_)
-    {
-        if (Pstream::parRun())
-        {
-            if (debug)
-            {
-                Pout<< "Calling adios2::ADIOS(MPI_COMM_WORLD)" << endl;
-            }
-            adiosPtr_.reset(new adios2::ADIOS(MPI_COMM_WORLD));
-        }
-        else
-        {
-            if (debug)
-            {
-                Pout<< "Calling adios2::ADIOS()" << endl;
-            }
-            adiosPtr_.reset(new adios2::ADIOS());
-        }
-    }
+    std::unique_ptr<adios2::Variable<double> > variablePtr_;
 
-    return adiosPtr_;
-}
+public:
+
+    //- Constructor
+    adiosRead(const fileName& pathname);
+
+    //- Destructor
+    ~adiosRead();
+
+    // Access
+
+        fileName pathname();
+
+        std::unique_ptr<adios2::IO>& ioReadPtr();
+
+        std::unique_ptr<adios2::Engine>& enginePtr();
+
+    void open();
+
+    void defineVariable(const string name);
+
+    void get(double* buf);
+
+    void performGets();
+
+    void read
+    (
+        double* buf,
+        const string name
+    );
+};
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

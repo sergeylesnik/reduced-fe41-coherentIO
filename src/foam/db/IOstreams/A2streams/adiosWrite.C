@@ -24,26 +24,40 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "adiosWrite.H"
-#include "adiosCore.H"
+
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+std::unique_ptr<adios2::IO> Foam::adiosWrite::ioWritePtr_ = nullptr;
+
+std::unique_ptr<adios2::Engine> Foam::adiosWrite::enginePtr_ = nullptr;
+
+
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+void Foam::adiosWrite::close()
+{
+    if (enginePtr_)
+    {
+        enginePtr_->Close();
+        enginePtr_.reset(nullptr);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::adiosWrite::adiosWrite()
-:
-    pathname_(),
-    adiosCorePtr_(new adiosCore())
-{}
 
 Foam::adiosWrite::adiosWrite(const fileName& pathname)
 :
     pathname_(pathname),
-    adiosCorePtr_(new adiosCore())
+    variablePtr_(nullptr)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::adiosWrite::~adiosWrite() {}
+Foam::adiosWrite::~adiosWrite()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -53,23 +67,142 @@ Foam::fileName Foam::adiosWrite::pathname()
     return this->pathname_;
 }
 
-bool Foam::adiosWrite::write
+
+std::unique_ptr<adios2::IO>& Foam::adiosWrite::ioWritePtr()
+{
+    if(!ioWritePtr_)
+    {
+        ioWritePtr_.reset
+        (
+            new adios2::IO(adiosPtr()->DeclareIO("write"))
+        );
+        ioWritePtr_->SetEngine("BP4");
+    }
+
+    return ioWritePtr_;
+}
+
+
+std::unique_ptr<adios2::Engine>& Foam::adiosWrite::enginePtr()
+{
+    if(!enginePtr_)
+    {
+        enginePtr_.reset
+        (
+            new adios2::Engine
+            (
+                ioWritePtr()->Open(pathname_, adios2::Mode::Append)
+            )
+        );
+    }
+
+    return enginePtr_;
+}
+
+
+void Foam::adiosWrite::defineVariable
 (
-    const Foam::word blockId,
+    const Foam::string name,
     const Foam::label shape,
     const Foam::label start,
     const Foam::label count,
-    const char* buf
+    const bool constantDims
 )
 {
-    adiosCorePtr_->defineVariable(blockId, shape, start, count, true);
-    adiosCorePtr_->open(this->pathname_);
-    adiosCorePtr_->beginStep();
-    adiosCorePtr_->put(buf);
-    adiosCorePtr_->endStep();
-    //adiosCorePtr_->close();
+    if (adiosCore::debug)
+    {
+        Pout<< "Define variable: " << name << endl;
+    }
 
-    return true;
+    variablePtr_.reset
+    (
+        new adios2::Variable<double>
+        (
+            ioWritePtr()->DefineVariable<double>
+            (
+                name,
+                {},
+                {},
+                {static_cast<size_t>(count)},
+                constantDims
+            )
+        )
+    );
+}
+
+
+void Foam::adiosWrite::open()
+{
+    enginePtr();
+}
+
+
+void Foam::adiosWrite::put(const double* buf)
+{
+    if (adiosCore::debug)
+    {
+        Pout<< "adiosWrite::put(const char* buf)" << endl;
+    }
+
+    enginePtr()->Put(*variablePtr_, buf);
+}
+
+
+void Foam::adiosWrite::performPuts()
+{
+    if (adiosCore::debug)
+    {
+        Pout<< "adiosWrite::performPuts()" << endl;
+    }
+
+    enginePtr()->PerformPuts();
+}
+
+
+void Foam::adiosWrite::write
+(
+    const Foam::string blockId,
+    const Foam::label shape,
+    const Foam::label start,
+    const Foam::label count,
+    const double* buf
+)
+{
+    if (adiosCore::debug)
+    {
+        Pout<< "adiosWrite::write : writing a variable" << nl
+            << "    with name = " << blockId << nl
+            << "    and pathname = " << nl
+            << "    " << pathname_ << endl;
+    }
+
+    // Use only the pointer infrastructure from this class by now for clarity
+    adios2::Variable<double> var =
+        ioWritePtr()->DefineVariable<double>
+        (
+            blockId,
+            {},
+            {},
+            {static_cast<size_t>(count)},
+            adios2::ConstantDims
+        );
+
+    // Step variant works in Mode::Append. Close() is called in parRunControl
+    // before MPI_Finalize.
+    enginePtr()->BeginStep();
+    enginePtr()->Put(var, buf);
+    enginePtr()->EndStep();
+    // close();
+
+    // PerformPuts variant.
+    // ?adios bug? :
+    //   Close() called here in Mode::Append : garbage data for ranks > 0
+    //   Close() called only once in parRunControl: Independent of Mode, only
+    //     the data from the last opened engine is present in the file.
+    // enginePtr()->Put(var, buf);
+    // enginePtr()->PerformPuts();
+    // enginePtr()->Flush();
+    // close();
 }
 
 // ************************************************************************* //

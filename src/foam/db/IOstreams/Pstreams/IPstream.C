@@ -317,9 +317,9 @@ Foam::Istream& Foam::IPstream::read(char* data, std::streamsize count)
 }
 
 
-Foam::Istream& Foam::IPstream::parread(char* data, std::streamsize count)
+Foam::Istream& Foam::IPstream::parread(double* data, const string& id)
 {
-    notImplemented("Istream& IPstream::parread(char*, std::streamsize)");
+    notImplemented("Istream& IPstream::parread(double*, std::streamsize)");
     return *this;
 }
 
