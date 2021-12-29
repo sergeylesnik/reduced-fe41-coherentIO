@@ -138,8 +138,14 @@ public:
                 return pathname_;
             }
 
+            //- Return the file name as a path relative to the root case
+            inline string getRelativeFileName()
+            {
+                return pathname_.caseName("");
+            }
+
             //- Get block identifier
-            virtual word getBlockId();
+            virtual string getBlockId();
 
 
         // STL stream

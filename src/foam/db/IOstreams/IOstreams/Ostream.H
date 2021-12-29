@@ -180,7 +180,7 @@ public:
             {}
 
             //- Get block identifier
-            virtual word getBlockId()
+            virtual string getBlockId()
             {
                 return "none (called Ostream Member)";
             }

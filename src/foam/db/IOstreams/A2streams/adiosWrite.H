@@ -102,6 +102,13 @@ public:
         const label count,
         const double* buf
     );
+
+    void writeLocalString
+    (
+        const Foam::fileName& varName,
+        const std::string& str,
+        const label size
+    );
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

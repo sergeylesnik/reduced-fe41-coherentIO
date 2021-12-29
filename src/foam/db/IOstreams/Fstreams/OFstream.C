@@ -78,11 +78,11 @@ Foam::OFstreamAllocator::OFstreamAllocator
             rm(pathname + ".gz");
         }
 
-        ofPtr_ = new ofstream(pathname.c_str(), mode);
-
         // create an extra file with extension .dat to split off the field values
         if (format == IOstream::PARALLEL)
         {
+            ofPtr_ = new std::ostringstream();
+
             fileName parpathname = pathname.path();
 
             // Escape uniform folder if applicable
@@ -101,6 +101,10 @@ Foam::OFstreamAllocator::OFstreamAllocator
             parpathname.clean();
 
             adiosPtr_.reset(new adiosWrite(parpathname));
+        }
+        else
+        {
+            ofPtr_ = new ofstream(pathname.c_str(), mode);
         }
     }
 }
@@ -156,14 +160,27 @@ Foam::OFstream::OFstream
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
 Foam::OFstream::~OFstream()
-{}
+{
+    if (isA<std::ostringstream>(*ofPtr_))
+    {
+        std::ostringstream& os = dynamic_cast<std::ostringstream&>(*ofPtr_);
+        std::cout << os.str() << '\n';
+
+        adiosPtr_->writeLocalString
+        (
+            getRelativeFileName(),
+            os.str().data(),
+            os.str().size()
+        );
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::word Foam::OFstream::getBlockId()
+Foam::string Foam::OFstream::getBlockId()
 {
-    word id = "";
+    string id = "";
     bool firstEntry = true;
     id = word(blockNamesStack_.size());
 
@@ -180,8 +197,7 @@ Foam::word Foam::OFstream::getBlockId()
         }
     }
 
-    id = pathname_.caseName("") + '/' + id;
-
+    id = getRelativeFileName() + '/' + id;
 
     if(debug > 1)
     {
@@ -247,6 +263,11 @@ Foam::word Foam::OFstream::incrBlock(const word name)
 
 void Foam::OFstream::decrBlock()
 {
+    if (debug > 1)
+    {
+        Info<< "OFsteam::decrBlock" << '\n';
+    }
+
     popBlockNamesStack();
 
     this->decrIndent();
@@ -299,7 +320,7 @@ Foam::Ostream& Foam::OFstream::parwrite(const double* buf, const label count)
             << abort(FatalIOError);
     }
 
-    word blockId = getBlockId();
+    string blockId = getBlockId();
     adiosPtr_->write(blockId, count, 0, count, buf);
 
     return *this;

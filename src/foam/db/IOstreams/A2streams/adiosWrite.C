@@ -205,4 +205,28 @@ void Foam::adiosWrite::write
     // close();
 }
 
+
+void Foam::adiosWrite::writeLocalString
+(
+    const Foam::fileName& varName,
+    const std::string& str,
+    const label size
+)
+{
+    adios2::Variable<std::string> var =
+        ioWritePtr()->DefineVariable<std::string>
+        (
+            varName,
+            {adios2::LocalValueDim}
+        );
+
+    // Step variant works in Mode::Append. Close() is called in parRunControl
+    // before MPI_Finalize.
+    enginePtr()->BeginStep();
+    enginePtr()->Put(var, str);
+    enginePtr()->EndStep();
+    // close();
+
+}
+
 // ************************************************************************* //
