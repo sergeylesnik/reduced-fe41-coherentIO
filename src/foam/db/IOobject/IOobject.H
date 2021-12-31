@@ -173,6 +173,10 @@ protected:
         //  exact file. The results is nullptr if the stream construction failed
         Istream* objectStream(const fileName&);
 
+        //- Construct and return an IFsteam with initialized ADIOS instance
+        //  and the underlying stream being std::istringstream
+        Istream* objectStreamPar(const fileName&);
+
         //- Set the object state to bad
         void setBad(const string&);
 

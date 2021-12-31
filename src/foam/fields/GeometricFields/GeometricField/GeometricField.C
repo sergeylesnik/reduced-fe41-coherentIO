@@ -363,7 +363,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
-    boundaryField_(*this, readField(this->readStream(typeName)))
+    boundaryField_(*this, readField(this->readStreamPar(typeName)))
 {
     this->close();
 

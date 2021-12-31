@@ -78,9 +78,10 @@ Foam::OFstreamAllocator::OFstreamAllocator
             rm(pathname + ".gz");
         }
 
-        // create an extra file with extension .dat to split off the field values
         if (format == IOstream::PARALLEL)
         {
+            // The file pointer is a buffer pointer in this case.
+            // The buffer is written to ADIOS in the destructor.
             ofPtr_ = new std::ostringstream();
 
             fileName parpathname = pathname.path();
@@ -161,10 +162,9 @@ Foam::OFstream::OFstream
 
 Foam::OFstream::~OFstream()
 {
-    if (isA<std::ostringstream>(*ofPtr_))
+    if (isA<std::ostringstream>(*ofPtr_) && format() == IOstream::PARALLEL)
     {
         std::ostringstream& os = dynamic_cast<std::ostringstream&>(*ofPtr_);
-        std::cout << os.str() << '\n';
 
         adiosPtr_->writeLocalString
         (
@@ -182,7 +182,7 @@ Foam::string Foam::OFstream::getBlockId()
 {
     string id = "";
     bool firstEntry = true;
-    id = word(blockNamesStack_.size());
+    id = string(blockNamesStack_.size());
 
     forAllConstIter(SLList<word>, blockNamesStack_, iter)
     {

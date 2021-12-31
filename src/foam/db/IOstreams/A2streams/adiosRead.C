@@ -128,6 +128,7 @@ void Foam::adiosRead::read
 )
 {
     // Use only the pointer infrastructure from this class by now for clarity
+    open();
     adios2::Variable<double> var =
         ioReadPtr()->InquireVariable<double>(blockId);
     enginePtr()->Get<double>(var, buf);
@@ -137,6 +138,25 @@ void Foam::adiosRead::read
     // defineVariable(blockId);
     // get(buf);
     // performGets();
+}
+
+
+void Foam::adiosRead::readLocalString
+(
+    std::string& buf,
+    const Foam::string strName
+)
+{
+    if (adiosCore::debug)
+    {
+        Pout<< "Read local string: " << strName << endl;
+    }
+    // Use only the pointer infrastructure from this class by now for clarity
+    open();
+    adios2::Variable<std::string> var =
+        ioReadPtr()->InquireVariable<std::string>(strName);
+    enginePtr()->Get(var, buf);
+    enginePtr()->PerformGets();
 }
 
 // ************************************************************************* //

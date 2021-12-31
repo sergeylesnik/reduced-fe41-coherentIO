@@ -445,6 +445,29 @@ Foam::Istream* Foam::IOobject::objectStream(const fileName& fName)
 }
 
 
+Foam::Istream* Foam::IOobject::objectStreamPar(const fileName& fName)
+{
+    if (fName.size())
+    {
+        IFstream* isPtr = new IFstream(fName, IOstream::PARALLEL);
+
+        if (isPtr->good())
+        {
+            return isPtr;
+        }
+        else
+        {
+            delete isPtr;
+            return nullptr;
+        }
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
 bool Foam::IOobject::headerOk()
 {
     bool ok = true;

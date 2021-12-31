@@ -70,7 +70,10 @@ bool Foam::regIOobject::writeObject
         const_cast<regIOobject&>(*this).instance() = time().timeName();
     }
 
-    mkDir(path());
+    if (fmt != IOstream::PARALLEL)
+    {
+        mkDir(path());
+    }
 
     if (OFstream::debug)
     {

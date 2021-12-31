@@ -243,6 +243,8 @@ public:
             //- Return Istream and check object type against that given
             Istream& readStream(const word&);
 
+            Istream& readStreamPar(const word&);
+
             //- Close Istream
             void close();
 

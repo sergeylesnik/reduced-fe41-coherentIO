@@ -77,6 +77,12 @@ public:
         double* buf,
         const string name
     );
+
+    void readLocalString
+    (
+        std::string& buf,
+        const Foam::string strName
+    );
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

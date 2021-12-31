@@ -45,6 +45,7 @@ Foam::IFstreamAllocator::IFstreamAllocator
 )
 :
     ifPtr_(nullptr),
+    bufStr_(),
     adiosPtr_(nullptr),
     compression_(IOstream::UNCOMPRESSED)
 {
@@ -57,7 +58,24 @@ Foam::IFstreamAllocator::IFstreamAllocator
         }
     }
 
-    ifPtr_ = new ifstream(pathname.c_str());
+    if (format == IOstream::PARALLEL)
+    {
+        ifPtr_ = new std::istringstream();
+
+        if (!adiosPtr_)
+        {
+            allocateAdios(format);
+        }
+
+        adiosPtr_->readLocalString(bufStr_, pathname.caseName(""));
+
+        // Assign the buffer of string bufStr_ to the buffer of the stream
+        ifPtr_->rdbuf()->pubsetbuf(&bufStr_[0], bufStr_.size());
+    }
+    else
+    {
+        ifPtr_ = new ifstream(pathname.c_str());
+    }
 
     // If the file is compressed, decompress it before reading.
     if (!ifPtr_->good() && isFile(pathname + ".gz", false))
@@ -78,7 +96,6 @@ Foam::IFstreamAllocator::IFstreamAllocator
         }
     }
 
-    allocateAdios(format);
 }
 
 
@@ -90,11 +107,8 @@ Foam::IFstreamAllocator::~IFstreamAllocator()
 
 void Foam::IFstreamAllocator::allocateAdios(IOstream::streamFormat format)
 {
-    if (format == IOstream::PARALLEL && !adiosPtr_)
-    {
-        fileName parpathname = getEnv("FOAM_CASE")/"data.bp";
-        adiosPtr_.reset(new adiosRead(parpathname));
-    }
+    fileName parpathname = getEnv("FOAM_CASE")/"data.bp";
+    adiosPtr_.reset(new adiosRead(parpathname));
 }
 
 

@@ -63,6 +63,11 @@ class IFstreamAllocator
     // Private data
 
         istream* ifPtr_;
+
+        //- String serves as buffer for ADIOS variable in case the format is
+        //  PARALLEL. It is then assigned to isrteam buffer.
+        std::string bufStr_;
+
         std::unique_ptr<adiosRead> adiosPtr_;
         IOstream::compressionType compression_;
 

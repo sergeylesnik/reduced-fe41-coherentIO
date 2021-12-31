@@ -145,6 +145,75 @@ Foam::Istream& Foam::regIOobject::readStream(const word& expectName)
 }
 
 
+Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
+{
+    // Fall back to the standarad readStream if the ADIOS data directory is not
+    // present
+    if (!isDir(getEnv("FOAM_CASE")/"data.bp"))
+    {
+        Info<< "No ADIOS data found at " << getEnv("FOAM_CASE")/"data.bp" << nl
+            << "Continuing with the standard IO" << endl;
+        readStream(expectName);
+    };
+
+    Info<< "Reading via ADIOS from " << getEnv("FOAM_CASE")/"data.bp" << endl;
+
+    // Get the file name relative to the root directory
+    fileName objPath = objectPath().caseName("");
+
+    if (IFstream::debug)
+    {
+        Info<< "regIOobject::readStreamPar(const word&) : "
+            << "reading object " << name()
+            << " from ADIOS variable " << objPath
+            << endl;
+    }
+
+    // Construct IFstream if not already constructed
+    if (!isPtr_)
+    {
+        if (!(isPtr_ = objectStreamPar(objPath)))
+        {
+            FatalIOError
+            (
+                "regIOobject::readStreamPar()",
+                __FILE__,
+                __LINE__,
+                objPath,
+                0
+            )   << "cannot open file"
+                << exit(FatalIOError);
+        }
+        else if (!readHeader(*isPtr_))
+        {
+            FatalIOErrorIn("regIOobject::readStreamPar()", *isPtr_)
+                << "problem while reading header for object " << name()
+                << exit(FatalIOError);
+        }
+
+        // Check the className of the regIOobject
+        // dictionary is an allowable name in case the actual class
+        // instantiated is a dictionary
+        if
+        (
+            expectName.size()
+         && headerClassName() != expectName
+         && headerClassName() != dictionary::typeName
+         && headerClassName() != IOdictionary::typeName
+        )
+        {
+            FatalIOErrorIn("regIOobject::readStream(const word&)", *isPtr_)
+                << "unexpected class name " << headerClassName()
+                << " expected " << expectName << endl
+                << "    while reading object " << name()
+                << exit(FatalIOError);
+        }
+    }
+
+    return *isPtr_;
+}
+
+
 void Foam::regIOobject::close()
 {
     if (IFstream::debug)
