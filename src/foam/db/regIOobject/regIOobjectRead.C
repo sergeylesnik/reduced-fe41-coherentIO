@@ -153,7 +153,7 @@ Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
     {
         Info<< "No ADIOS data found at " << getEnv("FOAM_CASE")/"data.bp" << nl
             << "Continuing with the standard IO" << endl;
-        readStream(expectName);
+        return readStream(expectName);
     };
 
     Info<< "Reading via ADIOS from " << getEnv("FOAM_CASE")/"data.bp" << endl;

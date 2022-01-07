@@ -77,6 +77,9 @@ std::unique_ptr<adios2::IO>& Foam::adiosWrite::ioWritePtr()
             new adios2::IO(adiosPtr()->DeclareIO("write"))
         );
         ioWritePtr_->SetEngine("BP4");
+        // Parameters to consider for increasing the IO performance
+        // ioWritePtr_->SetParameter("MaxBufferSize", "100Kb");
+        // ioWritePtr_->SetParameter("FlushStepsCount", "100");
     }
 
     return ioWritePtr_;
@@ -226,7 +229,6 @@ void Foam::adiosWrite::writeLocalString
     enginePtr()->Put(var, str);
     enginePtr()->EndStep();
     // close();
-
 }
 
 // ************************************************************************* //
