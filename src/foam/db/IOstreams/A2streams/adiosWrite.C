@@ -23,6 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "OSspecific.H"
 #include "adiosWrite.H"
 
 
@@ -32,8 +33,22 @@ std::unique_ptr<adios2::IO> Foam::adiosWrite::ioWritePtr_ = nullptr;
 
 std::unique_ptr<adios2::Engine> Foam::adiosWrite::enginePtr_ = nullptr;
 
+Foam::fileName Foam::adiosWrite::pathname_ = Foam::getEnv("FOAM_CASE")/"data.bp";
+
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+void Foam::adiosWrite::beginStep()
+{
+    enginePtr()->BeginStep();
+}
+
+
+void Foam::adiosWrite::endStep()
+{
+    enginePtr()->EndStep();
+}
+
 
 void Foam::adiosWrite::close()
 {
@@ -49,9 +64,10 @@ void Foam::adiosWrite::close()
 
 Foam::adiosWrite::adiosWrite(const fileName& pathname)
 :
-    pathname_(pathname),
     variablePtr_(nullptr)
-{}
+{
+    pathname_ = pathname;
+}
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
@@ -94,7 +110,7 @@ std::unique_ptr<adios2::Engine>& Foam::adiosWrite::enginePtr()
         (
             new adios2::Engine
             (
-                ioWritePtr()->Open(pathname_, adios2::Mode::Append)
+                ioWritePtr()->Open(pathname_, adios2::Mode::Write)
             )
         );
     }
@@ -192,9 +208,9 @@ void Foam::adiosWrite::write
 
     // Step variant works in Mode::Append. Close() is called in parRunControl
     // before MPI_Finalize.
-    enginePtr()->BeginStep();
+    // enginePtr()->BeginStep();
     enginePtr()->Put(var, buf);
-    enginePtr()->EndStep();
+    // enginePtr()->EndStep();
     // close();
 
     // PerformPuts variant.
@@ -225,9 +241,9 @@ void Foam::adiosWrite::writeLocalString
 
     // Step variant works in Mode::Append. Close() is called in parRunControl
     // before MPI_Finalize.
-    enginePtr()->BeginStep();
+    // enginePtr()->BeginStep();
     enginePtr()->Put(var, str);
-    enginePtr()->EndStep();
+    // enginePtr()->EndStep();
     // close();
 }
 

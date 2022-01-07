@@ -30,6 +30,7 @@ Description
 #include "objectRegistry.H"
 #include "OSspecific.H"
 #include "OFstream.H"
+#include "adiosWrite.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -136,12 +137,18 @@ bool Foam::regIOobject::writeObject
 
 bool Foam::regIOobject::write() const
 {
-    return writeObject
+    adiosWrite::beginStep();
+
+    bool ok = writeObject
     (
         time().writeFormat(),
         IOstream::currentVersion,
         time().writeCompression()
     );
+
+    adiosWrite::endStep();
+
+    return ok;
 }
 
 // ************************************************************************* //

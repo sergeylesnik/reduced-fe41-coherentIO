@@ -71,7 +71,7 @@ public:
     // Access
 
         //- ADIOS instance
-        std::unique_ptr<adios2::ADIOS>& adiosPtr();
+        static std::unique_ptr<adios2::ADIOS>& adiosPtr();
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

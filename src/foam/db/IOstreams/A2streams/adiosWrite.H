@@ -53,13 +53,19 @@ public adiosCore
 
     static std::unique_ptr<adios2::Engine> enginePtr_;
 
-    fileName pathname_;
+    static fileName pathname_;
 
     std::unique_ptr<adios2::Variable<double> > variablePtr_;
 
 public:
 
     // Static Member Functions
+
+        //- Close adios engine if existent
+        static void beginStep();
+
+        //- Close adios engine if existent
+        static void endStep();
 
         //- Close adios engine if existent
         static void close();
@@ -75,9 +81,9 @@ public:
 
         fileName pathname();
 
-        std::unique_ptr<adios2::IO>& ioWritePtr();
+        static std::unique_ptr<adios2::IO>& ioWritePtr();
 
-        std::unique_ptr<adios2::Engine>& enginePtr();
+        static std::unique_ptr<adios2::Engine>& enginePtr();
 
     void open();
 
