@@ -26,6 +26,7 @@ License
 #ifndef adiosRead_H
 #define adiosRead_H
 
+#include "IOstream.H"
 #include "adiosCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -74,7 +75,7 @@ public:
 
     void read
     (
-        double* buf,
+        parIOType* buf,
         const string name
     );
 

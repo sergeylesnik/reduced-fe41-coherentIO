@@ -156,7 +156,7 @@ public:
             Istream& read(char*, std::streamsize);
 
             //- Read binary block from second stream
-            Istream& parread(double*, const string&);
+            Istream& parread(parIOType*, const string&);
 
             //- Rewind and return the stream so that it may be read again
             Istream& rewind();

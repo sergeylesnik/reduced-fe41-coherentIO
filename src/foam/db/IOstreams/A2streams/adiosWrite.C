@@ -184,7 +184,7 @@ void Foam::adiosWrite::write
     const Foam::label shape,
     const Foam::label start,
     const Foam::label count,
-    const double* buf
+    const parIOType* buf
 )
 {
     if (adiosCore::debug)
@@ -196,8 +196,8 @@ void Foam::adiosWrite::write
     }
 
     // Use only the pointer infrastructure from this class by now for clarity
-    adios2::Variable<double> var =
-        ioWritePtr()->DefineVariable<double>
+    adios2::Variable<parIOType> var =
+        ioWritePtr()->DefineVariable<parIOType>
         (
             blockId,
             {},

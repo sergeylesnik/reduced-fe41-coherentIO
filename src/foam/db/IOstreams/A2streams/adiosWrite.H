@@ -27,6 +27,7 @@ License
 #define adiosWrite_H
 
 #include "Engine.h"
+#include "IOstream.H"
 #include "word.H"
 #include "label.H"
 #include "fileName.H"
@@ -106,7 +107,7 @@ public:
         const label shape,
         const label start,
         const label count,
-        const double* buf
+        const parIOType* buf
     );
 
     void writeLocalString

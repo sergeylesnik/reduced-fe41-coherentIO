@@ -172,7 +172,7 @@ public:
             virtual Istream& read(char*, std::streamsize);
 
             //- Read binary block from second stream
-            virtual Istream& parread(double*, const string&)
+            virtual Istream& parread(parIOType*, const string&)
             {
                 return *this;
             }

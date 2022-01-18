@@ -143,7 +143,9 @@ public:
             virtual Ostream& write(const char*, std::streamsize) = 0;
 
             //- Write binary block into second stream
-            virtual Ostream& parwrite(const double*, const label) = 0;
+            virtual Ostream& parwrite(const parIOType*, const label) = 0;
+
+            virtual Ostream& stringStream() = 0;
 
             //- Add indentation characters
             virtual void indent() = 0;

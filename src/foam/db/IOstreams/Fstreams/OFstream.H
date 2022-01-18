@@ -97,6 +97,9 @@ class OFstream
         fileName pathname_;
         LIFOStack<word> blockNamesStack_;
 
+        //- String stream for temporary data written by ADIOS at destruction
+        OStringStream* tmpOssPtr_;
+
 
 public:
 
@@ -175,7 +178,9 @@ public:
 
             virtual void popBlockNamesStack();
 
-            virtual Ostream& parwrite(const double*, const label);
+            virtual Ostream& parwrite(const parIOType*, const label);
+
+            virtual Ostream& stringStream();
 };
 
 

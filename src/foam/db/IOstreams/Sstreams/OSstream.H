@@ -168,7 +168,9 @@ public:
             virtual Ostream& write(const char*, std::streamsize);
 
             //- Write binary block into paros_
-            virtual Ostream& parwrite(const double*, const label);
+            virtual Ostream& parwrite(const parIOType*, const label);
+
+            virtual Ostream& stringStream();
 
             //- Add indentation characters
             virtual void indent();

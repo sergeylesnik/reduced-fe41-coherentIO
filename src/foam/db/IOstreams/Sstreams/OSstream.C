@@ -304,9 +304,17 @@ Foam::Ostream& Foam::OSstream::write(const char* buf, std::streamsize count)
 }
 
 
-Foam::Ostream& Foam::OSstream::parwrite(const double* buf, const label count)
+Foam::Ostream& Foam::OSstream::parwrite(const parIOType* buf, const label count)
 {
-    notImplemented("Ostream& OSstream::parwrite(const double*, const label)");
+    notImplemented("Ostream& OSstream::parwrite(const parIOType*, const label)");
+    setBad();
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OSstream::stringStream()
+{
+    notImplemented("Ostream& OSstream::stringStream()");
     setBad();
     return *this;
 }

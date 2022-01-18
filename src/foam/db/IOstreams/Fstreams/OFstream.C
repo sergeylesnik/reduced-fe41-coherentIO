@@ -25,6 +25,7 @@ License
 
 #include "OFstream.H"
 #include "OSspecific.H"
+#include "OStringStream.H"
 #include "UList.H"
 #include "Pstream.H"
 #include "gzstream.h"
@@ -131,7 +132,8 @@ Foam::OFstream::OFstream
     OFstreamAllocator(pathname, mode, format, compression),
     OSstream(*ofPtr_, "OFstream.sinkFile_", format, version, compression),
     pathname_(pathname),
-    blockNamesStack_()
+    blockNamesStack_(),
+    tmpOssPtr_(nullptr)
 {
     setClosed();
     setState(ofPtr_->rdstate());
@@ -173,6 +175,17 @@ Foam::OFstream::~OFstream()
             os.str().size()
         );
     }
+
+    if (tmpOssPtr_)
+    {
+        adiosPtr_->writeLocalString
+        (
+            getBlockId(),
+            tmpOssPtr_->str().data(),
+            tmpOssPtr_->str().size()
+        );
+        delete tmpOssPtr_;
+    }
 }
 
 
@@ -182,7 +195,6 @@ Foam::string Foam::OFstream::getBlockId()
 {
     string id = "";
     bool firstEntry = true;
-    id = string(blockNamesStack_.size());
 
     forAllConstIter(SLList<word>, blockNamesStack_, iter)
     {
@@ -311,11 +323,11 @@ void Foam::OFstream::popBlockNamesStack()
 }
 
 
-Foam::Ostream& Foam::OFstream::parwrite(const double* buf, const label count)
+Foam::Ostream& Foam::OFstream::parwrite(const parIOType* buf, const label count)
 {
     if (format() != PARALLEL)
     {
-        FatalIOErrorIn("Ostream::parwrite(const char*, const label)", *this)
+        FatalIOErrorIn("Ostream::parwrite(const parIOType*, const label)", *this)
             << "stream format not parallel"
             << abort(FatalIOError);
     }
@@ -324,6 +336,27 @@ Foam::Ostream& Foam::OFstream::parwrite(const double* buf, const label count)
     adiosPtr_->write(blockId, count, 0, count, buf);
 
     return *this;
+}
+
+
+Foam::Ostream& Foam::OFstream::stringStream()
+{
+    if (format() != PARALLEL)
+    {
+        FatalIOErrorIn("Ostream::stringStream()", *this)
+            << " stream format not parallel"
+            << abort(FatalIOError);
+    }
+
+    if (tmpOssPtr_)
+    {
+        FatalIOErrorIn("Ostream::stringStream()", *this)
+            << " a string stream object already exists"
+            << abort(FatalIOError);
+    }
+
+    tmpOssPtr_ = new OStringStream();
+    return *tmpOssPtr_;
 }
 
 // ************************************************************************* //

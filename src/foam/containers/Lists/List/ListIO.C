@@ -173,7 +173,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
             //ToDoIO Check the string read from the stream
             is.parread
             (
-                reinterpret_cast<double*>(list.data()),
+                reinterpret_cast<parIOType*>(list.data()),
                 id.replace("\"","")
             );
 

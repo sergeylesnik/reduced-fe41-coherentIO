@@ -162,9 +162,9 @@ Foam::Istream& Foam::ITstream::read(char*, std::streamsize)
 }
 
 
-Foam::Istream& Foam::ITstream::parread(double*, const string& id)
+Foam::Istream& Foam::ITstream::parread(parIOType*, const string& id)
 {
-    notImplemented("Istream& ITstream::parread(double*, const string& id)");
+    notImplemented("Istream& ITstream::parread(parIOType*, const string& id)");
     return *this;
 }
 

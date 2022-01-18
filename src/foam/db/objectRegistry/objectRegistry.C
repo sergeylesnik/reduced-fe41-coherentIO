@@ -395,6 +395,7 @@ bool Foam::objectRegistry::writeObject
                 << iter.key()
                 << " of type " << iter()->type()
                 << " with writeOpt " << iter()->writeOpt()
+                << " and streamFormat " << fmt
                 << " to file " << iter()->objectPath()
                 << endl;
         }

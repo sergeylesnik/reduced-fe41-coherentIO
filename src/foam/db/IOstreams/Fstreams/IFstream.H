@@ -146,7 +146,7 @@ public:
         // Read functions
 
             //- Read binary block from second stream
-            virtual Istream& parread(double*, const string&);
+            virtual Istream& parread(parIOType*, const string&);
 
         // STL stream
 

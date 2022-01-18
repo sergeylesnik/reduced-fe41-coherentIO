@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "adiosRead.H"
-#include "adiosCore.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -123,15 +122,15 @@ void Foam::adiosRead::performGets()
 
 void Foam::adiosRead::read
 (
-    double* buf,
+    parIOType* buf,
     const Foam::string blockId
 )
 {
     // Use only the pointer infrastructure from this class by now for clarity
     open();
-    adios2::Variable<double> var =
-        ioReadPtr()->InquireVariable<double>(blockId);
-    enginePtr()->Get<double>(var, buf);
+    adios2::Variable<parIOType> var =
+        ioReadPtr()->InquireVariable<parIOType>(blockId);
+    enginePtr()->Get<parIOType>(var, buf);
     enginePtr()->PerformGets();
 
     // open();

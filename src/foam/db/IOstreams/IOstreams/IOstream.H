@@ -66,6 +66,8 @@ using std::cin;
 using std::cout;
 using std::cerr;
 
+typedef char parIOType;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
