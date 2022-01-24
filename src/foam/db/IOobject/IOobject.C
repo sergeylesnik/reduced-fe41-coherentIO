@@ -509,6 +509,52 @@ bool Foam::IOobject::headerOk()
 }
 
 
+bool Foam::IOobject::headerOkPar()
+{
+    bool ok = true;
+
+    // Get the file name relative to the root directory
+    fileName objPath = objectPath().caseName("");
+
+    Istream* isPtr = objectStreamPar(objPath);
+
+    // If the stream has failed return
+    if (!isPtr)
+    {
+        if (objectRegistry::debug)
+        {
+            Info
+                << "IOobject::headerOkPar() : "
+                << "data " << objectPath() << " could not be found via ADIOS;"
+                << " Trying via standard input"
+                << endl;
+        }
+
+        ok = headerOk();
+    }
+    else
+    {
+        // Try reading header
+        if (!readHeader(*isPtr))
+        {
+            if (objectRegistry::debug)
+            {
+                IOWarningIn("IOobject::headerOkPar()", (*isPtr))
+                    << "failed to read header of file " << objectPath()
+                    << endl;
+            }
+
+            ok = false;
+        }
+    }
+
+    delete isPtr;
+
+    return ok;
+}
+
+
+
 void Foam::IOobject::setBad(const string& s)
 {
     if (objState_ != GOOD)

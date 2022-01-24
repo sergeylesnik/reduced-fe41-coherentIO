@@ -140,6 +140,8 @@ public:
             //- Rewind and return the stream so that it may be read again
             virtual Istream& rewind() = 0;
 
+            virtual Istream& readToStringStream(string&) = 0;
+
 
         // Read List punctuation tokens
 

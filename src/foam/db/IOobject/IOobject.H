@@ -401,6 +401,7 @@ public:
             //- Read and check header info
             bool headerOk();
 
+            bool headerOkPar();
 
         // Writing
 

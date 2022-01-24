@@ -615,6 +615,11 @@ public:
         // IOstream Operators
 
             friend Ostream& operator<<(Ostream&, const polyMesh&);
+
+        // Writing
+
+            //- Write using setting from DB
+            bool write() const;
 };
 
 

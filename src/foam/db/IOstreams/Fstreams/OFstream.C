@@ -85,24 +85,24 @@ Foam::OFstreamAllocator::OFstreamAllocator
             // The buffer is written to ADIOS in the destructor.
             ofPtr_ = new std::ostringstream();
 
-            fileName parpathname = pathname.path();
+            // fileName parpathname = pathname.path();
 
-            // Escape uniform folder if applicable
-            if (parpathname.name().find("uniform") != std::string::npos)
-            { parpathname = parpathname + "/../"; }
+            // // Escape uniform folder if applicable
+            // if (parpathname.name().find("uniform") != std::string::npos)
+            // { parpathname = parpathname + "/../"; }
 
-            // Escape time folder
-            parpathname = parpathname + "/../";
-            parpathname.clean();
+            // // Escape time folder
+            // parpathname = parpathname + "/../";
+            // parpathname.clean();
 
-            // Escape processor folder if applicable
-            if (parpathname.name().find("processor") != std::string::npos)
-            { parpathname = parpathname + "/../"; }
+            // // Escape processor folder if applicable
+            // if (parpathname.name().find("processor") != std::string::npos)
+            // { parpathname = parpathname + "/../"; }
 
-            parpathname = parpathname + "/data.bp";
-            parpathname.clean();
+            // parpathname = parpathname + "/data.bp";
+            // parpathname.clean();
 
-            adiosPtr_.reset(new adiosWrite(parpathname));
+            adiosPtr_.reset(new adiosWrite());
         }
         else
         {

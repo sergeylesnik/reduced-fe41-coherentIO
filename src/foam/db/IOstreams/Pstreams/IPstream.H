@@ -161,6 +161,11 @@ public:
             //- Rewind and return the stream so that it may be read again
             Istream& rewind();
 
+            Istream& readToStringStream(string&)
+            {
+                return *this;
+            }
+
 
         // Edit
 

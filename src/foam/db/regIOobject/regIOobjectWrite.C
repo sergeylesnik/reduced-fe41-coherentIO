@@ -137,7 +137,10 @@ bool Foam::regIOobject::writeObject
 
 bool Foam::regIOobject::write() const
 {
-    adiosWrite::beginStep();
+    if (time().writeFormat() == IOstream::PARALLEL)
+    {
+        adiosWrite::beginStep();
+    }
 
     bool ok = writeObject
     (
@@ -146,7 +149,10 @@ bool Foam::regIOobject::write() const
         time().writeCompression()
     );
 
-    adiosWrite::endStep();
+    if (time().writeFormat() == IOstream::PARALLEL)
+    {
+        adiosWrite::endStep();
+    }
 
     return ok;
 }

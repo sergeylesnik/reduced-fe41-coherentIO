@@ -51,11 +51,11 @@ Foam::IOList<T>::IOList(const IOobject& io)
             io.readOpt() == IOobject::MUST_READ
          || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
         )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-     || (io.readOpt() == IOobject::READ_IF_PRESENT_IF_MODIFIED && headerOk())
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOkPar())
+     || (io.readOpt() == IOobject::READ_IF_PRESENT_IF_MODIFIED && headerOkPar())
     )
     {
-        readStream(typeName) >> *this;
+        readStreamPar(typeName) >> *this;
         close();
     }
 }

@@ -88,7 +88,7 @@ class IFstreamAllocator
     // Member functions
 
         //- Allocate ADIOS object if not already present
-        void allocateAdios(IOstream::streamFormat);
+        void allocateAdios();
 };
 
 
@@ -104,6 +104,8 @@ class IFstream
     // Private data
 
         fileName pathname_;
+        Istream* tmpIssPtr_;
+        string tmpIssBuf_;
 
 public:
 
@@ -162,6 +164,7 @@ public:
             //- Print description of IOstream to Ostream
             virtual void print(Ostream&) const;
 
+            virtual Istream& readToStringStream(string&);
 
     // Member operators
 

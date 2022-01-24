@@ -107,46 +107,71 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
 
         if (is.format() == IOstream::ASCII || !contiguous<T>())
         {
-            // Read beginning of contents
-            const char delimiter = is.readBeginList("List");
-
-            if (len)
+            if (is.format() == IOstream::PARALLEL)
             {
-                if (delimiter == token::BEGIN_LIST)
+                // Read the id of list contents
+                string id;
+                is >> id;
+
+                Istream& iss = is.readToStringStream(id);
+                for (label i=0; i<len; ++i)
                 {
-                    for (label i=0; i<len; ++i)
+                    iss >> list[i];
+
+                    iss.fatalCheck
+                    (
+                        "operator>>(Istream&, List<T>&) : "
+                        "reading entry"
+                    );
+                }
+                if (List<T>::debug > 1)
+                {
+                    Pout<< "List read via PARALLEL = " << nl << list << endl;
+                }
+            }
+            else
+            {
+                // Read beginning of contents
+                const char delimiter = is.readBeginList("List");
+
+                if (len)
+                {
+                    if (delimiter == token::BEGIN_LIST)
                     {
-                        is >> list[i];
+                        for (label i=0; i<len; ++i)
+                        {
+                            is >> list[i];
+
+                            is.fatalCheck
+                            (
+                                "operator>>(Istream&, List<T>&) : "
+                                "reading entry"
+                            );
+                        }
+                    }
+                    else
+                    {
+                        // Uniform content (delimiter == token::BEGIN_BLOCK)
+
+                        T element;
+                        is >> element;
 
                         is.fatalCheck
                         (
                             "operator>>(Istream&, List<T>&) : "
-                            "reading entry"
+                            "reading the single entry"
                         );
+
+                        for (label i=0; i<len; ++i)
+                        {
+                            list[i] = element;  // Copy the value
+                        }
                     }
                 }
-                else
-                {
-                    // Uniform content (delimiter == token::BEGIN_BLOCK)
 
-                    T element;
-                    is >> element;
-
-                    is.fatalCheck
-                    (
-                        "operator>>(Istream&, List<T>&) : "
-                        "reading the single entry"
-                    );
-
-                    for (label i=0; i<len; ++i)
-                    {
-                        list[i] = element;  // Copy the value
-                    }
-                }
+                // Read end of contents
+                is.readEndList("List");
             }
-
-            // Read end of contents
-            is.readEndList("List");
         }
         else if (len && is.format() == IOstream::BINARY)
         {

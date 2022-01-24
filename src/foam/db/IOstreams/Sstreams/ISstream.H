@@ -180,6 +180,11 @@ public:
             //- Rewind and return the stream so that it may be read again
             virtual Istream& rewind();
 
+            Istream& readToStringStream(string&)
+            {
+                return *this;
+            }
+
 
         // Stream state functions
 

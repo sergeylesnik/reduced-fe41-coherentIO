@@ -65,7 +65,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
         polyPatchList& patches = *this;
 
         // Read polyPatchList
-        Istream& is = readStream(typeName);
+        Istream& is = readStreamPar(typeName);
 
         PtrList<entry> patchEntries(is);
         patches.setSize(patchEntries.size());

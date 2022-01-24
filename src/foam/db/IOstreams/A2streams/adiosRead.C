@@ -24,12 +24,63 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "adiosRead.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 std::unique_ptr<adios2::IO> Foam::adiosRead::ioReadPtr_ = nullptr;
 
+std::unique_ptr<adios2::IO> Foam::adiosRead::ioReadMeshPtr_ = nullptr;
+
 std::unique_ptr<adios2::Engine> Foam::adiosRead::enginePtr_ = nullptr;
+
+std::unique_ptr<adios2::Engine> Foam::adiosRead::engineMeshPtr_ = nullptr;
+
+const Foam::fileName Foam::adiosRead::meshPathname_ =
+    getEnv("FOAM_CASE")/"constant/polyMesh.bp";
+
+const Foam::fileName Foam::adiosRead::dataPathname_ =
+    getEnv("FOAM_CASE")/"data.bp";
+
+bool Foam::adiosRead::filesChecked_ = false;
+
+bool Foam::adiosRead::dataPresent_ = false;
+
+bool Foam::adiosRead::meshPresent_ = false;
+
+
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+const Foam::fileName& Foam::adiosRead::meshPathname()
+{
+    return meshPathname_;
+}
+
+
+void Foam::adiosRead::checkFiles()
+{
+    if (!filesChecked_)
+    {
+        dataPresent_ = isDir(dataPathname_);
+        meshPresent_ = isDir(meshPathname_);
+        filesChecked_ = true;
+    }
+}
+
+
+bool Foam::adiosRead::dataPresent()
+{
+    checkFiles();
+    return dataPresent_;
+}
+
+
+bool Foam::adiosRead::meshPresent()
+{
+    checkFiles();
+    return meshPresent_;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -68,6 +119,20 @@ std::unique_ptr<adios2::IO>& Foam::adiosRead::ioReadPtr()
 }
 
 
+std::unique_ptr<adios2::IO>& Foam::adiosRead::ioReadMeshPtr()
+{
+    if(!ioReadMeshPtr_)
+    {
+        ioReadMeshPtr_.reset
+        (
+            new adios2::IO(adiosPtr()->DeclareIO("readMesh"))
+        );
+    }
+
+    return ioReadMeshPtr_;
+}
+
+
 std::unique_ptr<adios2::Engine>& Foam::adiosRead::enginePtr()
 {
     if(!enginePtr_)
@@ -82,6 +147,23 @@ std::unique_ptr<adios2::Engine>& Foam::adiosRead::enginePtr()
     }
 
     return enginePtr_;
+}
+
+
+std::unique_ptr<adios2::Engine>& Foam::adiosRead::engineMeshPtr()
+{
+    if(!engineMeshPtr_)
+    {
+        engineMeshPtr_.reset
+        (
+            new adios2::Engine
+            (
+                ioReadMeshPtr()->Open(meshPathname_, adios2::Mode::Read)
+            )
+        );
+    }
+
+    return engineMeshPtr_;
 }
 
 
@@ -126,12 +208,27 @@ void Foam::adiosRead::read
     const Foam::string blockId
 )
 {
+    adios2::Variable<parIOType> var;
+
     // Use only the pointer infrastructure from this class by now for clarity
-    open();
-    adios2::Variable<parIOType> var =
-        ioReadPtr()->InquireVariable<parIOType>(blockId);
-    enginePtr()->Get<parIOType>(var, buf);
-    enginePtr()->PerformGets();
+    if (dataPresent())
+    {
+        open();
+        var = ioReadPtr()->InquireVariable<parIOType>(blockId);
+    }
+
+    if (var)
+    {
+        enginePtr()->Get<parIOType>(var, buf);
+        enginePtr()->PerformGets();
+    }
+    else if (meshPresent())
+    {
+        engineMeshPtr();
+        var = ioReadMeshPtr()->InquireVariable<parIOType>(blockId);
+        engineMeshPtr()->Get(var, buf);
+        engineMeshPtr()->PerformGets();
+    }
 
     // open();
     // defineVariable(blockId);
@@ -140,7 +237,7 @@ void Foam::adiosRead::read
 }
 
 
-void Foam::adiosRead::readLocalString
+bool Foam::adiosRead::readLocalString
 (
     std::string& buf,
     const Foam::string strName
@@ -150,12 +247,36 @@ void Foam::adiosRead::readLocalString
     {
         Pout<< "Read local string: " << strName << endl;
     }
+
     // Use only the pointer infrastructure from this class by now for clarity
-    open();
-    adios2::Variable<std::string> var =
-        ioReadPtr()->InquireVariable<std::string>(strName);
-    enginePtr()->Get(var, buf);
-    enginePtr()->PerformGets();
+    adios2::Variable<std::string> var;
+    if (dataPresent())
+    {
+        enginePtr();
+        var = ioReadPtr()->InquireVariable<std::string>(strName);
+    }
+
+    bool found = false;
+    if (var)
+    {
+        enginePtr()->Get(var, buf);
+        enginePtr()->PerformGets();
+        found = true;
+    }
+    else if (meshPresent())
+    {
+        // Try to look up in the mesh file
+        engineMeshPtr();
+        var = ioReadMeshPtr()->InquireVariable<std::string>(strName);
+        if (var)
+        {
+            engineMeshPtr()->Get(var, buf);
+            engineMeshPtr()->PerformGets();
+            found = true;
+        }
+    }
+
+    return found;
 }
 
 // ************************************************************************* //

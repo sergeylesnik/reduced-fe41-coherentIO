@@ -62,18 +62,21 @@ public:
 
     // Static Member Functions
 
-        //- Close adios engine if existent
+        //- Begin step
         static void beginStep();
 
-        //- Close adios engine if existent
+        //- End step
         static void endStep();
 
         //- Close adios engine if existent
         static void close();
 
+        //- Set path to the file
+        static void setPathName(const fileName& pathname);
+
 
     //- Constructor
-    adiosWrite(const fileName& pathname);
+    adiosWrite();
 
     //- Destructor
     ~adiosWrite();

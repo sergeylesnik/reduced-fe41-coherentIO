@@ -34,6 +34,7 @@ License
 #include "treeDataCell.H"
 #include "MeshObject.H"
 #include "pointMesh.H"
+#include "adiosWrite.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -336,7 +337,8 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
-    if (exists(owner_.objectPath()))
+    // if (exists(owner_.objectPath()))
+    if (owner_.headerOkPar())
     {
         initMesh();
     }
@@ -1417,6 +1419,18 @@ Foam::label Foam::polyMesh::findCell
         }
         return -1;
     }
+}
+
+
+bool Foam::polyMesh::write() const
+{
+    if (time().writeFormat() == IOstream::PARALLEL)
+    {
+        // Write mesh to a separate file
+        adiosWrite::setPathName("constant/polyMesh.bp");
+    }
+
+    return regIOobject::write();
 }
 
 

@@ -26,7 +26,6 @@ License
 #ifndef adiosCore_H
 #define adiosCore_H
 
-#include "IO.h"
 #include "adios2.h"
 
 #include "word.H"

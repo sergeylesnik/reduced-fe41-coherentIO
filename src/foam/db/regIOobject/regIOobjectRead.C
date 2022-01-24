@@ -27,6 +27,8 @@ License
 #include "IFstream.H"
 #include "objectRegistry.H"
 #include "PstreamReduceOps.H"
+#include "adiosRead.H"
+#include <string>
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -147,19 +149,38 @@ Foam::Istream& Foam::regIOobject::readStream(const word& expectName)
 
 Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
 {
+    // Get the file name relative to the root directory
+    fileName objPath = objectPath().caseName("");
+
+    bool isMeshFile = objPath.find("polyMesh") != std::string::npos;
+
     // Fall back to the standarad readStream if the ADIOS data directory is not
     // present
-    if (!isDir(getEnv("FOAM_CASE")/"data.bp"))
+    fileName adiosDir = getEnv("FOAM_CASE")/"data.bp";
+    if (isMeshFile)
     {
-        Info<< "No ADIOS data found at " << getEnv("FOAM_CASE")/"data.bp" << nl
-            << "Continuing with the standard IO" << endl;
+        if (adiosRead::meshPresent())
+        {
+            adiosDir = adiosRead::meshPathname();
+        }
+        else
+        {
+            Info<< "No ADIOS mesh data found at " << adiosRead::meshPathname()
+                << nl
+                << "Continuing with the standard IO for file " << objPath
+                << endl;
+            return readStream(expectName);
+        }
+    }
+    else if (!adiosRead::dataPresent())
+    {
+        Info<< "No ADIOS data found at " << adiosDir << nl
+            << "Continuing with the standard IO for file " << objPath
+            << endl;
         return readStream(expectName);
     };
 
-    Info<< "Reading via ADIOS from " << getEnv("FOAM_CASE")/"data.bp" << endl;
-
-    // Get the file name relative to the root directory
-    fileName objPath = objectPath().caseName("");
+    Info<< "Reading " << objPath << " via ADIOS from " << adiosDir << endl;
 
     if (IFstream::debug)
     {

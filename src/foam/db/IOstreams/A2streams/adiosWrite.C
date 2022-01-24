@@ -33,7 +33,8 @@ std::unique_ptr<adios2::IO> Foam::adiosWrite::ioWritePtr_ = nullptr;
 
 std::unique_ptr<adios2::Engine> Foam::adiosWrite::enginePtr_ = nullptr;
 
-Foam::fileName Foam::adiosWrite::pathname_ = Foam::getEnv("FOAM_CASE")/"data.bp";
+Foam::fileName Foam::adiosWrite::pathname_ =
+    Foam::getEnv("FOAM_CASE")/"data.bp";
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
@@ -59,15 +60,18 @@ void Foam::adiosWrite::close()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::adiosWrite::adiosWrite(const fileName& pathname)
-:
-    variablePtr_(nullptr)
+void Foam::adiosWrite::setPathName(const fileName& pathname)
 {
     pathname_ = pathname;
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::adiosWrite::adiosWrite()
+:
+    variablePtr_(nullptr)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //

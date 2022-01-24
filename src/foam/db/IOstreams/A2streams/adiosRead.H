@@ -43,7 +43,21 @@ public adiosCore
 {
     static std::unique_ptr<adios2::IO> ioReadPtr_;
 
+    static std::unique_ptr<adios2::IO> ioReadMeshPtr_;
+
     static std::unique_ptr<adios2::Engine> enginePtr_;
+
+    static std::unique_ptr<adios2::Engine> engineMeshPtr_;
+
+    static const Foam::fileName meshPathname_;
+
+    static const Foam::fileName dataPathname_;
+
+    static bool filesChecked_;
+
+    static bool dataPresent_;
+
+    static bool meshPresent_;
 
     fileName pathname_;
 
@@ -59,11 +73,23 @@ public:
 
     // Access
 
+        static const fileName& meshPathname();
+
+        static void checkFiles();
+
+        static bool dataPresent();
+
+        static bool meshPresent();
+
         fileName pathname();
 
         std::unique_ptr<adios2::IO>& ioReadPtr();
 
+        std::unique_ptr<adios2::IO>& ioReadMeshPtr();
+
         std::unique_ptr<adios2::Engine>& enginePtr();
+
+        std::unique_ptr<adios2::Engine>& engineMeshPtr();
 
     void open();
 
@@ -79,7 +105,7 @@ public:
         const string name
     );
 
-    void readLocalString
+    bool readLocalString
     (
         std::string& buf,
         const Foam::string strName
