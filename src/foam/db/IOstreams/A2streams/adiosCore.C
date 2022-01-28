@@ -24,15 +24,64 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Pstream.H"
-
 #include "adiosCore.H"
 #include "fileName.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::adiosCore, 0);
 
 std::unique_ptr<adios2::ADIOS> Foam::adiosCore::adiosPtr_ = nullptr;
+
+const Foam::fileName Foam::adiosCore::meshPathname_ = "constant/polyMesh.bp";
+
+const Foam::fileName Foam::adiosCore::dataPathname_ = "data.bp";
+
+bool Foam::adiosCore::filesChecked_ = false;
+
+bool Foam::adiosCore::dataPresent_ = false;
+
+bool Foam::adiosCore::meshPresent_ = false;
+
+
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+const Foam::fileName& Foam::adiosCore::meshPathname()
+{
+    return meshPathname_;
+}
+
+
+const Foam::fileName& Foam::adiosCore::dataPathname()
+{
+    return dataPathname_;
+}
+
+
+void Foam::adiosCore::checkFiles()
+{
+    if (!filesChecked_)
+    {
+        dataPresent_ = isDir(dataPathname_);
+        meshPresent_ = isDir(meshPathname_);
+        filesChecked_ = true;
+    }
+}
+
+
+bool Foam::adiosCore::dataPresent()
+{
+    checkFiles();
+    return dataPresent_;
+}
+
+
+bool Foam::adiosCore::meshPresent()
+{
+    checkFiles();
+    return meshPresent_;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

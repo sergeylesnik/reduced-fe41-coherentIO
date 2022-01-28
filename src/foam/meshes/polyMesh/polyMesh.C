@@ -1427,7 +1427,7 @@ bool Foam::polyMesh::write() const
     if (time().writeFormat() == IOstream::PARALLEL)
     {
         // Write mesh to a separate file
-        adiosWrite::setPathName("constant/polyMesh.bp");
+        adiosWrite::setPathName(adiosCore::meshPathname());
     }
 
     return regIOobject::write();

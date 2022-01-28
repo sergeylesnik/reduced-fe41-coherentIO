@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "adiosRead.H"
-#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,57 +35,12 @@ std::unique_ptr<adios2::Engine> Foam::adiosRead::enginePtr_ = nullptr;
 
 std::unique_ptr<adios2::Engine> Foam::adiosRead::engineMeshPtr_ = nullptr;
 
-const Foam::fileName Foam::adiosRead::meshPathname_ =
-    getEnv("FOAM_CASE")/"constant/polyMesh.bp";
-
-const Foam::fileName Foam::adiosRead::dataPathname_ =
-    getEnv("FOAM_CASE")/"data.bp";
-
-bool Foam::adiosRead::filesChecked_ = false;
-
-bool Foam::adiosRead::dataPresent_ = false;
-
-bool Foam::adiosRead::meshPresent_ = false;
-
-
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
-const Foam::fileName& Foam::adiosRead::meshPathname()
-{
-    return meshPathname_;
-}
-
-
-void Foam::adiosRead::checkFiles()
-{
-    if (!filesChecked_)
-    {
-        dataPresent_ = isDir(dataPathname_);
-        meshPresent_ = isDir(meshPathname_);
-        filesChecked_ = true;
-    }
-}
-
-
-bool Foam::adiosRead::dataPresent()
-{
-    checkFiles();
-    return dataPresent_;
-}
-
-
-bool Foam::adiosRead::meshPresent()
-{
-    checkFiles();
-    return meshPresent_;
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::adiosRead::adiosRead(const fileName& pathname)
+Foam::adiosRead::adiosRead()
 :
-    pathname_(pathname),
+    pathname_(adiosCore::dataPathname()),
     variablePtr_(nullptr)
 {}
 
@@ -158,7 +112,11 @@ std::unique_ptr<adios2::Engine>& Foam::adiosRead::engineMeshPtr()
         (
             new adios2::Engine
             (
-                ioReadMeshPtr()->Open(meshPathname_, adios2::Mode::Read)
+                ioReadMeshPtr()->Open
+                (
+                    adiosCore::meshPathname(),
+                    adios2::Mode::Read
+                )
             )
         );
     }
@@ -219,15 +177,13 @@ void Foam::adiosRead::read
 
     if (var)
     {
-        enginePtr()->Get<parIOType>(var, buf);
-        enginePtr()->PerformGets();
+        enginePtr()->Get<parIOType>(var, buf, adios2::Mode::Sync);
     }
     else if (meshPresent())
     {
         engineMeshPtr();
         var = ioReadMeshPtr()->InquireVariable<parIOType>(blockId);
-        engineMeshPtr()->Get(var, buf);
-        engineMeshPtr()->PerformGets();
+        engineMeshPtr()->Get(var, buf, adios2::Mode::Sync);
     }
 
     // open();
@@ -249,29 +205,32 @@ bool Foam::adiosRead::readLocalString
     }
 
     // Use only the pointer infrastructure from this class by now for clarity
-    adios2::Variable<std::string> var;
+    adios2::Variable<char> var;
     if (dataPresent())
     {
         enginePtr();
-        var = ioReadPtr()->InquireVariable<std::string>(strName);
+        var = ioReadPtr()->InquireVariable<char>(strName);
     }
 
     bool found = false;
     if (var)
     {
-        enginePtr()->Get(var, buf);
-        enginePtr()->PerformGets();
+        // Resize the buffer according to the size of the variable.
+        // SetSelection() not needed since the variable is local to each proc.
+        buf.resize(var.SelectionSize());
+        enginePtr()->Get(var, &buf[0], adios2::Mode::Sync);
         found = true;
     }
     else if (meshPresent())
     {
         // Try to look up in the mesh file
         engineMeshPtr();
-        var = ioReadMeshPtr()->InquireVariable<std::string>(strName);
+        var = ioReadMeshPtr()->InquireVariable<char>(strName);
+
         if (var)
         {
-            engineMeshPtr()->Get(var, buf);
-            engineMeshPtr()->PerformGets();
+            buf.resize(var.SelectionSize());
+            engineMeshPtr()->Get<char>(var, &buf[0], adios2::Mode::Sync);
             found = true;
         }
     }

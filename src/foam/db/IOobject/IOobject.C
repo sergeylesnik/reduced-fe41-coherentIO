@@ -518,7 +518,7 @@ bool Foam::IOobject::headerOkPar()
 
     Istream* isPtr = objectStreamPar(objPath);
 
-    // If the stream has failed return
+    // If the stream has failed fall back to standard IO
     if (!isPtr)
     {
         if (objectRegistry::debug)

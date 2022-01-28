@@ -117,8 +117,7 @@ Foam::IFstreamAllocator::~IFstreamAllocator()
 
 void Foam::IFstreamAllocator::allocateAdios()
 {
-    fileName parpathname = getEnv("FOAM_CASE")/"data.bp";
-    adiosPtr_.reset(new adiosRead(parpathname));
+    adiosPtr_.reset(new adiosRead());
 }
 
 

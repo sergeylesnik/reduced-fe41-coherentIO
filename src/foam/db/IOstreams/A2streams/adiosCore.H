@@ -44,8 +44,18 @@ namespace Foam
 class adiosCore
 {
 
-        //- ADIOS instance
-        static std::unique_ptr<adios2::ADIOS> adiosPtr_;
+    //- ADIOS instance
+    static std::unique_ptr<adios2::ADIOS> adiosPtr_;
+
+    static const Foam::fileName meshPathname_;
+
+    static const Foam::fileName dataPathname_;
+
+    static bool filesChecked_;
+
+    static bool dataPresent_;
+
+    static bool meshPresent_;
 
 
 public:
@@ -63,6 +73,18 @@ public:
 
     //- Destructor
     ~adiosCore();
+
+    // Access
+
+        static const fileName& meshPathname();
+
+        static const fileName& dataPathname();
+
+        static void checkFiles();
+
+        static bool dataPresent();
+
+        static bool meshPresent();
 
     //- Disallow copy assignment
     adiosCore& operator=(const adiosCore&) = delete;

@@ -135,9 +135,9 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
             << "suggests that a read constructor for field " << this->name()
             << " would be more appropriate." << endl;
     }
-    else if (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
+    else if (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOkPar())
     {
-        boundaryField_.transfer(readField(this->readStream(typeName))());
+        boundaryField_.transfer(readField(this->readStreamPar(typeName))());
         this->close();
 
         // Check compatibility between field and mesh
@@ -157,35 +157,6 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
         readOldTimeIfPresent();
 
         return true;
-    }
-    else if
-    (
-        this->readOpt() == IOobject::READ_IF_PRESENT
-     && isDir(getEnv("FOAM_CASE")/"data.bp")
-    )
-    {
-        boundaryField_.transfer(readField(this->readStreamPar(typeName))());
-        this->close();
-
-        // Check compatibility between field and mesh
-        if (this->size() != GeoMesh::size(this->mesh()))
-        {
-            FatalIOErrorIn
-            (
-                "GeometricField<Type, PatchField, GeoMesh>::"
-                "readIfPresent()",
-                this->readStream(typeName)
-            )   << "   number of field elements = " << this->size()
-                << " number of mesh elements = "
-                << GeoMesh::size(this->mesh())
-                << exit(FatalIOError);
-        }
-
-        // Not supported yet
-        // readOldTimeIfPresent();
-
-        return true;
-
     }
 
     return false;

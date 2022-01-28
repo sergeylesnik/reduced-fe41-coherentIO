@@ -49,16 +49,6 @@ public adiosCore
 
     static std::unique_ptr<adios2::Engine> engineMeshPtr_;
 
-    static const Foam::fileName meshPathname_;
-
-    static const Foam::fileName dataPathname_;
-
-    static bool filesChecked_;
-
-    static bool dataPresent_;
-
-    static bool meshPresent_;
-
     fileName pathname_;
 
     std::unique_ptr<adios2::Variable<double> > variablePtr_;
@@ -66,20 +56,12 @@ public adiosCore
 public:
 
     //- Constructor
-    adiosRead(const fileName& pathname);
+    adiosRead();
 
     //- Destructor
     ~adiosRead();
 
     // Access
-
-        static const fileName& meshPathname();
-
-        static void checkFiles();
-
-        static bool dataPresent();
-
-        static bool meshPresent();
 
         fileName pathname();
 

@@ -33,8 +33,7 @@ std::unique_ptr<adios2::IO> Foam::adiosWrite::ioWritePtr_ = nullptr;
 
 std::unique_ptr<adios2::Engine> Foam::adiosWrite::enginePtr_ = nullptr;
 
-Foam::fileName Foam::adiosWrite::pathname_ =
-    Foam::getEnv("FOAM_CASE")/"data.bp";
+Foam::fileName Foam::adiosWrite::pathname_ = Foam::adiosCore::dataPathname();
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
@@ -97,9 +96,6 @@ std::unique_ptr<adios2::IO>& Foam::adiosWrite::ioWritePtr()
             new adios2::IO(adiosPtr()->DeclareIO("write"))
         );
         ioWritePtr_->SetEngine("BP4");
-        // Parameters to consider for increasing the IO performance
-        // ioWritePtr_->SetParameter("MaxBufferSize", "100Kb");
-        // ioWritePtr_->SetParameter("FlushStepsCount", "100");
     }
 
     return ioWritePtr_;
@@ -236,17 +232,22 @@ void Foam::adiosWrite::writeLocalString
     const label size
 )
 {
-    adios2::Variable<std::string> var =
-        ioWritePtr()->DefineVariable<std::string>
+    adios2::Variable<char> var =
+        ioWritePtr()->DefineVariable<char>
         (
             varName,
-            {adios2::LocalValueDim}
+            {},
+            {},
+            {static_cast<size_t>(str.size())},
+            adios2::ConstantDims
         );
 
-    // Step variant works in Mode::Append. Close() is called in parRunControl
-    // before MPI_Finalize.
     // enginePtr()->BeginStep();
-    enginePtr()->Put(var, str);
+
+    // Char arrays need to be put in Sync mode since (e.g. header or string
+    // stream) data is not guaranteed to be available at EndStep()
+    enginePtr()->Put(var, str.data(), adios2::Mode::Sync);
+
     // enginePtr()->EndStep();
     // close();
 }

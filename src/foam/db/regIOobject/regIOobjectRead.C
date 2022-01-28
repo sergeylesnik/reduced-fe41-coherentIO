@@ -156,7 +156,7 @@ Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
 
     // Fall back to the standarad readStream if the ADIOS data directory is not
     // present
-    fileName adiosDir = getEnv("FOAM_CASE")/"data.bp";
+    fileName adiosDir = adiosRead::dataPathname();
     if (isMeshFile)
     {
         if (adiosRead::meshPresent())
