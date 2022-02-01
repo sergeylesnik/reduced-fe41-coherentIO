@@ -10,6 +10,7 @@
 *.orig[0-9][0-9]
 \#*\#
 .cache
+*.swp
 
 # file-browser settings - anywhere
 .directory
@@ -140,5 +141,8 @@ timestamp
 
 # new target folders - just for the moment
 lib
+
+# libarchive thirdParty for tar modules
+applications/tarmodules/startTarCase/thirdParty/libarchive/
 
 # end-of-file

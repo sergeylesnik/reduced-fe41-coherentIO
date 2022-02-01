@@ -32,6 +32,8 @@ Description
 #include "OFstream.H"
 #include "adiosWrite.H"
 
+#include "profiling.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 bool Foam::regIOobject::writeObject

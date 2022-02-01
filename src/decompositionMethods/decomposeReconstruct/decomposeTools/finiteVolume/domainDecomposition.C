@@ -577,6 +577,22 @@ bool Foam::domainDecomposition::writeDecomposition()
         labelField(mesh_.nPoints(), 0)
     );
 
+    Foam::Time runTime(
+        Foam::Time::controlDictName,
+        mesh_.time().rootPath(),
+        mesh_.time().caseName()
+        );
+    const dictionary& controlDict(runTime.controlDict());
+    bool ramDiskUsage_ = false;
+    if (controlDict.isDict("functions"))
+    {
+        const dictionary& functionSubDict(controlDict.subDict("functions"));
+        if (functionSubDict.isDict("tarSystemCall"))
+        {
+            const dictionary& tarSystemCallDict(functionSubDict.subDict("tarSystemCall"));
+            ramDiskUsage_ = tarSystemCallDict.lookupOrDefault("ramDiskUsage", false);
+        }
+    }
 
     // Write out the meshes
     for (label procI = 0; procI < nProcs_; procI++)
@@ -749,6 +765,16 @@ bool Foam::domainDecomposition::writeDecomposition()
             labelField(globalPointLevel, pointMap)
         );
         procPointLevel.write();
+
+        if (ramDiskUsage_)
+        {
+            std::ostringstream exeStream;
+            exeStream << "tar -uf processor" << procI << ".tar "
+                      << "processor" << procI << " && rm -r processor" << procI;
+            std::string executeString = exeStream.str();
+            Info<< executeString << endl;
+            Foam::system(executeString);
+        }
     }
 
     Info<< nl

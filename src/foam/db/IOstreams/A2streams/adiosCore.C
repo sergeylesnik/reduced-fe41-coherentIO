@@ -122,7 +122,7 @@ std::unique_ptr<adios2::ADIOS>& Foam::adiosCore::adiosPtr()
             {
                 Pout<< "Calling adios2::ADIOS(MPI_COMM_WORLD)" << endl;
             }
-            adiosPtr_.reset(new adios2::ADIOS(MPI_COMM_WORLD));
+            adiosPtr_.reset(new adios2::ADIOS("system/config.xml", MPI_COMM_WORLD));
         }
         else
         {
@@ -130,7 +130,7 @@ std::unique_ptr<adios2::ADIOS>& Foam::adiosCore::adiosPtr()
             {
                 Pout<< "Calling adios2::ADIOS()" << endl;
             }
-            adiosPtr_.reset(new adios2::ADIOS());
+            adiosPtr_.reset(new adios2::ADIOS("system/config.xml"));
         }
     }
 

@@ -223,7 +223,7 @@ Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
          && headerClassName() != IOdictionary::typeName
         )
         {
-            FatalIOErrorIn("regIOobject::readStream(const word&)", *isPtr_)
+            FatalIOErrorIn("regIOobject::readStreamPar(const word&)", *isPtr_)
                 << "unexpected class name " << headerClassName()
                 << " expected " << expectName << endl
                 << "    while reading object " << name()

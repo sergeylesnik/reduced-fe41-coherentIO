@@ -1300,6 +1300,7 @@ bool Foam::argList::checkRootCase() const
         return false;
     }
 
+    /* Disabled this check to allow restarts from TARs
     if (!isDir(path()) && Pstream::master())
     {
         // Allow slaves on non-existing processor directories, created later
@@ -1310,6 +1311,7 @@ bool Foam::argList::checkRootCase() const
 
         return false;
     }
+    */
 
     return true;
 }

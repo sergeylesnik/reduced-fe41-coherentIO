@@ -11,6 +11,12 @@ fi
 
 set -x
 
+cd ${FOAM_APP}/tarmodules/tarSystemCall
+./mymake
+cd ${FOAM_APP}/tarmodules/startTarCase
+./mymake
+
+cd ${FOAM_APP}/
 wmake all solvers
 wmake all utilities
 

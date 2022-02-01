@@ -110,7 +110,7 @@ std::unique_ptr<adios2::Engine>& Foam::adiosWrite::enginePtr()
         (
             new adios2::Engine
             (
-                ioWritePtr()->Open(pathname_, adios2::Mode::Write)
+                ioWritePtr()->Open(pathname_, adios2::Mode::Append)
             )
         );
     }
