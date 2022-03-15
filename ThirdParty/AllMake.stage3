@@ -249,6 +249,19 @@ else
     echo ""
 fi
 
+# PETSC
+if [ -z "$PETSC_SYSTEM" ]
+then
+    # petsc
+    #
+    [ ! -z "$WM_THIRD_PARTY_USE_PETSC" ] && {
+	echo "Building petsc 3.16.5"
+	( rpm_make -p petsc-release -s petsc-release.spec -u https://github.com/petsc/petsc/archive/release.tar.gz )
+    }
+else
+    echo "Using system installed petsc"
+    echo ""
+fi
 
 echo ========================================
 echo Done ThirdParty AllMake: Stage3

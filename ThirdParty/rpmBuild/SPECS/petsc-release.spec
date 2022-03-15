@@ -22,13 +22,13 @@
 #     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     RPM spec file for ADIOS2-2.7.1
+#     RPM spec file for petsc-release
 #
 # Description
 #     RPM spec file for creating a relocatable RPM
 #
 # Authors:
-#     Gregor Weiss, HLRS (2021)
+#     Gregor Weiss, HLRS, (2022)
 #
 #------------------------------------------------------------------------------
 
@@ -60,20 +60,20 @@
 #
 %define _prefix         %{_WM_THIRD_PARTY_DIR}
 
-%define name		ADIOS2
+%define name		petsc
 %define release		%{_WM_OPTIONS}
-%define version 	2.7.1
+%define version 	release
 
-%define buildroot       %{_topdir}/BUILD/%{name}-%{version}-root
+%define buildroot       %{_topdir}/BUILD/%{name}-%{version}
 
 BuildRoot:	        %{buildroot}
-Summary: 		ADIOS2
+Summary: 		petsc
 License: 		Unkown
 Name: 			%{name}
 Version: 		%{version}
 Release: 		%{release}
-URL:                    https://github.com/ornladios/ADIOS2/archive/
-Source: 		%url/v%{version}.tar.gz
+URL:                    https://github.com/petsc/petsc/archive/
+Source: 		%url/release.tar.gz
 Prefix: 		%{_prefix}
 Group: 			Development/Tools
 
@@ -87,18 +87,6 @@ Group: 			Development/Tools
 %setup -q 
 
 %build
-#
-# set CMake cache variables
-#
-    addCMakeVariable()
-    {
-        while [ -n "$1" ]
-        do
-            CMAKE_VARIABLES="$CMAKE_VARIABLES -D$1"
-            shift
-        done
-   }
-
     # export WM settings in a form that GNU configure recognizes
     [ -n "$WM_CC" ]         &&  export CC="$WM_CC"
     [ -n "$WM_CXX" ]        &&  export CXX="$WM_CXX"
@@ -106,28 +94,14 @@ Group: 			Development/Tools
     [ -n "$WM_CXXFLAGS" ]   &&  export CXXFLAGS="$WM_CXXFLAGS"
     [ -n "$WM_LDFLAGS" ]    &&  export LDFLAGS="$WM_LDFLAGS"
 
-    # start with these general settings
-    addCMakeVariable  BUILD_SHARED_LIBS:BOOL=ON
-    addCMakeVariable  CMAKE_BUILD_TYPE:STRING=Release
+    ./configure     \
+        --prefix=%{_installPrefix} --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90 --with-mpi=1 CFLAGS="-O3 -Wall" CC_LINKER_FLAGS="-O3 -Wall" CXXFLAGS="-O3 -Wall" CXX_LINKER_FLAGS="-O3 -Wall" LDFLAGS=-O3 FFLAGS="-O3 -Wall" FC_LINKER_FLAGS="-O3 -Wall" --with-debugging=0 --download-openblas --download-scalapack
 
-    echo "CMAKE_VARIABLES: $CMAKE_VARIABLES"
-
-    mkdir -p ./buildObj
-    cd ./buildObj
-
-    cmake \
-        -DCMAKE_INSTALL_PREFIX:PATH=%{_installPrefix} \
-        $CMAKE_VARIABLES \
-	..
-
-    [ -z "$WM_NCOMPPROCS" ] && WM_NCOMPPROCS=1
-    make -j $WM_NCOMPPROCS
+    #[ -z "$WM_NCOMPPROCS" ] && WM_NCOMPPROCS=1
+    make PETS_DIR=%{buildroot} PETSC_ARCH=arch-linux-c-opt all
 
 %install
-
-    cd buildObj
-    make install DESTDIR=$RPM_BUILD_ROOT
-
+    make PETS_DIR=%{buildroot} PETSC_ARCH=arch-linux-c-opt install
 
     # Creation of foam-extend specific .csh and .sh files"
 
@@ -142,21 +116,16 @@ cat << DOT_SH_EOF > $RPM_BUILD_ROOT/%{_installPrefix}/etc/%{name}-%{version}.sh
 # Load %{name}-%{version} binaries if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-export ADIOS2_DIR=\$WM_THIRD_PARTY_DIR/packages/%{name}-%{version}/platforms/\$WM_OPTIONS
-export ADIOS2_BIN_DIR=\$ADIOS2_DIR/bin
-export ADIOS2_LIB_DIR=\$ADIOS2_DIR/lib
-export ADIOS2_INCLUDE_DIR=\$ADIOS2_DIR/include
-export ADIOS2_INCLUDE_CXX11_DIR=\$ADIOS2_DIR/include/adios2/cxx11/
-export ADIOS2_INCLUDE_COMMON_DIR=\$ADIOS2_DIR/include/adios2/common/
+export PETSC_DIR=\$WM_THIRD_PARTY_DIR/packages/%{name}-%{version}/platforms/\$WM_OPTIONS
+export PETSC_BIN_DIR=\$PETSC_DIR/bin
+export PETSC_LIB_DIR=\$PETSC_DIR/lib
+export PETSC_INCLUDE_DIR=\$PETSC_DIR/include
 
-export ADIOS2_VERSION=%{version}
+export PETSC_VERSION=%{version}
 
 # Enable access to the package applications if present
-[ -d \$ADIOS2_BIN_DIR ] && _foamAddPath \$ADIOS2_BIN_DIR
-[ -d \$ADIOS2_LIB_DIR ] && _foamAddLib \$ADIOS2_LIB_DIR
-
-export ADIOS2_LIBS=\$(adios2-config --cxx-libs)
-export ADIOS2_FLAGS=\$(adios2-config --cxx-flags)
+[ -d \$PETSC_BIN_DIR ] && _foamAddPath \$PETSC_BIN_DIR
+[ -d \$PETSC_LIB_DIR ] && _foamAddLib \$PETSC_LIB_DIR
 
 DOT_SH_EOF
 
@@ -166,25 +135,20 @@ DOT_SH_EOF
 cat << DOT_CSH_EOF > $RPM_BUILD_ROOT/%{_installPrefix}/etc/%{name}-%{version}.csh
 # Load %{name}-%{version} binaries if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-setenv ADIOS2_DIR \$WM_THIRD_PARTY_DIR/packages/%{name}-%{version}/platforms/\$WM_OPTIONS
-setenv ADIOS2_BIN_DIR \$ADIOS2_DIR/bin
-setenv ADIOS2_LIB_DIR \$ADIOS2_DIR/lib
-setenv ADIOS2_INCLUDE_DIR \$ADIOS2_DIR/include
-setenv ADIOS2_INCLUDE_CXX11_DIR \$ADIOS2_DIR/include/adios2/cxx11/
-setenv ADIOS2_INCLUDE_COMMON_DIR \$ADIOS2_DIR/include/adios2/common/
+setenv PETSC_DIR \$WM_THIRD_PARTY_DIR/packages/%{name}-%{version}/platforms/\$WM_OPTIONS
+setenv PETSC_BIN_DIR \$PETSC_DIR/bin
+setenv PETSC_LIB_DIR \$PETSC_DIR/lib
+setenv PETSC_INCLUDE_DIR \$PETSC_DIR/include
 
-setenv ADIOS2_VERSION %{version}
+setenv PETSC_VERSION %{version}
 
-if ( -e \$ADIOS2_BIN_DIR ) then
-    _foamAddPath \$ADIOS2_BIN_DIR
+if ( -e \$PETSC_BIN_DIR ) then
+    _foamAddPath \$PETSC_BIN_DIR
 endif
 
-if ( -e \$ADIOS2_LIB_DIR ) then
-    _foamAddLib \$ADIOS2_LIB_DIR
+if ( -e \$PETSC_LIB_DIR ) then
+    _foamAddLib \$PETSC_LIB_DIR
 endif
-
-setenv ADIOS2_LIBS $(adios2-config --cxx-libs)
-setenv ADIOS2_FLAGS $(adios2-config --cxx-flags)
 
 DOT_CSH_EOF
 

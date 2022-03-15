@@ -84,6 +84,10 @@ uninstallPackage hwloc-1.7.2 $1
 uninstallPackage ADIOS2-2.7.1 $1
 rm -f $WM_THIRD_PARTY_DIR/rpmBuild/SOURCES/v2.7.1.tar.gz # manual because of skewed naming from download
 
+# petsc
+uninstallPackage petsc-release $1
+rm -f $WM_THIRD_PARTY_DIR/rpmBuild/SOURCES/release.tar.gz # manual because of skewed naming from download
+
 echo
 echo ========================================
 echo Done ThirdParty AllClean: Stage3

@@ -139,6 +139,8 @@ bool Foam::regIOobject::writeObject
 
 bool Foam::regIOobject::write() const
 {
+    addProfile2(io, "Foam::regIOobject::write()");
+
     if (time().writeFormat() == IOstream::PARALLEL)
     {
         adiosWrite::beginStep();
