@@ -23,25 +23,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "parRun.H"
-#include "adiosCore.H"
+#ifndef adiosWritePrimitives_H
+#define adiosWritePrimitives_H
 
+#include "foamString.H"
+#include "label.H"
+#include "uLabel.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::ParRunControl::~ParRunControl()
+namespace Foam
 {
-    if (RunPar)
-    {
-        Info<< "Finalising parallel run" << endl;
-        adiosCore::close();
-        Pstream::exit(0);
-    }
+
+template<typename T>
+void adiosWritePrimitives( const string name,
+                           const label count,
+                           const T* buf );
+
+void adiosWritePrimitives( const string name,
+                           const label count,
+                           const scalar* buf );
+
+void adiosWritePrimitives( const string name,
+                           const label count,
+                           const label* buf );
+
+void adiosWritePrimitives( const string name,
+                           const label count,
+                           const char* buf );
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<typename T>
+void Foam::adiosWritePrimitives( const Foam::string name,
+                                 const Foam::label count,
+                                 const T* buf ) {
+    std::cout << "adiosWritePrimitives not implemented for this type.\n";
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#endif
 
-// End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

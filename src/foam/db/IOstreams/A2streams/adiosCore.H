@@ -27,11 +27,14 @@ License
 #define adiosCore_H
 
 #include "adios2.h"
+#include "Engine.h"
 
 #include "word.H"
 #include "labelList.H"
 #include <memory>
 #include <map>
+
+#include "adiosVariableData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,6 +49,14 @@ class adiosCore
 
     //- ADIOS instance
     static std::unique_ptr<adios2::ADIOS> adiosPtr_;
+
+    static std::unique_ptr<adios2::IO> ioWritePtr_;
+
+    static std::unique_ptr<adios2::Engine> enginePtr_;
+
+    static std::unique_ptr< adiosVariableData > variableDataPtr_;
+
+    static Foam::fileName pathname_;
 
     static const Foam::fileName meshPathname_;
 
@@ -65,16 +76,26 @@ public:
 
 
     //- Constructors
-
-        adiosCore();
+    adiosCore() = default;
 
     //- Disallow copy constructor
     adiosCore(const adiosCore&) = delete;
 
     //- Destructor
-    ~adiosCore();
+    ~adiosCore() = default;
 
     // Access
+
+        //- Set path to the file
+        static void setPathName( const fileName& pathname ) {
+            pathname_ = pathname;
+        }
+
+        static void beginStep();
+
+        static void endStep();
+
+        static void close();
 
         static const fileName& meshPathname();
 
@@ -93,6 +114,26 @@ public:
 
         //- ADIOS instance
         static std::unique_ptr<adios2::ADIOS>& adiosPtr();
+
+        static std::unique_ptr<adios2::IO>& ioWritePtr();
+
+        static std::unique_ptr<adios2::Engine>& enginePtr();
+
+    template< typename T >
+    static void makeVariable( const string name,
+                              const label shape,
+                              const label start,
+                              const label count );
+
+    template< typename T >
+    static void makeVariableWithSpan( const string name,
+                                      const label shape,
+                                      const label start,
+                                      const label count );
+
+    template< typename T >
+    static void write( const Foam::string blockId,
+                       const T* buf );
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -100,6 +141,47 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+template< typename T >
+void Foam::adiosCore::makeVariable
+(
+    const Foam::string name,
+    const Foam::label shape,
+    const Foam::label start,
+    const Foam::label count
+)
+{
+    variableDataPtr_ = adiosVariableData::makeVariable<T>
+                           (
+                               ioWritePtr().get(),
+                               name,
+                               count
+                           );
+}
+
+
+template< typename T >
+void Foam::adiosCore::makeVariableWithSpan( const Foam::string name,
+                                            const Foam::label shape,
+                                            const Foam::label start,
+                                            const Foam::label count ) {
+    variableDataPtr_ = adiosVariableData::makeVariableWithSpan<T>
+                           (
+                               ioWritePtr().get(),
+                               enginePtr().get(),
+                               name,
+                               count
+                           );
+
+    variableDataPtr_->createSpan( adiosCore::enginePtr().get() );
+}
+
+template< typename T >
+void Foam::adiosCore::write( const Foam::string blockId, const T* buf ) {
+    enginePtr()->Put( static_cast<const adiosVariable<T>*>( variableDataPtr_.get() )->variable_, buf, adios2::Mode::Sync );
+}
+
 
 #endif
 

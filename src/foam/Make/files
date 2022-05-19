@@ -165,7 +165,9 @@ $(Pstreams)/OPwrite.C
 
 A2streams = $(Streams)/A2streams
 $(A2streams)/adiosCore.C
+$(A2streams)/adiosVariableData.C
 $(A2streams)/adiosWrite.C
+$(A2streams)/adiosWritePrimitives.C
 $(A2streams)/adiosRead.C
 
 dictionary = db/dictionary
@@ -477,6 +479,10 @@ $(faceZone)/newFaceZone.C
 pointZone = $(polyMesh)/zones/pointZone
 $(pointZone)/pointZone.C
 $(pointZone)/newPointZone.C
+
+sliceMesh = $(polyMesh)/sliceMesh
+$(sliceMesh)/sliceMesh.C
+$(sliceMesh)/sliceMeshHelper.C
 
 $(polyMesh)/polyMesh.C
 $(polyMesh)/polyMeshFromShapeMesh.C

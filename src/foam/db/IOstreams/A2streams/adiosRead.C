@@ -35,12 +35,14 @@ std::unique_ptr<adios2::Engine> Foam::adiosRead::enginePtr_ = nullptr;
 
 std::unique_ptr<adios2::Engine> Foam::adiosRead::engineMeshPtr_ = nullptr;
 
+Foam::fileName Foam::adiosRead::pathname_ = Foam::adiosCore::dataPathname();
+
+std::unique_ptr< Foam::adiosVariableData > Foam::adiosRead::variableDataPtr_ = nullptr;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::adiosRead::adiosRead()
 :
-    pathname_(adiosCore::dataPathname()),
     variablePtr_(nullptr)
 {}
 
@@ -65,7 +67,7 @@ std::unique_ptr<adios2::IO>& Foam::adiosRead::ioReadPtr()
     {
         ioReadPtr_.reset
         (
-            new adios2::IO(adiosPtr()->DeclareIO("read"))
+            new adios2::IO(adiosCore_.adiosPtr()->DeclareIO("read"))
         );
     }
 
@@ -79,7 +81,7 @@ std::unique_ptr<adios2::IO>& Foam::adiosRead::ioReadMeshPtr()
     {
         ioReadMeshPtr_.reset
         (
-            new adios2::IO(adiosPtr()->DeclareIO("readMesh"))
+            new adios2::IO(adiosCore_.adiosPtr()->DeclareIO("readMesh"))
         );
     }
 

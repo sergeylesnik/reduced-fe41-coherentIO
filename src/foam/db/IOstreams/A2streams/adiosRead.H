@@ -28,19 +28,26 @@ License
 
 #include "IOstream.H"
 #include "adiosCore.H"
+#include "adiosVariableData.H"
+#include "adios2.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+template<typename Container>
+void readAdiosToContainer( const Foam::string blockId,
+                           Container& container );
+
+
 /*---------------------------------------------------------------------------*\
                        Class adiosRead Declaration
 \*---------------------------------------------------------------------------*/
 class adiosRead
-:
-public adiosCore
 {
+    static adiosCore adiosCore_;
+
     static std::unique_ptr<adios2::IO> ioReadPtr_;
 
     static std::unique_ptr<adios2::IO> ioReadMeshPtr_;
@@ -49,9 +56,11 @@ public adiosCore
 
     static std::unique_ptr<adios2::Engine> engineMeshPtr_;
 
-    fileName pathname_;
+    static fileName pathname_;
 
     std::unique_ptr<adios2::Variable<double> > variablePtr_;
+
+    static std::unique_ptr< adiosVariableData > variableDataPtr_;
 
 public:
 
@@ -65,13 +74,37 @@ public:
 
         fileName pathname();
 
-        std::unique_ptr<adios2::IO>& ioReadPtr();
+        static std::unique_ptr<adios2::IO>& ioReadPtr();
 
-        std::unique_ptr<adios2::IO>& ioReadMeshPtr();
+        static std::unique_ptr<adios2::IO>& ioReadMeshPtr();
 
-        std::unique_ptr<adios2::Engine>& enginePtr();
+        static std::unique_ptr<adios2::Engine>& enginePtr();
 
-        std::unique_ptr<adios2::Engine>& engineMeshPtr();
+        static std::unique_ptr<adios2::Engine>& engineMeshPtr();
+
+        static const fileName& meshPathname() {
+            return adiosCore_.meshPathname();
+        }
+
+        static const fileName& dataPathname() {
+            return adiosCore_.dataPathname();
+        }
+
+        static void checkFiles() {
+            adiosCore_.checkFiles();
+        }
+
+        static bool dataPresent() {
+            return adiosCore_.dataPresent();
+        }
+
+        static bool meshPresent() {
+            return adiosCore_.meshPresent();
+        }
+
+        static std::unique_ptr<adios2::ADIOS>& adiosPtr_() {
+            return adiosCore_.adiosPtr();
+        }
 
     void open();
 
@@ -80,6 +113,13 @@ public:
     void get(double* buf);
 
     void performGets();
+
+    template< typename T >
+    static label getVariable( const string name );
+
+    template< typename T >
+    static void read( const string name,
+                      T* buf );
 
     void read
     (
@@ -97,6 +137,49 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+template< typename T >
+Foam::label Foam::adiosRead::getVariable( const Foam::string name )
+{
+    variableDataPtr_ = adiosVariableData::getVariable<T>
+                           (
+                               ioReadMeshPtr().get(),
+                               name
+                           );
+
+    auto var = static_cast<const adiosVariable<T>*>( variableDataPtr_.get() )->variable_;
+    Foam::label count{};
+    if ( static_cast<const adiosVariable<T>*>( variableDataPtr_.get() )->variable_ )
+    {
+        auto blocksInfo = engineMeshPtr()->BlocksInfo( static_cast<const adiosVariable<T>*>( variableDataPtr_.get() )->variable_, 0 );
+        count = blocksInfo[0].Count[0];
+    }
+
+    return count;
+}
+
+template<typename T>
+void Foam::adiosRead::read
+(
+    const Foam::string blockId,
+    T* buf
+)
+{
+    engineMeshPtr()->Get( static_cast<const adiosVariable<T>*>( variableDataPtr_.get() )->variable_, buf, adios2::Mode::Sync );
+}
+
+template<typename Container>
+void Foam::readAdiosToContainer
+(
+    const Foam::string blockId,
+    Container& container
+)
+{
+    typedef typename Container::value_type ElementType;
+    Foam::label count = Foam::adiosRead::getVariable<ElementType>( blockId );
+    container.resize( count );
+    Foam::adiosRead::read( blockId, container.data() );
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -34,6 +34,14 @@ defineTypeNameAndDebug(Foam::adiosCore, 0);
 
 std::unique_ptr<adios2::ADIOS> Foam::adiosCore::adiosPtr_ = nullptr;
 
+std::unique_ptr<adios2::IO> Foam::adiosCore::ioWritePtr_ = nullptr;
+
+std::unique_ptr<adios2::Engine> Foam::adiosCore::enginePtr_ = nullptr;
+
+std::unique_ptr< Foam::adiosVariableData > Foam::adiosCore::variableDataPtr_ = nullptr;
+
+Foam::fileName Foam::adiosCore::pathname_ = "data.bp";
+
 const Foam::fileName Foam::adiosCore::meshPathname_ = "constant/polyMesh.bp";
 
 const Foam::fileName Foam::adiosCore::dataPathname_ = "data.bp";
@@ -46,6 +54,24 @@ bool Foam::adiosCore::meshPresent_ = false;
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+void Foam::adiosCore::beginStep() {
+    enginePtr()->BeginStep();
+}
+
+
+void Foam::adiosCore::endStep() {
+    enginePtr()->EndStep();
+}
+
+
+void Foam::adiosCore::close() {
+    if (enginePtr_) {
+        enginePtr_->Close();
+        enginePtr_.reset(nullptr);
+    }
+}
+
 
 const Foam::fileName& Foam::adiosCore::meshPathname()
 {
@@ -86,24 +112,8 @@ bool Foam::adiosCore::meshPresent()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::adiosCore::adiosCore()
-{
-    if (debug)
-    {
-        Pout<< "adiosCore::adiosCore()" << endl;
-    }
-}
-
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::adiosCore::~adiosCore()
-{
-    if (debug)
-    {
-        Pout<< "adiosCore::~adiosCore()" << endl;
-    }
-}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -135,6 +145,22 @@ std::unique_ptr<adios2::ADIOS>& Foam::adiosCore::adiosPtr()
     }
 
     return adiosPtr_;
+}
+
+std::unique_ptr<adios2::IO>& Foam::adiosCore::ioWritePtr() {
+    if(!ioWritePtr_) {
+        ioWritePtr_.reset( new adios2::IO( adiosPtr()->DeclareIO("writeCore") ) );
+        ioWritePtr_->SetEngine("BP4");
+    }
+    return ioWritePtr_;
+}
+
+
+std::unique_ptr<adios2::Engine>& Foam::adiosCore::enginePtr() {
+    if(!enginePtr_) {
+        enginePtr_.reset( new adios2::Engine( ioWritePtr()->Open( pathname_, adios2::Mode::Append ) ) );
+    }
+    return enginePtr_;
 }
 
 // ************************************************************************* //

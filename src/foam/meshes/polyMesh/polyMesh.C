@@ -35,6 +35,11 @@ License
 #include "MeshObject.H"
 #include "pointMesh.H"
 #include "adiosWrite.H"
+#include "adiosRead.H"
+#include "SortableList.H"
+
+#include <numeric>
+#include "sliceMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -201,6 +206,7 @@ void Foam::polyMesh::calcDirections() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+
 Foam::polyMesh::polyMesh(const IOobject& io)
 :
     objectRegistry(io),
@@ -337,8 +343,89 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
+    if (time().writeFormat() == IOstream::PARALLEL)
+    {
+        this->checkOut( allPoints_ );
+        this->checkOut( allFaces_ );
+        this->checkOut( owner_ );
+        this->checkOut( neighbour_ );
+
+        // Clear addressing. Keep geometric props for mapping.
+        clearAddressing();
+
+        // Clear everything
+        clearOut();
+
+        // Reading neighbours and patches
+        std::vector<label> patchesAndNeighbours;
+        readAdiosToContainer( "neighbours", patchesAndNeighbours );
+
+        // Retrieve neighbour_ and boundary_ from sliceable mesh addressing
+        sliceMesh sliceableMesh{ patchesAndNeighbours };
+        sliceableMesh.copyPolyNeighbours( neighbour_ );
+        sliceableMesh.resetPolyPatches( boundary_ );
+
+        // Reading faceStarts and faces
+        Foam::label faceStartsCount = adiosRead::getVariable<Foam::label>("faceStarts");
+        std::vector<label> faceStarts( faceStartsCount );
+        adiosRead::read( "faceStarts", faceStarts.data() );
+        label facesCount = adiosRead::getVariable<label>("faces");
+        std::vector<label> linearizedFaces( facesCount );
+        adiosRead::read( "faces", linearizedFaces.data() );
+
+        // De-serialize and reorder faces and copy to polyMesh.allFaces_
+        std::vector<std::vector<label> > faces( faceStarts.size() - 1 );
+        for( size_t i = 0; i < faceStarts.size()-1; ++i) {
+           faces[i].resize( faceStarts[i+1] - faceStarts[i] );
+           std::copy( linearizedFaces.begin() + faceStarts[i],
+                      linearizedFaces.begin() + faceStarts[i+1],
+                      faces[i].begin() );
+        }
+        sliceableMesh.mapToPoly( faces );
+        allFaces_.resize( faces.size() );
+        for ( size_t i = 0; i < faces.size(); ++i ) {
+            allFaces_[i].resize( faces[i].size() );
+            std::copy_n( faces[i].begin(), faces[i].size(), allFaces_[i].begin() );
+        }
+        faces_.reset( allFaces_, allFaces_.size() );
+
+        // Reading and de-serializing points
+        label pointsCount = adiosRead::getVariable<Foam::scalar>("points");
+        std::vector<scalar> points( pointsCount );
+        adiosRead::read( "points", points.data() );
+        allPoints_.resize( pointsCount / 3 );
+        for ( label i = 0; i < pointsCount; i+=3 )
+        {
+            for ( label j = 0; j < 3; ++j )
+            { allPoints_[i/3][j] = points[i + j]; }
+        }
+        points_.reset( allPoints_, allPoints_.size() );
+
+        // Reading owner
+        label ownerStartsCount = adiosRead::getVariable<Foam::label>("ownerStarts");
+        std::vector<label> ownerStarts( ownerStartsCount );
+        adiosRead::read( "ownerStarts", ownerStarts.data() );
+
+        // Serialize and reorder owner_
+        label ownerCellID = 0;
+        owner_.resize( *(ownerStarts.end()-1) );
+        for( size_t i = 0; i < ownerStarts.size()-1; ++i)
+        {
+           std::fill(owner_.begin() + ownerStarts[i],
+                     owner_.begin() + ownerStarts[i+1],
+                     ownerCellID);
+           ++ownerCellID;
+        }
+        sliceableMesh.mapToPoly( owner_ );
+
+        bounds_ = boundBox(allPoints_);
+
+        // Prepare sliceMesh in adiosWrite
+        Foam::adiosWrite::setSliceMesh( owner_, allFaces_, allPoints_.size() );
+    }
+
     // if (exists(owner_.objectPath()))
-    if (owner_.headerOkPar())
+    if (owner_.headerOkPar() || (time().writeFormat() == IOstream::PARALLEL))
     {
         initMesh();
     }
@@ -524,6 +611,14 @@ Foam::polyMesh::polyMesh
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
+    if (time().writeFormat() == IOstream::PARALLEL)
+    {
+        this->checkOut( allPoints_ );
+        this->checkOut( allFaces_ );
+        this->checkOut( owner_ );
+        this->checkOut( neighbour_ );
+    }
+
     // Check if the faces and cells are valid
     forAll (allFaces_, faceI)
     {
@@ -686,6 +781,14 @@ Foam::polyMesh::polyMesh
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
+    if (time().writeFormat() == IOstream::PARALLEL)
+    {
+        this->checkOut( allPoints_ );
+        this->checkOut( allFaces_ );
+        this->checkOut( owner_ );
+        this->checkOut( neighbour_ );
+    }
+
     // Check if the faces and cells are valid
     forAll (allFaces_, faceI)
     {
@@ -1421,14 +1524,88 @@ Foam::label Foam::polyMesh::findCell
     }
 }
 
+template<typename T>
+Foam::labelList determineOffsets2D( const T& input2DList )
+{
+    Foam::label offset = 0;
+    Foam::labelList offsets{ input2DList.size() + 1, 0 };
+    forAll( input2DList, i )
+    {
+       offset += input2DList[i].size();
+       offsets[ i+1 ] = offset;
+    }
+
+    return offsets;
+}
 
 bool Foam::polyMesh::write() const
 {
     if (time().writeFormat() == IOstream::PARALLEL)
     {
         // Write mesh to a separate file
-        adiosWrite::setPathName(adiosCore::meshPathname());
-    }
+        Foam::adiosWrite adiosInstance{};
+        adiosInstance.setPathName(adiosCore::meshPathname());
+
+        // Indices after sort represent map for local face addressing
+        Foam::SortableList<Foam::label> tmpOwner{ owner_ };
+        Foam::labelList adiosToLocalFaceAddressing{ tmpOwner.indices() };
+
+        sliceMesh sliceableMesh{ *this };
+
+        // Re-order faces
+        faceList adiosFaces{ allFaces_ };
+        sliceableMesh.generateSlice( adiosFaces );
+        Foam::labelList adiosOwner{ owner_ };
+        sliceableMesh.generateSlice( adiosOwner );
+        Foam::pointField adiosPoints{ allPoints_ };
+        sliceableMesh.generateSlice( adiosPoints );
+
+        // Linearize faces and points
+        label k = 0;
+        Foam::label linearSizeOfFaces = allFaces_.linearSize();
+        Foam::List<Foam::label> linearizedAdiosFaces{ linearSizeOfFaces, 0 };
+        forAll( adiosFaces, i )
+        {
+           forAll( adiosFaces[i], j )
+           {
+               linearizedAdiosFaces[k] = adiosFaces[i][j];
+               ++k;
+           }
+        }
+
+        Foam::List<Foam::scalar> linearizedPoints{ 3*allPoints_.size(), 0.0 };
+        forAll( adiosPoints, i )
+        {
+           linearizedPoints[i*3] = adiosPoints[i][0];
+           linearizedPoints[i*3+1] = adiosPoints[i][1];
+           linearizedPoints[i*3+2] = adiosPoints[i][2];
+        }
+
+        auto faceStarts = determineOffsets2D( adiosFaces ); // Generate offsets of linearized face list
+        adiosInstance.write( "faceStarts", 0, 0, faceStarts.size(), faceStarts.cdata() );
+        adiosInstance.write( "faces", 0, 0, linearizedAdiosFaces.size(), linearizedAdiosFaces.cdata() );
+        adiosInstance.write( "points", 0, 0, linearizedPoints.size(), linearizedPoints.cdata() );
+
+        // Generate ownerStarts
+        labelList ownerStarts{ cells().size() + 1, 0 };
+        label ownerStart = 0;
+        forAll( adiosOwner, i ) 
+        {
+            if( adiosOwner[i] == (ownerStart + 1) )
+            { 
+                ++ownerStart;
+                ownerStarts[ownerStart] = i;
+            }
+        }
+        ++ownerStart;
+        ownerStarts[ownerStart] = adiosOwner.size();
+        adiosInstance.write( "ownerStarts", 0, 0, ownerStarts.size(), ownerStarts.cdata() );
+
+        // Generate local neighbours
+        Foam::labelList adiosNeighbours;
+        sliceableMesh.generateSlice( adiosNeighbours, *this );
+        adiosInstance.write( "neighbours", 0, 0, adiosNeighbours.size(), adiosNeighbours.cdata() );
+   }
 
     return regIOobject::write();
 }

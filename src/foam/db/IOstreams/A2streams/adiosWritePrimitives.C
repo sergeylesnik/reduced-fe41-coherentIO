@@ -23,25 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "parRun.H"
-#include "adiosCore.H"
+#include "adiosWritePrimitives.H"
+#include "adiosWrite.H"
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::ParRunControl::~ParRunControl()
-{
-    if (RunPar)
-    {
-        Info<< "Finalising parallel run" << endl;
-        adiosCore::close();
-        Pstream::exit(0);
-    }
+void Foam::adiosWritePrimitives( const Foam::string blockId,
+                                 const Foam::label count,
+                                 const Foam::scalar* buf ) {
+    adiosWrite::write( blockId, 0, 0, count, buf);
 }
 
+void Foam::adiosWritePrimitives( const Foam::string blockId,
+                                 const Foam::label count,
+                                 const Foam::label* buf ) {
+    adiosWrite::write( blockId, 0, 0, count, buf);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+void Foam::adiosWritePrimitives( const Foam::string blockId,
+                                 const Foam::label count,
+                                 const char* buf ) {
+    adiosWrite::write( blockId, 0, 0, count, buf);
+}
 
-// End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

@@ -32,6 +32,8 @@ License
 
 #include "prefixOSstream.H"
 
+#include "adiosWritePrimitives.H"
+
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
 namespace Foam {
@@ -206,6 +208,7 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
                 reinterpret_cast<const parIOType*>(L.v_),
                 L.byteSize()/sizeof(parIOType)
             );
+            //adiosWritePrimitives( id, L.size(), L.v_ );
         }
     }
 

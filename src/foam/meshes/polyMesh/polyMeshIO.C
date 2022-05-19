@@ -166,6 +166,14 @@ Foam::polyMesh::polyMesh
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
+    if (time().writeFormat() == IOstream::PARALLEL)
+    {
+        this->checkOut( allPoints_ );
+        this->checkOut( allFaces_ );
+        this->checkOut( owner_ );
+        this->checkOut( neighbour_ );
+    }
+
     // Check if the faces and cells are valid
     forAll (allFaces_, faceI)
     {

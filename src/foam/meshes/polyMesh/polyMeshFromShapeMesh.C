@@ -557,6 +557,14 @@ Foam::polyMesh::polyMesh
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
+    if (time().writeFormat() == IOstream::PARALLEL)
+    {
+        this->checkOut( allPoints_ );
+        this->checkOut( allFaces_ );
+        this->checkOut( owner_ );
+        this->checkOut( neighbour_ );
+    }
+
     if (debug)
     {
         Info<<"Constructing polyMesh from cell and boundary shapes." << endl;
@@ -843,6 +851,14 @@ Foam::polyMesh::polyMesh
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
+    //if (time().writeFormat() == IOstream::PARALLEL)
+    //{
+        //this->checkOut( allPoints_ );
+        //this->checkOut( allFaces_ );
+        //this->checkOut( owner_ );
+        //this->checkOut( neighbour_ );
+    //}
+
     if (debug)
     {
         Info<<"Constructing polyMesh from cell and boundary shapes." << endl;

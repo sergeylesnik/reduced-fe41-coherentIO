@@ -26,99 +26,90 @@ License
 #ifndef adiosWrite_H
 #define adiosWrite_H
 
-#include "Engine.h"
-#include "IOstream.H"
+//#include "IOstream.H"
 #include "word.H"
 #include "label.H"
 #include "fileName.H"
+#include "faceList.H"
 #include <memory>
-#include "adiosCore.H"
-#include "adios2.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-//Forward declaration
+// Forward declaration
 class adiosCore;
+class sliceMesh;
 
 /*---------------------------------------------------------------------------*\
                        Class adiosWrite Declaration
 \*---------------------------------------------------------------------------*/
 class adiosWrite
-:
-public adiosCore
 {
-    static std::unique_ptr<adios2::IO> ioWritePtr_;
 
-    static std::unique_ptr<adios2::Engine> enginePtr_;
+    static adiosCore adiosCore_;
 
-    static fileName pathname_;
-
-    std::unique_ptr<adios2::Variable<double> > variablePtr_;
+    static std::unique_ptr< sliceMesh > sliceMeshPtr_;
 
 public:
 
     // Static Member Functions
 
-        //- Begin step
-        static void beginStep();
-
-        //- End step
-        static void endStep();
-
-        //- Close adios engine if existent
-        static void close();
-
         //- Set path to the file
-        static void setPathName(const fileName& pathname);
+        static void setPathName( const fileName& );
+
+        static const fileName& meshPathname();
+
+        static const fileName& dataPathname();
+
+        static void checkFiles();
+
+        static bool dataPresent();
+
+        static bool meshPresent();
 
 
     //- Constructor
-    adiosWrite();
+    adiosWrite() = default;
 
     //- Destructor
-    ~adiosWrite();
+    ~adiosWrite() = default;
+
+    //- Disallow copying
+    adiosWrite( adiosWrite const& other ) = delete;
+    adiosWrite& operator=( adiosWrite const& other ) = delete;
 
     // Access
 
-        fileName pathname();
-
-        static std::unique_ptr<adios2::IO>& ioWritePtr();
-
-        static std::unique_ptr<adios2::Engine>& enginePtr();
-
-    void open();
-
-    void defineVariable
+    static std::unique_ptr<sliceMesh>& setSliceMesh
     (
-        const string name,
-        const label shape,
-        const label start,
-        const label count,
-        const bool constantDims = false
+        const labelList&,
+        const faceList&,
+        const label&
     );
 
-    void put(const double* buf);
+    static void write( const string name,
+                       const label shape,
+                       const label start,
+                       const label count,
+                       const scalar* buf );
 
-    void performPuts();
+    static void write( const string name,
+                       const label shape,
+                       const label start,
+                       const label count,
+                       const label* buf );
 
-    void write
-    (
-        const string name,
-        const label shape,
-        const label start,
-        const label count,
-        const parIOType* buf
-    );
+    static void write( const string name,
+                       const label shape,
+                       const label start,
+                       const label count,
+                       const char* buf );
 
-    void writeLocalString
-    (
-        const Foam::fileName& varName,
-        const std::string& str,
-        const label size
-    );
+    void writeLocalString( const Foam::fileName& varName,
+                           const std::string& str,
+                           const label size );
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

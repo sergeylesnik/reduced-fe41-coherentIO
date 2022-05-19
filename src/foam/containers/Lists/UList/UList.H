@@ -49,6 +49,43 @@ SourceFiles
 
 #include "className.H"
 
+#include<type_traits>
+
+/// checks the existence of size() method
+template<typename C>
+struct has_size_method
+{
+private:
+    template<typename T>
+    static constexpr auto check(T*)
+    -> typename std::is_same< decltype( std::declval<T>().size() ), Foam::label >::type;  // attempt to call size()
+
+    template<typename>
+    static constexpr std::false_type check(...);
+
+    typedef decltype(check<C>(0)) type;
+
+public:
+    static constexpr bool value = type::value;
+};
+
+/// checks the existence of size() method
+template<typename C>
+class has_linearSize_method
+{
+    template<typename T>
+    static constexpr auto check(T*)
+    -> typename std::is_same< decltype( std::declval<T>().linearSize() ), Foam::label >::type;  // attempt to call size()
+
+    template<typename>
+    static constexpr std::false_type check(...);
+
+    typedef decltype(check<C>(0)) type;
+
+public:
+    static constexpr bool value = type::value;
+};
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -83,6 +120,9 @@ class UList
 
         //- Number of elements in UList.
         label size_;
+
+        //- Number of elements of primitive type in multi-dimensional UList.
+        mutable label linearSize_;
 
 
 protected:
@@ -165,6 +205,11 @@ public:
             //  i.e. contiguous<T>() == true
             label byteSize() const;
 
+            //- Return size of linearized data
+            label linearSize() const;
+
+            //- Adding sizes of multi-dimensional lists during traversing
+            label addToLinearSize( label ) const;
 
             //- Return a const pointer to the first data element,
             //  similar to the STL front() method and the string::data() method
@@ -377,6 +422,12 @@ inline void reverse(UList<T>&, const label n);
 // Reverse all the elements of the list
 template<class T>
 inline void reverse(UList<T>&);
+
+template<class T>
+void swap( UList<T>& a, UList<T>& b );
+
+template<typename ElementType>
+Foam::label calculateLinearSize( const Foam::UList<ElementType>*, Foam::label& );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
