@@ -40,7 +40,8 @@ namespace Foam
 {
 
 //- Forward declaration
-class adiosCore;
+//class adiosCore;
+class adiosRepo;
 
 /*---------------------------------------------------------------------------*\
                            Class adiosControl Declaration
@@ -48,7 +49,8 @@ class adiosCore;
 
 class adiosControl
 {
-    std::unique_ptr<adiosCore> adiosCorePtr_;
+    //std::unique_ptr<adiosCore> adiosCorePtr_;
+    std::unique_ptr<adiosRepo> repoPtr_{ nullptr };
 
 public:
 

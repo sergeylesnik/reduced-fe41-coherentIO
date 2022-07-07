@@ -30,6 +30,8 @@ License
 #include "contiguous.H"
 #include <iostream>
 
+#include "adiosReadPrimitives.H"
+
 #include "Ostream.H"
 #include "prefixOSstream.H"
 
@@ -113,17 +115,17 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 string id;
                 is >> id;
 
-                Istream& iss = is.readToStringStream(id);
-                for (label i=0; i<len; ++i)
-                {
-                    iss >> list[i];
+                //Istream& iss = is.readToStringStream(id);
+                //for (label i=0; i<len; ++i)
+                //{
+                    //iss >> list[i];
 
-                    iss.fatalCheck
-                    (
-                        "operator>>(Istream&, List<T>&) : "
-                        "reading entry"
-                    );
-                }
+                    //iss.fatalCheck
+                    //(
+                        //"operator>>(Istream&, List<T>&) : "
+                        //"reading entry"
+                    //);
+                //}
                 if (List<T>::debug > 1)
                 {
                     Pout<< "List read via PARALLEL = " << nl << list << endl;
@@ -190,17 +192,21 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
             string id;
             is >> id;
 
+            Pout<< "Reading via PARALLEL id = " << id << endl;
             if (List<T>::debug)
             {
                 Pout<< "Reading via PARALLEL id = " << id << endl;
             }
 
             //ToDoIO Check the string read from the stream
+            /*
             is.parread
             (
                 reinterpret_cast<parIOType*>(list.data()),
                 id.replace("\"","")
             );
+            */
+            adiosReadPrimitives( id, list.data() );
 
             if (UList<T>::debug > 1)
             {

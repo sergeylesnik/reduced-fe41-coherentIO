@@ -32,7 +32,7 @@ Description
 #include "OSspecific.H"
 #include "foamTime.H"
 #include "IOobject.H"
-#include "adiosRead.H"
+#include "adiosPaths.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,8 +46,8 @@ Foam::word Foam::Time::findInstance
 {
     // Note: if name is empty, just check the directory itself
 
-
-    if (isDir(adiosRead::meshPathname()))
+    adiosPaths paths;
+    if ( paths.meshPresent() )
     {
         return constant();
     }

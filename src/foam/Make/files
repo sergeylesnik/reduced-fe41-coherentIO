@@ -164,11 +164,20 @@ $(Pstreams)/IPread.C
 $(Pstreams)/OPwrite.C
 
 A2streams = $(Streams)/A2streams
-$(A2streams)/adiosCore.C
-$(A2streams)/adiosVariableData.C
-$(A2streams)/adiosWrite.C
 $(A2streams)/adiosWritePrimitives.C
-$(A2streams)/adiosRead.C
+$(A2streams)/adiosReadPrimitives.C
+
+$(A2streams)/adiosPaths.C
+$(A2streams)/adiosRepo.C
+$(A2streams)/adiosStream.C
+$(A2streams)/adiosFileStream.C
+$(A2streams)/create/adiosOutputFeatures.C
+$(A2streams)/create/adiosInputFeatures.C
+$(A2streams)/create/adiosWriting.C
+$(A2streams)/create/adiosReading.C
+$(A2streams)/buffer/adiosBuffer.C
+$(A2streams)/buffer/variableBuffer.C
+
 
 dictionary = db/dictionary
 $(dictionary)/dictionary.C

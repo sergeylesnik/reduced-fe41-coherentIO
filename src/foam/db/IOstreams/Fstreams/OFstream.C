@@ -32,7 +32,10 @@ License
 #include "messageStream.H"
 #include <iostream>
 #include <memory>
-#include "adiosWrite.H"
+
+#include "adiosWriting.H"
+#include "adiosFileStream.H"
+#include "adiosStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -50,7 +53,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
 )
 :
     ofPtr_(nullptr),
-    adiosPtr_(nullptr)
+    adiosStreamPtr_(nullptr)
 {
     if (pathname.empty())
     {
@@ -85,24 +88,13 @@ Foam::OFstreamAllocator::OFstreamAllocator
             // The buffer is written to ADIOS in the destructor.
             ofPtr_ = new std::ostringstream();
 
-            // fileName parpathname = pathname.path();
-
-            // // Escape uniform folder if applicable
-            // if (parpathname.name().find("uniform") != std::string::npos)
-            // { parpathname = parpathname + "/../"; }
-
-            // // Escape time folder
-            // parpathname = parpathname + "/../";
-            // parpathname.clean();
-
-            // // Escape processor folder if applicable
-            // if (parpathname.name().find("processor") != std::string::npos)
-            // { parpathname = parpathname + "/../"; }
-
-            // parpathname = parpathname + "/data.bp";
-            // parpathname.clean();
-
-            adiosPtr_.reset(new adiosWrite());
+            adiosWriting adiosCreator{}; 
+            adiosStreamPtr_ = adiosCreator.createStream();
+            Foam::string type = "fields";
+            if ( pathname.find("polyMesh") != std::string::npos ) {
+                type = "mesh";
+            }
+            adiosStreamPtr_->open( std::move( type ) );
         }
         else
         {
@@ -161,6 +153,17 @@ Foam::OFstream::OFstream
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+void writeLocalString( const Foam::fileName& varName,
+                       const Foam::string& str,
+                       const Foam::label size ) {
+    if ( Foam::Pstream::master() ) {
+        std::ofstream outFile;
+        Foam::mkDir( "fields/" );
+        outFile.open( "fields/" + varName.name(), ios_base::out|ios_base::trunc );
+        outFile << str;
+        outFile.close();
+    }
+}
 
 Foam::OFstream::~OFstream()
 {
@@ -168,22 +171,16 @@ Foam::OFstream::~OFstream()
     {
         std::ostringstream& os = dynamic_cast<std::ostringstream&>(*ofPtr_);
 
-        adiosPtr_->writeLocalString
-        (
-            getRelativeFileName(),
-            os.str().data(),
-            os.str().size()
-        );
+        writeLocalString( getRelativeFileName(),
+                          os.str().data(),
+                          os.str().size() );
     }
 
     if (tmpOssPtr_)
     {
-        adiosPtr_->writeLocalString
-        (
-            getBlockId(),
-            tmpOssPtr_->str().data(),
-            tmpOssPtr_->str().size()
-        );
+        writeLocalString( getBlockId(),
+                          tmpOssPtr_->str().data(),
+                          tmpOssPtr_->str().size() );
         delete tmpOssPtr_;
     }
 }
@@ -258,7 +255,7 @@ Foam::word Foam::OFstream::incrBlock(const word name)
     if(debug)
     {
         Pout
-            << "Add to the block name LIFO stack: " << name << '\n';
+            << "Add word to the block name LIFO stack: " << name << '\n';
     }
 
     this->indent();
@@ -293,10 +290,15 @@ Foam::Ostream& Foam::OFstream::writeKeyword(const keyType& kw)
     if (debug)
     {
         Pout
-            << "Add to the block name LIFO stack: " << kw << "\n";
+            << "Add keyType to the block name LIFO stack: " << kw << "\n";
     }
 
     blockNamesStack_.push(kw);
+    // Inform adiosRepo that n'th boundary is being written.
+    if( kw == "type" ) {
+       ++boundaryCounter_;
+       adiosRepo{}.push( boundaryCounter_ );
+    }
 
     return this->Ostream::writeKeyword(kw);
 }
@@ -333,7 +335,17 @@ Foam::Ostream& Foam::OFstream::parwrite(const parIOType* buf, const label count)
     }
 
     string blockId = getBlockId();
-    adiosPtr_->write(blockId, count, 0, count, buf);
+
+    labelList shapeList{1};
+    labelList startList{1};
+    labelList countList{1};
+    shapeList[0] = count;
+    startList[0] = 0;
+    countList[0] = count;
+    
+    adiosStreamPtr_->beginStep();
+    adiosStreamPtr_->transfer( blockId, shapeList, startList, countList, buf );
+    adiosStreamPtr_->endStep();
 
     return *this;
 }

@@ -30,7 +30,7 @@ Description
 #include "objectRegistry.H"
 #include "OSspecific.H"
 #include "OFstream.H"
-#include "adiosCore.H"
+#include "adiosStream.H"
 
 #include "profiling.H"
 
@@ -143,7 +143,8 @@ bool Foam::regIOobject::write() const
 
     if (time().writeFormat() == IOstream::PARALLEL)
     {
-        adiosCore::beginStep();
+        auto type = Foam::adiosStreamType( objectPath() );
+        Foam::adiosBeginStep< Foam::adiosWriting >( std::move( type ) );
     }
 
     bool ok = writeObject
@@ -155,7 +156,8 @@ bool Foam::regIOobject::write() const
 
     if (time().writeFormat() == IOstream::PARALLEL)
     {
-        adiosCore::endStep();
+        auto type = Foam::adiosStreamType( objectPath() );
+        Foam::adiosEndStep< Foam::adiosWriting >( std::move( type ) );
     }
 
     return ok;

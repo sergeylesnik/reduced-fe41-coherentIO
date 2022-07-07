@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "parRun.H"
-#include "adiosCore.H"
+#include "adiosRepo.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,7 +34,7 @@ Foam::ParRunControl::~ParRunControl()
     if (RunPar)
     {
         Info<< "Finalising parallel run" << endl;
-        adiosCore::close();
+        adiosRepo{}.close();
         Pstream::exit(0);
     }
 }

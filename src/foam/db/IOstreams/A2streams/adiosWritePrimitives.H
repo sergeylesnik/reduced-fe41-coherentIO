@@ -31,39 +31,49 @@ License
 #include "uLabel.H"
 #include "scalar.H"
 
+#include <typeinfo>
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+template<typename T> class Vector;
+
 template<typename T>
-void adiosWritePrimitives( const string name,
+void adiosWritePrimitives( string& type,
+                           const string name,
                            const label count,
                            const T* buf );
 
-void adiosWritePrimitives( const string name,
+void adiosWritePrimitives( string& type, 
+                           const string blockId,
                            const label count,
                            const scalar* buf );
 
-void adiosWritePrimitives( const string name,
+void adiosWritePrimitives( string& type, 
+                           const string blockId,
                            const label count,
                            const label* buf );
 
-void adiosWritePrimitives( const string name,
+void adiosWritePrimitives( string& type,
+                           const string blockId,
                            const label count,
-                           const char* buf );
+                           const Vector<scalar>* buf );
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<typename T>
-void Foam::adiosWritePrimitives( const Foam::string name,
+void Foam::adiosWritePrimitives( Foam::string& type,
+                                 const Foam::string name,
                                  const Foam::label count,
                                  const T* buf ) {
     std::cout << "adiosWritePrimitives not implemented for this type.\n";
+    std::cout << typeid( buf ).name() << "\n";
+    std::cout << name << "\n";
 }
-
 
 #endif
 

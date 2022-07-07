@@ -27,7 +27,7 @@ License
 #include "IFstream.H"
 #include "objectRegistry.H"
 #include "PstreamReduceOps.H"
-#include "adiosRead.H"
+#include "adiosPaths.H"
 #include <string>
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -156,23 +156,24 @@ Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
 
     // Fall back to the standarad readStream if the ADIOS data directory is not
     // present
-    fileName adiosDir = adiosRead::dataPathname();
+    adiosPaths paths;
+    fileName adiosDir = paths.dataPathname();
     if (isMeshFile)
     {
-        if (adiosRead::meshPresent())
+        if (paths.meshPresent())
         {
-            adiosDir = adiosRead::meshPathname();
+            adiosDir = paths.meshPathname();
         }
         else
         {
-            Info<< "No ADIOS mesh data found at " << adiosRead::meshPathname()
+            Info<< "No ADIOS mesh data found at " << paths.meshPathname()
                 << nl
                 << "Continuing with the standard IO for file " << objPath
                 << endl;
             return readStream(expectName);
         }
     }
-    else if (!adiosRead::dataPresent())
+    else if (!paths.dataPresent())
     {
         Info<< "No ADIOS data found at " << adiosDir << nl
             << "Continuing with the standard IO for file " << objPath

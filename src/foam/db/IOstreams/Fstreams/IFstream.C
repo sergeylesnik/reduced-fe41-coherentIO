@@ -28,8 +28,28 @@ License
 #include "OSspecific.H"
 #include "debug.H"
 #include "gzstream.h"
-#include "adiosRead.H"
+#include "adiosFileStream.H"
 #include "IStringStream.H"
+
+#include <fstream>
+bool readLocalString( std::string& buf,
+                      const Foam::string strName ) {
+
+    //TODO : Parallel implementation. Only master reading and distributing.
+    std::ifstream inFile;
+    inFile.open( "fields/" + strName );
+    bool found = inFile.good();
+    if ( found ) {
+        inFile.seekg(0, std::ios::end);
+        size_t size = inFile.tellg();
+        buf.resize( size );
+        inFile.seekg(0);
+        inFile.read( &buf[0], size );
+        inFile.close();
+    }
+
+    return found;
+}
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,7 +66,8 @@ Foam::IFstreamAllocator::IFstreamAllocator
 :
     ifPtr_(nullptr),
     bufStr_(),
-    adiosPtr_(nullptr),
+    //adiosPtr_(nullptr),
+    adiosStreamPtr_(nullptr),
     compression_(IOstream::UNCOMPRESSED)
 {
     if (pathname.empty())
@@ -62,14 +83,14 @@ Foam::IFstreamAllocator::IFstreamAllocator
     {
         ifPtr_ = new std::istringstream();
 
-        if (!adiosPtr_)
+        if ( !adiosStreamPtr_ ) //|| !adiosPtr_ )
         {
             allocateAdios();
         }
 
         // Get state from ADIOS
         const bool dataFound =
-            adiosPtr_->readLocalString(bufStr_, pathname.caseName(""));
+            readLocalString(bufStr_, pathname.name()); //pathname.caseName(""));
 
         if (!dataFound)
         {
@@ -117,7 +138,8 @@ Foam::IFstreamAllocator::~IFstreamAllocator()
 
 void Foam::IFstreamAllocator::allocateAdios()
 {
-    adiosPtr_.reset(new adiosRead());
+    //adiosPtr_.reset(new adiosRead());
+    adiosStreamPtr_ = adiosReading{}.createStream();
 }
 
 
@@ -202,12 +224,13 @@ Foam::Istream& Foam::IFstream::parread(parIOType* buf, const string& blockId)
             << exit(FatalIOError);
     }
 
-    if (!adiosPtr_)
+    if ( !adiosStreamPtr_ ) //|| !adiosPtr_ )
     {
         allocateAdios();
     }
 
-    adiosPtr_->read(buf, blockId);
+    //adiosPtr_->read(buf, blockId);
+    //adiosStreamPtr_->transfer(blockId, buf);
 
     return *this;
 }
@@ -238,7 +261,7 @@ Foam::Istream& Foam::IFstream::readToStringStream(string& id)
     {
 
     }
-    adiosPtr_->readLocalString(tmpIssBuf_, id);
+    readLocalString(tmpIssBuf_, id);
     tmpIssPtr_ = new IStringStream(tmpIssBuf_);
     return *tmpIssPtr_;
 }

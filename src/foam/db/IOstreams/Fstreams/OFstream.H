@@ -52,6 +52,7 @@ namespace Foam
 
 class OFstream;
 class adiosWrite;
+class adiosStream;
 
 /*---------------------------------------------------------------------------*\
                       Class OFstreamAllocator Declaration
@@ -63,7 +64,8 @@ class OFstreamAllocator
     friend class OFstream;
 
     ostream* ofPtr_;
-    std::shared_ptr<adiosWrite> adiosPtr_;
+    //std::shared_ptr<adiosWrite> adiosPtr_;
+    std::unique_ptr<adiosStream> adiosStreamPtr_;
 
     // Constructors
 
@@ -100,6 +102,7 @@ class OFstream
         //- String stream for temporary data written by ADIOS at destruction
         OStringStream* tmpOssPtr_;
 
+        label boundaryCounter_{0};
 
 public:
 

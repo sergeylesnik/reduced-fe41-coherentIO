@@ -23,23 +23,52 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "adiosControl.H"
-#include "adiosRepo.H"
+#ifndef adiosReadPrimitives_H
+#define adiosReadPrimitives_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "foamString.H"
+#include "label.H"
+#include "uLabel.H"
+#include "scalar.H"
 
-Foam::adiosControl::adiosControl()
-:
-    repoPtr_(new adiosRepo())
-{}
+#include <typeinfo>
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::adiosControl::~adiosControl()
+namespace Foam
 {
-    Info<< "Closing ADIOS2 files" << endl;
-    repoPtr_->close();
+
+template<typename T> class Vector;
+
+template<typename T>
+void adiosReadPrimitives( const string name,
+                          T* buf );
+
+void adiosReadPrimitives( const string name,
+                          scalar* buf );
+
+void adiosReadPrimitives( const string name,
+                          label* buf );
+
+void adiosReadPrimitives( const string name,
+                          char* buf );
+
+void adiosReadPrimitives( const string name,
+                          Vector<scalar>* buf );
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<typename T>
+void Foam::adiosReadPrimitives( const Foam::string name,
+                                T* buf ) {
+    std::cout << "adiosReadPrimitives not implemented for this type.\n";
+    std::cout << typeid( buf ).name() << "\n";
+    std::cout << name << "\n";
 }
 
 
+#endif
+
+// ************************************************************************* //

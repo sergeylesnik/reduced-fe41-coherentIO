@@ -1,0 +1,27 @@
+#ifndef adiosFileStream_H
+#define adiosFileStream_H
+
+#include "adiosStream.H"
+
+namespace Foam
+{
+
+// Forward declaration
+class string;
+class adiosFeatures;
+
+class adiosFileStream : public adiosStream {
+
+    std::unique_ptr<adiosFeatures> adiosFile_{ nullptr };
+
+    virtual void v_open() final;
+
+public:
+
+    explicit adiosFileStream( std::unique_ptr<adiosFeatures>& );
+
+};
+
+}
+
+#endif
