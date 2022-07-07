@@ -41,27 +41,22 @@ namespace Foam
 template<typename T> class Vector;
 
 template<typename T>
-void adiosReadPrimitives( const string name,
-                          T* buf );
+void adiosReadPrimitives( const string, const string, T* buf );
 
-void adiosReadPrimitives( const string name,
-                          scalar* buf );
+void adiosReadPrimitives( const string, const string, scalar* );
 
-void adiosReadPrimitives( const string name,
-                          label* buf );
+void adiosReadPrimitives( const string, const string, label* );
 
-void adiosReadPrimitives( const string name,
-                          char* buf );
+void adiosReadPrimitives( const string, const string, char* );
 
-void adiosReadPrimitives( const string name,
-                          Vector<scalar>* buf );
+void adiosReadPrimitives( const string, const string, Vector<scalar>* );
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<typename T>
-void Foam::adiosReadPrimitives( const Foam::string name,
+void Foam::adiosReadPrimitives( const Foam::string type, const Foam::string name,
                                 T* buf ) {
     std::cout << "adiosReadPrimitives not implemented for this type.\n";
     std::cout << typeid( buf ).name() << "\n";

@@ -29,35 +29,39 @@ License
 
 #include "vector.H"
 
-void Foam::adiosReadPrimitives( const Foam::string blockId,
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string blockId,
                                 Foam::scalar* buf ) {
-    auto type = Foam::adiosStreamType( blockId );
+    //auto type = Foam::adiosStreamType( blockId );
     auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, buf );
 }
 
-void Foam::adiosReadPrimitives( const Foam::string blockId,
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string blockId,
                                 Foam::label* buf ) {
-    auto type = Foam::adiosStreamType( blockId );
+    //auto type = Foam::adiosStreamType( blockId );
     auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, buf );
 }
 
-void Foam::adiosReadPrimitives( const Foam::string blockId,
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string blockId,
                                 char* buf ) {
-    auto type = Foam::adiosStreamType( blockId );
+    //auto type = Foam::adiosStreamType( blockId );
     auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, buf );
 }
 
-void Foam::adiosReadPrimitives( const Foam::string blockId,
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string blockId,
                                 Foam::Vector<Foam::scalar>* buf ) {
-    auto type = Foam::adiosStreamType( blockId );
+    //auto type = Foam::adiosStreamType( blockId );
     auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, reinterpret_cast<Foam::scalar*>( buf ) );
 }
 

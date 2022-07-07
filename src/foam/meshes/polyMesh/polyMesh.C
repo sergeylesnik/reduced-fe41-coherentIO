@@ -36,6 +36,8 @@ License
 #include "pointMesh.H"
 #include "adiosWriting.H"
 #include "adiosFileStream.H"
+#include "adiosWritePrimitives.H"
+#include "adiosReadPrimitives.H"
 #include "SortableList.H"
 
 #include <numeric>
@@ -391,14 +393,8 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         faces_.reset( allFaces_, allFaces_.size() );
 
         // Reading and de-serializing points
-        std::vector<scalar> points;
-        adiosReadToContainer( "mesh", "points", points );
-        allPoints_.resize( points.size() / 3 );
-        for ( label i = 0; i < points.size(); i+=3 )
-        {
-            for ( label j = 0; j < 3; ++j )
-            { allPoints_[i/3][j] = points[i + j]; }
-        }
+        // (now allPoints_ really should be sized from ASCII file information, currently guaranteed from IOobject construction)
+        adiosReadPrimitives( "mesh", "points", allPoints_.data() );
         points_.reset( allPoints_, allPoints_.size() );
 
         // Reading owner
@@ -1581,7 +1577,7 @@ bool Foam::polyMesh::write() const
         auto faceStarts = determineOffsets2D( adiosFaces ); // Generate offsets of linearized face list
         adiosStreamPtr->transfer( "faceStarts", faceStarts.size(), 0, faceStarts.size(), faceStarts.cdata() );
         adiosStreamPtr->transfer( "faces", linearizedAdiosFaces.size(), 0, linearizedAdiosFaces.size(), linearizedAdiosFaces.cdata() );
-        adiosStreamPtr->transfer( "points", linearizedPoints.size(), 0, linearizedPoints.size(), linearizedPoints.cdata() );
+        adiosWritePrimitives( "mesh", "points", adiosPoints.size(), adiosPoints.cdata() );
 
         // Generate ownerStarts
         labelList ownerStarts{ cells().size() + 1, 0 };
@@ -1602,6 +1598,7 @@ bool Foam::polyMesh::write() const
         adiosStreamPtr->transfer( "neighbours", adiosNeighbours.size(), 0, adiosNeighbours.size(), adiosNeighbours.cdata() );
 
         adiosStreamPtr->endStep();
+
    }
 
     return regIOobject::write();

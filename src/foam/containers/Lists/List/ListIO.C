@@ -206,7 +206,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 id.replace("\"","")
             );
             */
-            adiosReadPrimitives( id, list.data() );
+            Foam::string type = "fields";
+            if ( is.name().find("polyMesh") != std::string::npos ) {
+                type = "mesh";
+            }
+            adiosReadPrimitives( type, id, list.data() );
 
             if (UList<T>::debug > 1)
             {

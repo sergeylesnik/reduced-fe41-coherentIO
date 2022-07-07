@@ -14,11 +14,11 @@ namespace Foam
 
 std::string adiosStreamType( const std::string& id );
 
-template<class adiosFactory> void adiosBeginStep( Foam::string&& );
-template<class adiosFactory> void adiosEndStep( Foam::string&& );
+template<class adiosFactory> void adiosBeginStep( const Foam::string& );
+template<class adiosFactory> void adiosEndStep( const Foam::string& );
 
 template<typename Container>
-void adiosReadToContainer( string&&, const string&, Container& );
+void adiosReadToContainer( const string&, const string&, Container& );
 
 class adiosStream {
 
@@ -48,7 +48,7 @@ public:
 
     virtual ~adiosStream() = default;
 
-    void open( Foam::string&& );
+    void open( const Foam::string& );
 
     void beginStep();
 
@@ -153,23 +153,23 @@ void Foam::adiosStream::transfer( const Foam::string& blockId,
 }
 
 template <class adiosFactory>
-void Foam::adiosBeginStep( Foam::string&& type ) {
+void Foam::adiosBeginStep( const Foam::string& type ) {
     //adiosFactory adiosCreator{};
     auto adiosStreamPtr = adiosFactory{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->beginStep();
 }
 
 template <class adiosFactory>
-void Foam::adiosEndStep( Foam::string&& type ) {
+void Foam::adiosEndStep( const Foam::string& type ) {
     ////adiosFactory adiosCreator{};
     auto adiosStreamPtr = adiosFactory{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->endStep();
 }
 
 template <typename Container>
-void Foam::adiosReadToContainer( Foam::string&& type,
+void Foam::adiosReadToContainer( const Foam::string& type,
                                  const Foam::string& blockId,
                                  Container& container ) {
     //adiosReading adiosCreator{};

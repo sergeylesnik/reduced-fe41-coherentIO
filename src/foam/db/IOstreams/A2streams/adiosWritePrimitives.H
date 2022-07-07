@@ -41,22 +41,22 @@ namespace Foam
 template<typename T> class Vector;
 
 template<typename T>
-void adiosWritePrimitives( string& type,
+void adiosWritePrimitives( const string type,
                            const string name,
                            const label count,
                            const T* buf );
 
-void adiosWritePrimitives( string& type, 
+void adiosWritePrimitives( const string type,
                            const string blockId,
                            const label count,
                            const scalar* buf );
 
-void adiosWritePrimitives( string& type, 
+void adiosWritePrimitives( const string type,
                            const string blockId,
                            const label count,
                            const label* buf );
 
-void adiosWritePrimitives( string& type,
+void adiosWritePrimitives( const string type,
                            const string blockId,
                            const label count,
                            const Vector<scalar>* buf );
@@ -66,7 +66,7 @@ void adiosWritePrimitives( string& type,
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<typename T>
-void Foam::adiosWritePrimitives( Foam::string& type,
+void Foam::adiosWritePrimitives( const Foam::string type,
                                  const Foam::string name,
                                  const Foam::label count,
                                  const T* buf ) {

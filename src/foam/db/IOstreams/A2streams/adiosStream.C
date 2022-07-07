@@ -24,7 +24,7 @@ void Foam::adiosStream::setPath( const Foam::string& type ) {
     }
 }
 
-void Foam::adiosStream::open( Foam::string&& type ) {
+void Foam::adiosStream::open( const Foam::string& type ) {
     type_ = type;
     setPath( type );
     v_open();

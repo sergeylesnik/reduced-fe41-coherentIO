@@ -30,25 +30,25 @@ License
 
 #include "vector.H"
 
-void Foam::adiosWritePrimitives( Foam::string& type,
+void Foam::adiosWritePrimitives( const Foam::string type,
                                  const Foam::string blockId,
                                  const Foam::label count,
                                  const Foam::scalar* buf ) {
     auto adiosStreamPtr = adiosWriting{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, count, 0, count, buf );
 }
 
-void Foam::adiosWritePrimitives( Foam::string& type,
+void Foam::adiosWritePrimitives( const Foam::string type,
                                  const Foam::string blockId,
                                  const Foam::label count,
                                  const Foam::label* buf ) {
     auto adiosStreamPtr = adiosWriting{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, count, 0, count, buf );
 }
 
-void Foam::adiosWritePrimitives( Foam::string& type,
+void Foam::adiosWritePrimitives( const Foam::string type,
                                  const Foam::string blockId,
                                  const Foam::label count,
                                  const Foam::Vector<Foam::scalar>* buf ) {
@@ -60,7 +60,7 @@ void Foam::adiosWritePrimitives( Foam::string& type,
     Foam::labelList iCount{ iShape };
 
     auto adiosStreamPtr = adiosWriting{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, iShape, iStart, iCount, reinterpret_cast<const Foam::scalar*>( buf ) );
 }
 
