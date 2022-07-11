@@ -217,6 +217,13 @@ public:
 
         // Decomposed mesh and addressing
 
+            //autoPtr<fvMesh> 
+            void parallelMesh
+            (
+                const Time& procDb,
+                const word& regionName
+            ) const;
+
             //- Create a decomposed mesh for a given processor index
             //  Note: at the point of construction, the boundary is marked
             //  as invalid.  If the mesh should be used immediately upon
