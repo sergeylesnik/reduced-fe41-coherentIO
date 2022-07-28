@@ -212,25 +212,6 @@ private:
         //- Set data for parallel running
         static void setParRun(const label nProcs);
 
-        //- Calculate linear communication schedule
-        static List<commsStruct> calcLinearComm(const label nProcs);
-
-        //- Calculate tree communication schedule
-        static List<commsStruct> calcTreeComm(const label nProcs);
-
-        //- Helper function for tree communication schedule determination
-        //  Collects all processorIDs below a processor
-        static void collectReceives
-        (
-            const label procID,
-            const dynamicLabelListList& receives,
-            dynamicLabelList& allReceives
-        );
-
-        //- Initialize all communication schedules. Callback from
-        //  Pstream::init()
-        static void initCommunicationSchedule();
-
         //- Allocate a communicator with index
         static void allocatePstreamCommunicator
         (
@@ -774,6 +755,16 @@ inline void Pstream::enlargeBuffer(size_t count)
 
 
 Ostream& operator<<(Ostream&, const Pstream::commsStruct&);
+
+// Template specialisation for access of commsStruct from the commucator list.
+// Evaluates commsStruct on the fly if this is not present in the list.
+template<>
+Pstream::commsStruct&
+UList<Pstream::commsStruct>::operator[](const label);
+
+template<>
+const Pstream::commsStruct&
+UList<Pstream::commsStruct>::operator[](const label) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -97,164 +97,6 @@ void Foam::Pstream::setParRun(const label nProcs)
 }
 
 
-Foam::List<Foam::Pstream::commsStruct> Foam::Pstream::calcLinearComm
-(
-    const label nProcs
-)
-{
-    List<commsStruct> linearCommunication(nProcs);
-
-    // Master
-    labelList belowIDs(nProcs - 1);
-    forAll (belowIDs, i)
-    {
-        belowIDs[i] = i + 1;
-    }
-
-    linearCommunication[0] = commsStruct
-    (
-        nProcs,
-        0,
-        -1,
-        belowIDs,
-        labelList()
-    );
-
-    // Slaves. Have no below processors, only communicate up to master
-    for (label procID = 1; procID < nProcs; procID++)
-    {
-        linearCommunication[procID] = commsStruct
-        (
-            nProcs,
-            procID,
-            0,
-            labelList(),
-            labelList()
-        );
-    }
-
-    return linearCommunication;
-}
-
-
-// Tree like schedule. For 8 procs:
-// (level 0)
-//      0 receives from 1
-//      2 receives from 3
-//      4 receives from 5
-//      6 receives from 7
-// (level 1)
-//      0 receives from 2
-//      4 receives from 6
-// (level 2)
-//      0 receives from 4
-//
-// The sends/receives for all levels are collected per processor (one send per
-// processor; multiple receives possible) creating a table:
-//
-// So per processor:
-// proc     receives from   sends to
-// ----     -------------   --------
-//  0       1,2,4           -
-//  1       -               0
-//  2       3               0
-//  3       -               2
-//  4       5               0
-//  5       -               4
-//  6       7               4
-//  7       -               6
-Foam::List<Foam::Pstream::commsStruct> Foam::Pstream::calcTreeComm
-(
-    const label nProcs
-)
-{
-    label nLevels = 1;
-    while ((1 << nLevels) < nProcs)
-    {
-        nLevels++;
-    }
-
-    List<dynamicLabelList> receives(nProcs);
-    labelList sends(nProcs, -1);
-
-    label offset = 2;
-    label childOffset = offset/2;
-
-    for (label level = 0; level < nLevels; level++)
-    {
-        label receiveID = 0;
-        while (receiveID < nProcs)
-        {
-            // Determine processor that sends and we receive from
-            label sendID = receiveID + childOffset;
-
-            if (sendID < nProcs)
-            {
-                receives[receiveID].append(sendID);
-                sends[sendID] = receiveID;
-            }
-
-            receiveID += offset;
-        }
-
-        offset <<= 1;
-        childOffset <<= 1;
-    }
-
-    // For all processors find the processors it receives data from
-    // (and the processors they receive data from etc.)
-    List<dynamicLabelList> allReceives(nProcs);
-    for (label procID = 0; procID < nProcs; procID++)
-    {
-        collectReceives(procID, receives, allReceives[procID]);
-    }
-
-
-    List<commsStruct> treeCommunication(nProcs);
-
-    for (label procID = 0; procID < nProcs; procID++)
-    {
-        treeCommunication[procID] = commsStruct
-        (
-            nProcs,
-            procID,
-            sends[procID],
-            receives[procID].shrink(),
-            allReceives[procID].shrink()
-        );
-    }
-
-    return treeCommunication;
-}
-
-
-// Append my children (and my children;s children etc.) to allReceives.
-void Foam::Pstream::collectReceives
-(
-    const label procID,
-    const List<dynamicLabelList>& receives,
-    dynamicLabelList& allReceives
-)
-{
-    const dynamicLabelList& myChildren = receives[procID];
-
-    forAll (myChildren, childI)
-    {
-        allReceives.append(myChildren[childI]);
-        collectReceives(myChildren[childI], receives, allReceives);
-    }
-}
-
-
-// Callback from Pstream::init() : initialize linear and tree communication
-// schedules now that nProcs is known.
-void Foam::Pstream::initCommunicationSchedule()
-{
-    calcLinearComm(nProcs());
-    calcTreeComm(nProcs());
-}
-
-
 void Foam::Pstream::allocatePstreamCommunicator
 (
     const label parentIndex,
@@ -445,14 +287,9 @@ Foam::label Foam::Pstream::allocateCommunicator
     }
     parentCommunicator_[index] = parentIndex;
 
-    linearCommunication_[index] = calcLinearComm(procIDs_[index].size());
-    treeCommunication_[index] = calcTreeComm(procIDs_[index].size());
-
-
-    if (doPstream && parRun())
-    {
-        allocatePstreamCommunicator(parentIndex, index);
-    }
+    // Size but do not fill structure - this is done on-the-fly
+    linearCommunication_[index] = List<commsStruct>(procIDs_[index].size());
+    treeCommunication_[index] = List<commsStruct>(procIDs_[index].size());
 
     return index;
 }
@@ -876,6 +713,115 @@ void Foam::Pstream::freeTag(const word& s, const int tag)
         Pout<< "Pstream::freeTag " << s << " tag:" << tag << endl;
     }
     PstreamGlobals::freedTags_.append(tag);
+}
+
+
+template<>
+Foam::Pstream::commsStruct&
+Foam::UList<Foam::Pstream::commsStruct>::operator[](const label procID)
+{
+    Pstream::commsStruct& t = v_[procID];
+
+    if (t.allBelow().size() + t.allNotBelow().size() + 1 != size())
+    {
+        // Not yet allocated
+
+        label above(-1);
+        labelList below;
+        labelList allBelow;
+
+        if (size() < Pstream::nProcsSimpleSum())
+        {
+            // Linear schedule
+
+            if (procID == 0)
+            {
+                below.setSize(size()-1);
+                for (label procI = 1; procI < size(); procI++)
+                {
+                    below[procI-1] = procI;
+                }
+            }
+            else
+            {
+                above = 0;
+            }
+        }
+        else
+        {
+            // Use tree like schedule. For 8 procs:
+            // (level 0)
+            //      0 receives from 1
+            //      2 receives from 3
+            //      4 receives from 5
+            //      6 receives from 7
+            // (level 1)
+            //      0 receives from 2
+            //      4 receives from 6
+            // (level 2)
+            //      0 receives from 4
+            //
+            // The sends/receives for all levels are collected per processor
+            // (one send per processor; multiple receives possible) creating
+            // a table:
+            //
+            // So per processor:
+            // proc     receives from   sends to
+            // ----     -------------   --------
+            //  0       1,2,4           -
+            //  1       -               0
+            //  2       3               0
+            //  3       -               2
+            //  4       5               0
+            //  5       -               4
+            //  6       7               4
+            //  7       -               6
+
+            label mod = 0;
+
+            for (label step = 1; step < size(); step = mod)
+            {
+                mod = step * 2;
+
+                if (procID % mod)
+                {
+                    above = procID - (procID % mod);
+                    break;
+                }
+                else
+                {
+                    for
+                    (
+                        label j = procID + step;
+                        j < size() && j < procID + mod;
+                        j += step
+                    )
+                    {
+                        below.append(j);
+                    }
+                    for
+                    (
+                        label j = procID + step;
+                        j < size() && j < procID + mod;
+                        j++
+                    )
+                    {
+                        allBelow.append(j);
+                    }
+                }
+            }
+        }
+        t = Pstream::commsStruct(size(), procID, above, below, allBelow);
+    }
+    return t;
+}
+
+
+template<>
+const Foam::Pstream::commsStruct&
+Foam::UList<Foam::Pstream::commsStruct>::operator[](const label procID) const
+{
+    return const_cast<UList<Pstream::commsStruct>&>(*this).operator[](procID);
 }
 
 
