@@ -36,6 +36,8 @@ License
 #include "DynamicList.H"
 #include "globalMeshData.H"
 
+#include "sliceMeshHelper.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::domainDecomposition, 0);
@@ -133,6 +135,23 @@ void Foam::domainDecomposition::parallelMesh
     faceList procFaces = mesh_.allFaces();
     pointField procPoints = mesh_.allPoints();
 
+    label counter;
+    counter = 0;
+    while ( counter < procNeighbour.size() ) {
+        if ( procOwner[ counter ] > procNeighbour[ counter ] ) {
+            std::swap( procOwner[ counter ], procNeighbour[ counter ] );
+            procFaces[ counter ] = procFaces[ counter ].reverseFace();
+        }
+        ++counter;
+    }
+
+    std::vector<Foam::label> indices{};
+    indexIota( indices, procNeighbour.size(), 0 );
+    indexSort( indices, procNeighbour );
+    applyPermutation( procNeighbour, indices );
+    applyPermutation( procOwner, indices );
+    applyPermutation( procFaces, indices );
+
     // Create processor mesh without a boundary
     autoPtr<fvMesh> procMeshPtr
     (
@@ -161,6 +180,7 @@ void Foam::domainDecomposition::parallelMesh
     procMesh.addFvPatches( procPatches, false );
     procMesh.write();
 
+    procMesh.checkMesh( true );
     // REMOVED: "Create processor boundary patches"
     // Because will be identified through extended neighbour list while reading.
 }
