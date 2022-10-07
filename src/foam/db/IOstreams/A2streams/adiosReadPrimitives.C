@@ -28,29 +28,51 @@ License
 #include "adiosFileStream.H"
 
 #include "vector.H"
+//#include "List.H"
 
 void Foam::adiosReadPrimitives( const Foam::string type,
                                 const Foam::string blockId,
                                 Foam::scalar* buf ) {
-    //auto type = Foam::adiosStreamType( blockId );
     auto adiosStreamPtr = adiosReading{}.createStream();
     adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, buf );
+}
+
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string blockId,
+                                Foam::scalar* buf,
+                                const label& start,
+                                const label& count ) {
+    labelList startList( 1 ); startList[0] = start;
+    labelList countList( 1 ); countList[0] = count;
+    auto adiosStreamPtr = adiosReading{}.createStream();
+    adiosStreamPtr->open( type );
+    adiosStreamPtr->transfer( blockId, buf, startList, countList );
 }
 
 void Foam::adiosReadPrimitives( const Foam::string type,
                                 const Foam::string blockId,
                                 Foam::label* buf ) {
-    //auto type = Foam::adiosStreamType( blockId );
     auto adiosStreamPtr = adiosReading{}.createStream();
     adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, buf );
+}
+
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string blockId,
+                                Foam::label* buf,
+                                const label& start,
+                                const label& count ) {
+    labelList startList( 1 ); startList[0] = start;
+    labelList countList( 1 ); countList[0] = count;
+    auto adiosStreamPtr = adiosReading{}.createStream();
+    adiosStreamPtr->open( type );
+    adiosStreamPtr->transfer( blockId, buf, startList, countList );
 }
 
 void Foam::adiosReadPrimitives( const Foam::string type,
                                 const Foam::string blockId,
                                 char* buf ) {
-    //auto type = Foam::adiosStreamType( blockId );
     auto adiosStreamPtr = adiosReading{}.createStream();
     adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, buf );
@@ -58,11 +80,32 @@ void Foam::adiosReadPrimitives( const Foam::string type,
 
 void Foam::adiosReadPrimitives( const Foam::string type,
                                 const Foam::string blockId,
+                                char* buf,
+                                const label& start,
+                                const label& count ) {
+    labelList startList( 1 ); startList[0] = start;
+    labelList countList( 1 ); countList[0] = count;
+    auto adiosStreamPtr = adiosReading{}.createStream();
+    adiosStreamPtr->open( type );
+    adiosStreamPtr->transfer( blockId, buf, startList, countList );
+}
+
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string blockId,
                                 Foam::Vector<Foam::scalar>* buf ) {
-    //auto type = Foam::adiosStreamType( blockId );
     auto adiosStreamPtr = adiosReading{}.createStream();
     adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, reinterpret_cast<Foam::scalar*>( buf ) );
+}
+
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string blockId,
+                                Foam::Vector<Foam::scalar>* buf,
+                                const Foam::List<Foam::label>& start,
+                                const Foam::List<Foam::label>& count ) {
+    auto adiosStreamPtr = adiosReading{}.createStream();
+    adiosStreamPtr->open( type );
+    adiosStreamPtr->transfer( blockId, reinterpret_cast<Foam::scalar*>( buf ), start, count );
 }
 
 // ************************************************************************* //

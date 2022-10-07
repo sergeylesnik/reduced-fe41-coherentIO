@@ -126,6 +126,7 @@ void Foam::domainDecomposition::parallelMesh
         auto cellId = own[faceI];
         procOwner[faceI] = cellLookup[cellId];
     }
+
     labelList procNeighbour( nei.size(), -1 );
     forAll ( nei, faceI ) {
         auto cellId = nei[faceI];

@@ -490,8 +490,14 @@ $(pointZone)/pointZone.C
 $(pointZone)/newPointZone.C
 
 sliceMesh = $(polyMesh)/sliceMesh
+$(sliceMesh)/Offsets.C
+$(sliceMesh)/sliceMap.C
+$(sliceMesh)/Slice.C
 $(sliceMesh)/sliceMesh.C
+$(sliceMesh)/slicePermutation.C
 $(sliceMesh)/sliceMeshHelper.C
+$(sliceMesh)/sliceProcPatch.C
+$(sliceMesh)/exchangeSlicePatch.C
 
 $(polyMesh)/polyMesh.C
 $(polyMesh)/polyMeshFromShapeMesh.C

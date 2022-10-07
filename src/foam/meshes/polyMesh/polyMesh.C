@@ -38,10 +38,22 @@ License
 #include "adiosFileStream.H"
 #include "adiosWritePrimitives.H"
 #include "adiosReadPrimitives.H"
-#include "SortableList.H"
+//#include "SortableList.H"
 
+#include "DynamicList.H"
 #include <numeric>
+#include <set>
+#include <map>
+#include <array>
+#include "slicePermutation.H"
+
 #include "sliceMesh.H"
+#include "slicePermutation.H"
+#include "sliceProcPatch.H"
+#include "Offsets.H"
+#include "Slice.H"
+#include "sliceMap.H"
+#include "exchangeSlicePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -358,65 +370,17 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         // Clear everything
         clearOut();
 
-        // Reading neighbours and patches
-        std::vector<label> patchesAndNeighbours;
-        std::cout << "neighbours reading\n";
-        adiosReadToContainer( "mesh", "neighbours", patchesAndNeighbours );
-        std::cout << "neighbours reading succeeded\n";
+        sliceMesh sliceableMesh{ boundary_.size() };
+        neighbour_ = sliceableMesh.polyNeighbours();
+        owner_ = sliceableMesh.polyOwner();
+        allFaces_ = sliceableMesh.polyFaces();
+        allPoints_ = sliceableMesh.polyPoints();
+        sliceableMesh.polyPatches( boundary_ );
 
-        // Retrieve neighbour_ and boundary_ from sliceable mesh addressing
-        sliceMesh sliceableMesh{ patchesAndNeighbours };
-        sliceableMesh.copyPolyNeighbours( neighbour_ );
-        sliceableMesh.resetPolyPatches( boundary_ );
-
-        // Reading faceStarts and faces
-        std::vector<label> faceStarts;
-        adiosReadToContainer( "mesh", "faceStarts", faceStarts );
-
-        std::vector<label> linearizedFaces;
-        adiosReadToContainer( "mesh", "faces", linearizedFaces );
-
-        // De-serialize and reorder faces and copy to polyMesh.allFaces_
-        std::vector<std::vector<label> > faces( faceStarts.size() - 1 );
-        for( size_t i = 0; i < faceStarts.size()-1; ++i) {
-           faces[i].resize( faceStarts[i+1] - faceStarts[i] );
-           std::copy( linearizedFaces.begin() + faceStarts[i],
-                      linearizedFaces.begin() + faceStarts[i+1],
-                      faces[i].begin() );
-        }
-        sliceableMesh.mapToPoly( faces );
-        allFaces_.resize( faces.size() );
-        for ( size_t i = 0; i < faces.size(); ++i ) {
-            allFaces_[i].resize( faces[i].size() );
-            std::copy_n( faces[i].begin(), faces[i].size(), allFaces_[i].begin() );
-        }
         faces_.reset( allFaces_, allFaces_.size() );
-
-        // Reading and de-serializing points
-        // (now allPoints_ really should be sized from ASCII file information, currently guaranteed from IOobject construction)
-        adiosReadPrimitives( "mesh", "points", allPoints_.data() );
         points_.reset( allPoints_, allPoints_.size() );
 
-        // Reading owner
-        std::vector<label> ownerStarts;
-        adiosReadToContainer( "mesh", "ownerStarts", ownerStarts );
-
-        // Serialize and reorder owner_
-        label ownerCellID = 0;
-        owner_.resize( *(ownerStarts.end()-1) );
-        for( size_t i = 0; i < ownerStarts.size()-1; ++i)
-        {
-           std::fill(owner_.begin() + ownerStarts[i],
-                     owner_.begin() + ownerStarts[i+1],
-                     ownerCellID);
-           ++ownerCellID;
-        }
-        sliceableMesh.mapToPoly( owner_ );
-
-        bounds_ = boundBox(allPoints_);
-
-        // Prepare sliceMesh in adiosWrite
-        //Foam::adiosWrite::setSliceMesh( owner_, allFaces_, allPoints_.size() );
+        bounds_ = boundBox( allPoints_ );
     }
 
     // if (exists(owner_.objectPath()))
@@ -466,6 +430,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         WarningIn("polyMesh(const IOobject&)")
             << "no cells in mesh" << endl;
     }
+    checkMesh( true );
 }
 
 
@@ -1542,19 +1507,15 @@ bool Foam::polyMesh::write() const
         adiosStreamPtr->open( "mesh" );
         adiosStreamPtr->beginStep();
 
-        // Indices after sort represent map for local face addressing
-        Foam::SortableList<Foam::label> tmpOwner{ owner_ };
-        Foam::labelList adiosToLocalFaceAddressing{ tmpOwner.indices() };
-
-        sliceMesh sliceableMesh{ *this };
+        slicePermutation sliceablePermutation{ *this };
 
         // Re-order faces
         faceList adiosFaces{ allFaces_ };
-        sliceableMesh.generateSlice( adiosFaces );
+        sliceablePermutation.generateSlice( adiosFaces );
         Foam::labelList adiosOwner{ owner_ };
-        sliceableMesh.generateSlice( adiosOwner );
+        sliceablePermutation.generateSlice( adiosOwner );
         Foam::pointField adiosPoints{ allPoints_ };
-        sliceableMesh.generateSlice( adiosPoints );
+        sliceablePermutation.generateSlice( adiosPoints );
 
         // Linearize faces and points
         label k = 0;
@@ -1594,7 +1555,7 @@ bool Foam::polyMesh::write() const
 
         // Generate local neighbours
         Foam::labelList adiosNeighbours;
-        sliceableMesh.generateSlice( adiosNeighbours, *this );
+        sliceablePermutation.generateSlice( adiosNeighbours, *this );
         adiosStreamPtr->transfer( "neighbours", adiosNeighbours.size(), 0, adiosNeighbours.size(), adiosNeighbours.cdata() );
 
         adiosStreamPtr->endStep();

@@ -5,6 +5,7 @@
 #include "label.H"
 #include "faceList.H"
 
+#include <set>
 #include <vector>
 #include <algorithm>
 
@@ -34,6 +35,10 @@ void indexIota( Container&,
 template<typename IndexContainer, typename DataContainer>
 void indexSort( IndexContainer&, const DataContainer& );
 
+template<typename Container1, typename Container2>
+std::vector<std::pair<typename Container1::value_type, typename Container2::value_type> >
+zip( const Container1&, const Container2& );
+
 template<typename ValueType, typename UnaryOperation>
 auto extractNth( const std::vector<ValueType>&, UnaryOperation );
 
@@ -52,6 +57,15 @@ void swapUntilIndexMatch( Container&,
 
 template<typename Container, typename IndexContainer>
 void applyPermutation( Container&, const IndexContainer& );
+
+template<typename Container, typename UnaryPredicate>
+std::set<label> pointSubset( const Container&, UnaryPredicate );
+
+template<typename UnaryPredicate>
+std::set<label> pointSubset( const faceList&, UnaryPredicate );
+
+template<typename Container>
+std::set<label> pointSubset( const Container& );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

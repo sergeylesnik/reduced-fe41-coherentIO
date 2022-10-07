@@ -11,6 +11,19 @@ void Foam::indexIota( Container& input,
     std::iota( input.begin(), input.end(), start );
 }
 
+template<typename Container1, typename Container2>
+std::vector<std::pair<typename Container1::value_type, typename Container2::value_type> >
+Foam::zip( const Container1& container1, const Container2& container2 ) {
+    typedef typename Container1::value_type type1;
+    typedef typename Container2::value_type type2;
+    std::vector<std::pair<type1, type2> > zipped{};
+    std::transform( container1.begin(), container1.end(), container2.begin(),
+                    std::back_inserter( zipped ),
+                    [] ( const auto& value1, const auto& value2 )
+                    { return std::pair<type1, type2>{value1, value2}; } );
+    return zipped;
+}
+
 
 template<typename IndexContainer, typename DataContainer>
 void Foam::indexSort( IndexContainer& indices, const DataContainer& data ) {
@@ -83,5 +96,31 @@ void Foam::applyPermutation( Container& data, const IndexContainer& permutation)
     }
 }
 
+template<typename Container, typename UnaryPredicate>
+std::set<Foam::label> Foam::pointSubset( const Container& list, UnaryPredicate pred ) {
+    std::set<Foam::label> pointIDs{};
+    std::copy_if( list.begin(), list.end(),
+                  std::inserter( pointIDs, pointIDs.end() ),
+                  pred );
+    return pointIDs;
+}
+
+template<typename UnaryPredicate>
+std::set<Foam::label> Foam::pointSubset( const Foam::faceList& faces, UnaryPredicate pred ) {
+    std::set<Foam::label> pointIDs{};
+    for ( const auto& face : faces ) {
+        auto tmp = Foam::pointSubset( face, pred );
+        pointIDs.insert( std::begin( tmp ), std::end( tmp ) );
+        //std::copy_if( face.begin(), face.end(),
+                      //std::inserter( pointIDs, pointIDs.end() ),
+                      //pred );
+    }
+    return pointIDs;
+}
+
+template<typename Container>
+std::set<Foam::label> Foam::pointSubset( const Container& data ) {
+    return Foam::pointSubset( data, [](auto){ return true; } );
+}
 
 // ************************************************************************* //

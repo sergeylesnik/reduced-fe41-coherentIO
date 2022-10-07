@@ -115,6 +115,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 string id;
                 is >> id;
 
+                // TODO: Re-enable reading non-contiguous data.
                 //Istream& iss = is.readToStringStream(id);
                 //for (label i=0; i<len; ++i)
                 //{

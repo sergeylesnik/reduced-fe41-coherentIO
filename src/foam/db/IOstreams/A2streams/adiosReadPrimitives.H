@@ -39,17 +39,27 @@ namespace Foam
 {
 
 template<typename T> class Vector;
+template<typename T> class List;
 
 template<typename T>
 void adiosReadPrimitives( const string, const string, T* buf );
 
 void adiosReadPrimitives( const string, const string, scalar* );
+void adiosReadPrimitives( const string, const string, scalar*, const label&, const label& );
 
 void adiosReadPrimitives( const string, const string, label* );
+void adiosReadPrimitives( const string, const string, label*, const label&, const label& );
 
 void adiosReadPrimitives( const string, const string, char* );
+void adiosReadPrimitives( const string, const string, char*, const label&, const label& );
 
 void adiosReadPrimitives( const string, const string, Vector<scalar>* );
+
+void adiosReadPrimitives( const string,
+                          const string,
+                          Vector<scalar>*,
+                          const List<label>&,
+                          const List<label>& );
 
 } // End namespace Foam
 

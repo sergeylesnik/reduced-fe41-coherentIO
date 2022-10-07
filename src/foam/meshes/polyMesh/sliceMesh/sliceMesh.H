@@ -35,7 +35,10 @@ SourceFiles
 #ifndef sliceMesh_H
 #define sliceMesh_H
 
-#include "sliceMeshHelper.H"
+#include "Offsets.H"
+#include "Slice.H"
+#include "sliceProcPatch.H"
+#include "slicePermutation.H"
 #include "polyMesh.H"
 
 #include <vector>
@@ -46,140 +49,76 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration
-class pointMesh;
-
-label encodeSlicePatchId( const label& );
-label decodeSlicePatchId( const label& );
-label sliceNeighbourId( const label&, const polyMesh&);
-
 /*---------------------------------------------------------------------------*\
                        Class sliceMesh Declaration
 \*---------------------------------------------------------------------------*/
 
+void sendSliceFaces( std::pair<label, label> sendPair,
+                     Offsets& cellOffsets,
+                     Offsets& pointOffsets,
+                     std::vector<label>& globalNeighbours,
+                     faceList& globalFaces,
+                     DynamicList<label>& newGlobalNeighbours,
+                     pointField& allPoints_,
+                     std::vector<sliceProcPatch>& sliceProcPatches,
+                     label numBoundaries );
+
+void recvSliceFaces( std::pair<label, label> recvPair,
+                     faceList& globalFaces,
+                     labelList& localOwner,
+                     Offsets& cellOffsets,
+                     Offsets& pointOffsets,
+                     Slice& mySlice,
+                     pointField& allPoints_,
+                     std::vector<sliceProcPatch>& sliceProcPatches,
+                     std::vector<label>& globalNeighbours,
+                     label numBoundaries );
+
 
 class sliceMesh
 {
-    std::vector<std::pair<label, label> > polyNeighboursPermutation_{};
-    std::vector<label> polyNeighboursAndPatches_{};
+    label numBoundaries_{};
+    std::vector<label> globalNeighbours_{};
+    DynamicList<label> newGlobalNeighbours_{};
+    labelList localOwner_{};
+    faceList globalFaces_{};
+    pointField allPoints_{};
+    Offsets cellOffsets_{};
+    Offsets pointOffsets_{};
+    Slice slice_{};
+    std::vector<sliceProcPatch> slicePatches_{};
+    slicePermutation sliceablePermutation{};
 
-    std::vector<label> permutationToPoly_{};
-    std::vector<label> permutationToSlice_{};
 
-    std::vector<label> permutationToSlicePoint_{};
-    std::vector<label> permutationToPolyPoint_{};
+    // De-serialize faces
+    faceList deserializeFaces( const std::vector<label>&, const std::vector<label>& );
 
-    std::vector<std::pair<label, label> >
-    createPolyNeighbourPermutation( const std::vector<label>& );
+    // Serialize owner list
+    labelList serializeOwner( const std::vector<label>& );
 
-    std::vector<label> createSlicePermutation( const labelList& );
-
-    void createPointPermutation( faceList&, const label& );
-
-    void renumberToSlice( faceList& );
-
-    template< typename IterType >
-    void resetNextPatch( IterType& patchBegin,
-                         IterType& patchEnd,
-                         polyPatch& patch,
-                         const label& patchId ) {
-        findValueExtend( patchBegin,
-                         patchEnd,
-                         polyNeighboursAndPatches_.end(),
-                         encodeSlicePatchId( patchId ) );
-        patch.resetPatch( std::distance( patchBegin, patchEnd ),
-                          std::distance( polyNeighboursAndPatches_.begin(), patchBegin ) );
-    }
-
-    auto findPatchBegin() {
-        return std::find_if( polyNeighboursAndPatches_.begin(),
-                             polyNeighboursAndPatches_.end(),
-                             []( const auto& id )  
-                             { return id == encodeSlicePatchId( 0 ); } );
-    }
-
+    void commSlicePatches();
+    void commSharedPoints();
+    void renumberFaces();
 
 public:
 
     // Constructors
-    sliceMesh() = delete;
-
-    //- Construct from sliceMesh neighbour and patch list
-    explicit sliceMesh( const std::vector<label>& );
-
-    //- Construct from polyMesh
-    explicit sliceMesh( const polyMesh& );
-
-    //- Construct from faces, owners and number of points
-    sliceMesh( const labelList&, const faceList&, const label& );
+    sliceMesh() = default;
+    sliceMesh( label );
 
     // Destructor
     ~sliceMesh() = default;
 
     // Member Functions
-    //
 
-    // Transformations to sliceMesh
-    
-    template<typename Container>
-    void mapToSlice( Container& );
-
-    void mapToSlice( pointField& );
-
-    label mapToSlice( const label& );
-
-    template<typename MeshElement>
-    MeshElement generateSlice( MeshElement& );
-
-    faceList generateSlice( faceList& );
-
-    // Generate 'sliced' neighbours
-    labelList generateSlice( labelList&, const polyMesh& );
-
-    // Transformations to polyMesh
-    
-    template<typename Container>
-    void mapToPoly( Container& );
-    
-    label mapToPoly( const label& );
-
-    void resetPolyPatches( polyBoundaryMesh& );
-
-    template<typename Container>
-    void copyPolyNeighbours( Container& );
+    labelList polyNeighbours();
+    labelList polyOwner();
+    faceList polyFaces();
+    pointField polyPoints();
+    std::vector<label> polyPatches();
+    std::vector<sliceProcPatch> procPatches();
+    void polyPatches( polyBoundaryMesh& );
 };
-
-// Transformations to sliceMesh
-
-template<typename Container>
-void Foam::sliceMesh::mapToSlice( Container& input ) {
-    applyPermutation( input, permutationToSlice_ );
-}
-
-
-template<typename MeshElement>
-MeshElement Foam::sliceMesh::generateSlice( MeshElement& input ) {
-    mapToSlice( input );
-    return input;
-}
-
-
-// Transformations to polyMesh
-
-template<typename Container>
-void Foam::sliceMesh::mapToPoly( Container& input ) {
-    applyPermutation( input, permutationToPoly_ );
-}
-
-
-template<typename Container>
-void Foam::sliceMesh::copyPolyNeighbours( Container& neighbours ) {
-     const auto polyNeighboursBegin = polyNeighboursAndPatches_.begin();
-     const auto polyPatchBegin = findPatchBegin();
-     neighbours.resize( std::distance( polyNeighboursBegin, polyPatchBegin ) );
-     std::copy( polyNeighboursBegin, polyPatchBegin, neighbours.begin() );
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
