@@ -291,6 +291,11 @@ Foam::label Foam::Pstream::allocateCommunicator
     linearCommunication_[index] = List<commsStruct>(procIDs_[index].size());
     treeCommunication_[index] = List<commsStruct>(procIDs_[index].size());
 
+    if (doPstream && parRun())
+    {
+        allocatePstreamCommunicator(parentIndex, index);
+    }
+
     return index;
 }
 
