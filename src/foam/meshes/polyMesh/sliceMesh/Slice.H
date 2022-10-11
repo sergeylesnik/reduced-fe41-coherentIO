@@ -19,6 +19,9 @@ namespace Foam
 class Offsets;
 class Slice;
 
+std::set<label> missingPoints( const faceList& faces,
+                               const Slice& slice );
+
 template<typename Container>
 label numCellsFromSlice( const Container&, const Slice& );
 
@@ -31,51 +34,27 @@ class Slice {
 
     label partition_{};
 
-    label lowerCellId_{};
-    label upperCellId_{};
-
-    label lowerPointId_{};
-    label upperPointId_{};
-
     label bottom_{};
     label top_{};
 
-    std::shared_ptr<sliceMap> cellMap_{};
-    std::shared_ptr<sliceMap> pointMap_{};
-    
     std::shared_ptr<sliceMap> mapping_{};
-
-    template< typename Container >
-    void append( const Container& );
 
 public:
 
     // Constructors
     Slice() = default;
-    Slice( const label&, const Foam::Offsets&, const Foam::Offsets&  );
+    Slice( const label&, const Foam::Offsets&  );
 
-    auto partition() { return partition_; }
+    label partition();
 
-    Slice cells() {
-        bottom_ = lowerCellId_; 
-        top_ = upperCellId_; 
-        mapping_ = cellMap_;
-        return *this;
-    }
+    bool operator()( const label& id ) const;
 
-    Slice points() {
-        bottom_ = lowerPointId_;
-        top_ = upperPointId_; 
-        mapping_ = pointMap_;
-        return *this;
-    }
+    bool exist( const label& id ) const;
 
-    bool operator()( const label& id ) { return ( bottom_ <= id && id < top_ ); }
-
-    auto shift( const label& id ) { return id - bottom_; }
+    label shift( const label& id ) const;
 
     template< typename Container >
-    auto shiftRange( Container& list ) 
+    auto shiftRange( Container& list ) const
     { 
         std::transform( std::begin( list ), std::end( list ),
                         std::begin( list ),
@@ -84,49 +63,18 @@ public:
         return list; 
     }
 
-    label convert( const label& id ) { 
-        return this->operator()( id ) ? shift( id ) : mapping_->operator[]( id ); 
-    }
+    label convert( const label& id ) const;
 
     template< typename Container >
-    void appendCells( const Container& );
-
-    template< typename Container >
-    void appendPoints( const Container& );
-
-    std::set<label> missingPoints( const faceList& faces ) {
-        points();
-        auto pointsInFaces = Foam::pointSubset( faces );
-        std::set<label> missingPointIDs{};
-        std::copy_if( std::begin( pointsInFaces ), std::end( pointsInFaces ),
-                      std::inserter( missingPointIDs, missingPointIDs.end() ),
-                      [ this ] ( const label& id ) { 
-                          return !( mapping_->exist( id ) ) 
-                                 && 
-                                 !( this->operator()( id ) ); } );
-        return missingPointIDs;
-    }
-    
-
+    void append( const Container& );
 };
+
 
 }
 
 template< typename Container >
 void Foam::Slice::append( const Container& list ) {
     mapping_->append( list );
-}
-
-template< typename Container >
-void Foam::Slice::appendCells( const Container& list ) {
-    cells();
-    append( list );
-}
-
-template< typename Container >
-void Foam::Slice::appendPoints( const Container& list ) {
-    points();
-    append( list );
 }
 
 template<typename Container>

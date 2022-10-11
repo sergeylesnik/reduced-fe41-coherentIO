@@ -68,7 +68,8 @@ void recvSliceFaces( std::pair<label, label> recvPair,
                      labelList& localOwner,
                      Offsets& cellOffsets,
                      Offsets& pointOffsets,
-                     Slice& mySlice,
+                     Slice& cellSlice,
+                     Slice& pointSlice,
                      pointField& allPoints_,
                      std::vector<sliceProcPatch>& sliceProcPatches,
                      std::vector<label>& globalNeighbours,
@@ -85,7 +86,8 @@ class sliceMesh
     pointField allPoints_{};
     Offsets cellOffsets_{};
     Offsets pointOffsets_{};
-    Slice slice_{};
+    Slice cellSlice_{};
+    Slice pointSlice_{};
     std::vector<sliceProcPatch> slicePatches_{};
     slicePermutation sliceablePermutation{};
 

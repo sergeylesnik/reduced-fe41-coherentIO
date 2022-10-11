@@ -15,15 +15,6 @@
 namespace Foam
 {
 
-//template<typename Container, typename UnaryPredicate>
-//std::set<label> pointSet( const Container&, UnaryPredicate );
-
-//template<typename UnaryPredicate>
-//std::set<label> pointSet( const faceList&, UnaryPredicate );
-
-//template<typename Container>
-//std::set<label> pointSet( const Container& );
-
 template<typename SomeList, typename IndexList>
 SomeList extractor( const SomeList& input, const IndexList& extractorList );
 
@@ -51,6 +42,7 @@ public:
                     const std::vector<label>&,
                     const Foam::label& );
 
+
     // Copy constructor
     sliceProcPatch( const sliceProcPatch& );
 
@@ -70,7 +62,6 @@ public:
 
     template<typename Container>
     label countFaces( const Container& neighbours ) {
-        slice_.cells();
         return std::count_if( neighbours.begin(), neighbours.end(), slice_ );
     }
 
@@ -94,34 +85,6 @@ public:
 void swap( sliceProcPatch&, sliceProcPatch& ) noexcept;
 
 }
-
-//template<typename Container, typename UnaryPredicate>
-//std::set<Foam::label> Foam::pointSet( const Container& list, UnaryPredicate pred ) {
-    //std::set<Foam::label> pointIDs{};
-    //std::copy_if( list.begin(), list.end(),
-                  //std::inserter( pointIDs, pointIDs.end() ),
-                  //pred );
-    //return pointIDs;
-//}
-
-//template<typename UnaryPredicate>
-//std::set<Foam::label> Foam::pointSet( const Foam::faceList& faces, UnaryPredicate pred ) {
-    //std::set<Foam::label> pointIDs{};
-    //for ( const auto& face : faces ) {
-        //auto tmp = Foam::pointSet( face, pred );
-        //pointIDs.insert( std::begin( tmp ), std::end( tmp ) );
-        ////std::copy_if( face.begin(), face.end(),
-                      ////std::inserter( pointIDs, pointIDs.end() ),
-                      ////pred );
-    //}
-    //return pointIDs;
-//}
-//
-//template<typename Container>
-//std::set<Foam::label> Foam::pointSet( const Container& data ) {
-    //return Foam::pointSet( data, [](auto){ return true; } );
-//}
-
 
 template<typename SomeList, typename IndexList>
 SomeList Foam::extractor( const SomeList& input, const IndexList& extractorList ) {

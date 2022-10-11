@@ -3,18 +3,44 @@
 
 #include "Offsets.H"
 
+
+std::set<Foam::label> Foam::missingPoints( const Foam::faceList& faces,
+                                           const Foam::Slice& slice )
+{
+    auto pointsInFaces = Foam::pointSubset( faces );
+    std::set<label> missingPointIDs{};
+    std::copy_if( std::begin( pointsInFaces ), std::end( pointsInFaces ),
+                  std::inserter( missingPointIDs, missingPointIDs.end() ),
+                  [ &slice ] ( const label& id )
+                  { return slice.exist( id ); } );
+    return missingPointIDs;
+}
+
 Foam::Slice::Slice( const Foam::label& partition,
-                    const Foam::Offsets& cellOffsets,
-                    const Foam::Offsets& pointOffsets )
+                    const Foam::Offsets& offsets )
     : partition_{ partition }
-    , lowerCellId_{ cellOffsets.lowerBound( partition ) }
-    , upperCellId_{ cellOffsets.upperBound( partition ) } 
-    , lowerPointId_{ pointOffsets.lowerBound( partition ) } 
-    , upperPointId_{ pointOffsets.upperBound( partition ) } 
-    , bottom_{ lowerCellId_ }
-    , top_{ lowerCellId_ }
-    , cellMap_{ std::make_shared<Foam::sliceMap>( cellOffsets.count( partition ) ) }
-    , pointMap_{ std::make_shared<Foam::sliceMap>( pointOffsets.count( partition ) ) }
-    , mapping_{ cellMap_ }
+    , bottom_{ offsets.lowerBound( partition ) }
+    , top_{ offsets.upperBound( partition ) }
+    , mapping_{ std::make_shared<Foam::sliceMap>( offsets.count( partition ) ) }
 {}
+
+Foam::label Foam::Slice::partition() {
+    return partition_;
+}
+
+bool Foam::Slice::operator()( const Foam::label& id ) const {
+    return ( bottom_ <= id && id < top_ );
+}
+
+bool Foam::Slice::exist( const Foam::label& id ) const {
+    return !( mapping_->exist( id ) ) && !( this->operator()( id ) );
+}
+
+Foam::label Foam::Slice::shift( const Foam::label& id ) const {
+    return id - bottom_;
+}
+
+Foam::label Foam::Slice::convert( const Foam::label& id ) const {
+    return this->operator()( id ) ? shift( id ) : mapping_->operator[]( id );
+}
 

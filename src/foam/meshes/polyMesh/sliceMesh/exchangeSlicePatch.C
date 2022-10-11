@@ -15,9 +15,9 @@ Foam::numFacesToExchange( const Foam::Offsets& cellOffsets,
     std::map<Foam::label, Foam::label> data{};
     for ( Foam::label partition = myProcNo + 1; partition < Pstream::nProcs(); ++partition ) 
     {
-        Foam::Slice slice( partition, cellOffsets, pointOffsets );
-        slice.cells();
-        Foam::label numberOfPartitionFaces = Foam::numCellsFromSlice( globalNeighbours, slice );
+        Foam::Slice cellSlice( partition, cellOffsets );
+        //slice.cells();
+        Foam::label numberOfPartitionFaces = Foam::numCellsFromSlice( globalNeighbours, cellSlice );
         if ( numberOfPartitionFaces != 0 ) {
             data[ partition ] = numberOfPartitionFaces;
         }

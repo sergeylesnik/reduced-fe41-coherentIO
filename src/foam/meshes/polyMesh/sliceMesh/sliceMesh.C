@@ -51,8 +51,7 @@ void Foam::sendSliceFaces( std::pair<Foam::label, Foam::label> sendPair,
     Foam::label partition = sendPair.first;
     Foam::OPstream toPartition( Pstream::blocking, partition, 0, 0 );
 
-    Foam::Slice slice( partition, cellOffsets, pointOffsets );
-    slice.cells();
+    Foam::Slice slice( partition, cellOffsets );
     Foam::sliceProcPatch procPatch( slice, globalNeighbours, numBoundaries );
 
     // Face Stuff
@@ -78,7 +77,8 @@ void Foam::recvSliceFaces( std::pair<Foam::label, Foam::label> recvPair,
                            Foam::labelList& localOwner,
                            Foam::Offsets& cellOffsets,
                            Foam::Offsets& pointOffsets,
-                           Foam::Slice& mySlice,
+                           Foam::Slice& cellSlice,
+                           Foam::Slice& pointSlice,
                            Foam::pointField& allPoints_,
                            std::vector<Foam::sliceProcPatch>& sliceProcPatches,
                            std::vector<Foam::label>& globalNeighbours,
@@ -98,17 +98,16 @@ void Foam::recvSliceFaces( std::pair<Foam::label, Foam::label> recvPair,
     // Owner Communication
     labelList recvOwner( numberOfPartitionFaces );
     fromPartition >> recvOwner;
-    mySlice.cells();
     Foam::appendTransformed( localOwner, recvOwner, 
-                             [ &mySlice ]( const auto& id )
-                             { return mySlice.convert( id ); } );
+                             [ &cellSlice ]( const auto& id )
+                             { return cellSlice.convert( id ); } );
 
     // Identify points from slice/partition that associate with the received faces
-    Foam::Slice slice( partition, cellOffsets, pointOffsets );
-    auto pointIDs = Foam::pointSubset( recvFaces, slice.points() );
+    Foam::Slice recvPointSlice( partition, pointOffsets );
+    auto pointIDs = Foam::pointSubset( recvFaces, recvPointSlice );
     // Append new point IDs to point mapping
     // TODO: Create proper state behaviour in Slice
-    mySlice.appendPoints( pointIDs );
+    pointSlice.append( pointIDs );
 
     // Point Communication 
     pointField recvPoints( pointIDs.size() );
@@ -116,7 +115,8 @@ void Foam::recvSliceFaces( std::pair<Foam::label, Foam::label> recvPair,
     allPoints_.append( recvPoints );
 
     // ProcBoundary Stuff
-    sliceProcPatch procPatch( slice, globalNeighbours, numBoundaries );
+    Foam::Slice recvCellSlice( partition, cellOffsets );
+    sliceProcPatch procPatch( recvCellSlice, globalNeighbours, numBoundaries );
     procPatch.encodePatch( globalNeighbours, numberOfPartitionFaces );
     sliceProcPatches.push_back( procPatch );
 }
@@ -173,7 +173,8 @@ void Foam::sliceMesh::commSlicePatches() {
                         localOwner_,
                         cellOffsets_,
                         pointOffsets_,
-                        slice_,
+                        cellSlice_,
+                        pointSlice_,
                         allPoints_,
                         slicePatches_,
                         globalNeighbours_,
@@ -186,11 +187,10 @@ void Foam::sliceMesh::commSharedPoints()
     auto myProcNo = Pstream::myProcNo();
     //TODO: Refactor
     std::map<label, std::vector<label> > sendPointIDs{};
-    auto missingPointIDs = slice_.missingPoints( globalFaces_ );
+    auto missingPointIDs = Foam::missingPoints( globalFaces_, pointSlice_ ); //slice_.missingPoints( globalFaces_ );
     for ( label partition = 0; partition < myProcNo; ++partition ) {
-        Foam::Slice toSlice( partition, cellOffsets_, pointOffsets_ );
-        toSlice.points();
-        auto globallySharedPoints = Foam::pointSubset( missingPointIDs, toSlice );
+        Foam::Slice recvPointSlice( partition, pointOffsets_ );
+        auto globallySharedPoints = Foam::pointSubset( missingPointIDs, recvPointSlice );
         if ( !globallySharedPoints.empty() ) {
             std::vector<label> tmp( globallySharedPoints.begin(), globallySharedPoints.end() );
             sendPointIDs[ partition ] = std::move( tmp );
@@ -198,11 +198,10 @@ void Foam::sliceMesh::commSharedPoints()
     }
     auto recvPointIDs = Foam::exchangeSlicePatch( sendPointIDs, MPI_LONG );
 
-    slice_.points();
     for ( const auto& commPair : recvPointIDs ) {
         auto partition = commPair.first;
         auto sharedPoints = commPair.second;
-        slice_.shiftRange( sharedPoints );
+        pointSlice_.shiftRange( sharedPoints );
         pointField pointBuf = Foam::extractor( allPoints_, sharedPoints );
         OPstream::write( Pstream::blocking,
                          partition,
@@ -221,7 +220,7 @@ void Foam::sliceMesh::commSharedPoints()
                         reinterpret_cast<char*>( pointBuf.data() ),
                         count * 3 * sizeof(scalar) );
         for ( const auto& point : pointBuf ) allPoints_.append( point );
-        slice_.appendPoints( sharedPoints );
+        pointSlice_.append( sharedPoints );
     }
 }
 
@@ -230,7 +229,7 @@ void Foam::sliceMesh::renumberFaces()
     for ( auto& face : globalFaces_ ) {
         std::transform( face.begin(), face.end(), face.begin(),
                         [ this ] ( const auto& id )
-                        { return slice_.convert( id ); } );
+                        { return pointSlice_.convert( id ); } );
     }
 }
 
@@ -289,7 +288,8 @@ Foam::sliceMesh::sliceMesh( Foam::label numBoundaries )
     localOwner_ = serializeOwner( ownerStarts );
     globalFaces_ = deserializeFaces( faceStarts, linearizedFaces );
 
-    slice_ = Foam::Slice( Pstream::myProcNo(), cellOffsets_, pointOffsets_ );
+    cellSlice_ = Foam::Slice( Pstream::myProcNo(), cellOffsets_ );
+    pointSlice_ = Foam::Slice( Pstream::myProcNo(), pointOffsets_ );
 
     if ( Pstream::parRun() ) {
        commSlicePatches();
@@ -309,8 +309,7 @@ Foam::labelList Foam::sliceMesh::polyNeighbours() {
     // TODO: copy poly neighbours into labelList
     std::vector<Foam::label> neighbours{};
     sliceablePermutation.copyPolyNeighbours( neighbours );
-    slice_.cells();
-    slice_.shiftRange( neighbours );
+    cellSlice_.shiftRange( neighbours );
     labelList polyNeighbours( neighbours.size() );
     std::copy( std::begin( neighbours ), 
                std::end( neighbours ),

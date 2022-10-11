@@ -56,7 +56,6 @@ void Foam::sliceProcPatch::swap( Foam::sliceProcPatch& other ) noexcept
 
 void Foam::sliceProcPatch::determineFaceIDs( const std::vector<label>& neighbours )
 {
-    slice_.cells();
     auto faceIdIter = localFaceIDs_.begin();
     for ( auto neighboursIter = std::begin( neighbours );
           neighboursIter != std::end( neighbours );
@@ -84,7 +83,6 @@ void Foam::sliceProcPatch::determinePointIDs( const Foam::faceList& faces,
 void Foam::sliceProcPatch::appendOwner( Foam::labelList& owner, 
                                         Foam::labelList& recvOwner )
 {
-    slice_.cells();
     std::transform( recvOwner.begin(),
                     recvOwner.end(),
                     recvOwner.begin(),
@@ -94,7 +92,6 @@ void Foam::sliceProcPatch::appendOwner( Foam::labelList& owner,
 }
 
 void Foam::sliceProcPatch::encodePatch( std::vector<Foam::label>& neighbours ) {
-    slice_.cells();
     std::transform( std::begin( neighbours ), std::end( neighbours ),
                     std::begin( neighbours ),
                     [ this ] ( const auto& cellId ) 
