@@ -87,7 +87,7 @@ void Foam::sliceProcPatch::appendOwner( Foam::labelList& owner,
                     recvOwner.end(),
                     recvOwner.begin(),
                     [ this ] ( const auto& id )
-                    { return slice_.shift( id ); } );
+                    { return slice_.convert( id ); } );
     owner.append( recvOwner );
 }
 

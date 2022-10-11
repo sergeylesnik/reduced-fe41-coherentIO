@@ -8,12 +8,32 @@
 
 #include <functional>
 #include <algorithm>
+#include <utility> // std::declval
 
 #include "sliceMap.H"
 #include "sliceMeshHelper.H"
 
 namespace Foam
 {
+
+template<typename T, typename _ = void>
+struct is_range : std::false_type {};
+
+template<typename... Ts>
+struct is_range_helper {};
+
+template<typename T>
+struct is_range<
+        T,
+        std::conditional_t<
+            false,
+            is_range_helper<
+                decltype(std::declval<T>().begin()),
+                decltype(std::declval<T>().end())
+                >,
+            void
+            >
+        > : public std::true_type {};
 
 // Forward declaration
 class Offsets;
@@ -39,6 +59,8 @@ class Slice {
 
     std::shared_ptr<sliceMap> mapping_{};
 
+    label shift( const label& id ) const;
+
 public:
 
     // Constructors
@@ -51,25 +73,27 @@ public:
 
     bool exist( const label& id ) const;
 
-    label shift( const label& id ) const;
+    label convert( const label& id ) const;
 
     template< typename Container >
-    auto shiftRange( Container& list ) const
-    { 
-        std::transform( std::begin( list ), std::end( list ),
-                        std::begin( list ),
-                        [ this ]( const auto& id ) 
-                        { return shift( id ); } );
-        return list; 
-    }
-
-    label convert( const label& id ) const;
+    typename std::enable_if<is_range<Container>::value, Container >::type
+    convert( Container& list ) const;
 
     template< typename Container >
     void append( const Container& );
 };
 
+}
 
+template< typename Container >
+typename std::enable_if<Foam::is_range<Container>::value, Container >::type
+Foam::Slice::convert( Container& list ) const
+{
+    std::transform( std::begin( list ), std::end( list ),
+                    std::begin( list ),
+                    [ this ]( const auto& id )
+                    { return convert( id ); } );
+    return list;
 }
 
 template< typename Container >

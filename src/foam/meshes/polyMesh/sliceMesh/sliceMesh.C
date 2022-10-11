@@ -201,7 +201,7 @@ void Foam::sliceMesh::commSharedPoints()
     for ( const auto& commPair : recvPointIDs ) {
         auto partition = commPair.first;
         auto sharedPoints = commPair.second;
-        pointSlice_.shiftRange( sharedPoints );
+        pointSlice_.convert( sharedPoints );
         pointField pointBuf = Foam::extractor( allPoints_, sharedPoints );
         OPstream::write( Pstream::blocking,
                          partition,
@@ -252,6 +252,7 @@ Foam::sliceMesh::sliceMesh( Foam::label numBoundaries )
         adiosReadToContainer( "mesh", "ownerStarts", ownerStarts, cellStart, cellCount + 1 );
     } else {
         adiosReadToContainer( "mesh", "ownerStarts", ownerStarts );
+        cellOffsets_.set( ownerStarts.size() );
     }
 
     // Reading neighbours and patches
@@ -309,7 +310,7 @@ Foam::labelList Foam::sliceMesh::polyNeighbours() {
     // TODO: copy poly neighbours into labelList
     std::vector<Foam::label> neighbours{};
     sliceablePermutation.copyPolyNeighbours( neighbours );
-    cellSlice_.shiftRange( neighbours );
+    cellSlice_.convert( neighbours );
     labelList polyNeighbours( neighbours.size() );
     std::copy( std::begin( neighbours ), 
                std::end( neighbours ),
