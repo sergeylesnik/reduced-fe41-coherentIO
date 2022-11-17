@@ -44,8 +44,8 @@ wmake libso finiteVolume
 #
 #wmake libso tetFiniteElement
 #
-## We can now compile this library from decompositionMethods
-#wmake libso decompositionMethods/decomposeReconstruct
+# We can now compile this library from decompositionMethods
+wmake libso decompositionMethods/decomposeReconstruct
 #
 ## Make dynamicMesh tools
 dynamicMesh/AllwmakeLnInclude
