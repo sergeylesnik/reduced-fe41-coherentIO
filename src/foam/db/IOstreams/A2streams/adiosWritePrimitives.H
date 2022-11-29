@@ -26,25 +26,37 @@ License
 #ifndef adiosWritePrimitives_H
 #define adiosWritePrimitives_H
 
-#include "foamString.H"
 #include "label.H"
-#include "uLabel.H"
 #include "scalar.H"
+#include "direction.H"
 
-#include <typeinfo>
+#include <type_traits> // defines false_type, true_typ, enable_if, void_t
+#include <utility> // defines declval
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-template<typename T> class Vector;
+// is_vectorspace
+// primary template
+template<typename, typename = std::void_t<>>
+struct is_vectorspace : std::false_type {};
 
+// partial specialization, maybe SFINAE'd away
 template<typename T>
-void adiosWritePrimitives( const string type,
-                           const string name,
-                           const label count,
-                           const T* buf );
+struct is_vectorspace< T,
+                       std::void_t<
+                           decltype( std::declval<T>().size() ),
+                           decltype( std::declval<T>().component( std::declval<direction>() ) ),
+                           decltype( std::declval<T>()[ std::declval<direction>() ] )
+                       >
+                     > : std::true_type {};
+
+class string;
+template<typename T> class List;
+
+List<label> create2DList( const label& val0, const label& val1 );
 
 void adiosWritePrimitives( const string type,
                            const string blockId,
@@ -58,14 +70,16 @@ void adiosWritePrimitives( const string type,
 
 void adiosWritePrimitives( const string type,
                            const string blockId,
-                           const label count,
-                           const Vector<scalar>* buf );
+                           const List<label> shape,
+                           const List<label> start,
+                           const List<label> count,
+                           const scalar* buf );
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<typename T>
+template< typename T, std::enable_if_t< !Foam::is_vectorspace<T>::value, void >* = nullptr >
 void Foam::adiosWritePrimitives( const Foam::string type,
                                  const Foam::string name,
                                  const Foam::label count,
@@ -73,6 +87,22 @@ void Foam::adiosWritePrimitives( const Foam::string type,
     std::cout << "adiosWritePrimitives not implemented for this type.\n";
     std::cout << typeid( buf ).name() << "\n";
     std::cout << name << "\n";
+}
+
+template< typename T, std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr >
+void Foam::adiosWritePrimitives( const Foam::string type,
+                                 const Foam::string name,
+                                 const Foam::label count,
+                                 const T* buf ) {
+    Foam::List<Foam::label> shapeList = create2DList( count, buf[0].size() );
+    Foam::List<Foam::label> startList = create2DList( 0, 0 );
+    Foam::List<Foam::label> countList{ shapeList };
+    adiosWritePrimitives( type,
+                          name,
+                          shapeList,
+                          startList,
+                          countList,
+                          reinterpret_cast<const Foam::scalar*>( buf ) );
 }
 
 #endif

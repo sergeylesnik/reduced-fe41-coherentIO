@@ -28,7 +28,16 @@ License
 #include "adiosWriting.H"
 #include "adiosFileStream.H"
 
-#include "vector.H"
+#include "foamString.H"
+#include "labelList.H"
+
+Foam::List<Foam::label> Foam::create2DList( const Foam::label& val0,
+                                            const Foam::label& val1 ) {
+    Foam::List<Foam::label> ret{2};
+    ret[0] = val0;
+    ret[1] = val1;
+    return ret;
+};
 
 void Foam::adiosWritePrimitives( const Foam::string type,
                                  const Foam::string blockId,
@@ -50,18 +59,13 @@ void Foam::adiosWritePrimitives( const Foam::string type,
 
 void Foam::adiosWritePrimitives( const Foam::string type,
                                  const Foam::string blockId,
-                                 const Foam::label count,
-                                 const Foam::Vector<Foam::scalar>* buf ) {
-    Foam::labelList iShape{2};
-    iShape[0] = count;
-    iShape[1] = buf[0].size();
-    Foam::labelList iStart{2};
-    iStart[0] = iStart[1] = 0;
-    Foam::labelList iCount{ iShape };
-
+                                 const Foam::List<label> shape,
+                                 const Foam::List<label> start,
+                                 const Foam::List<label> count,
+                                 const Foam::scalar* buf ) {
     auto adiosStreamPtr = adiosWriting{}.createStream();
     adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, iShape, iStart, iCount, reinterpret_cast<const Foam::scalar*>( buf ) );
+    adiosStreamPtr->transfer( blockId, shape, start, count, buf );
 }
 
 // ************************************************************************* //
