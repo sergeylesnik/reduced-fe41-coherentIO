@@ -27,6 +27,7 @@ License
 #include "foamTime.H"
 #include "demandDrivenData.H"
 #include "dictionary.H"
+#include "OFCstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -995,6 +996,49 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::writeMinMax
 }
 
 
+template<class Type, template<class> class PatchField, class GeoMesh>
+bool Foam::GeometricField<Type, PatchField, GeoMesh>::writeToStream
+(
+    const fileName& pathname,
+    ios_base::openmode mode,
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp
+) const
+{
+    OFCstream<PatchField, GeoMesh> os
+    (
+        pathname,
+        this->mesh().thisDb(),
+        mode,
+        fmt,
+        ver,
+        cmp
+    );
+
+    // If any of these fail, return (leave error handling to Ostream class)
+    if (!os.good())
+    {
+        return false;
+    }
+
+    if (!this->writeHeader(os))
+    {
+        return false;
+    }
+
+    // Write the data to the Ostream
+    if (!this->writeData(os))
+    {
+        return false;
+    }
+
+    this->writeEndDivider(os);
+
+    return os.good();
+}
+
+
 // writeData member function required by regIOobject
 template<class Type, template<class> class PatchField, class GeoMesh>
 bool Foam::GeometricField<Type, PatchField, GeoMesh>::
@@ -1284,7 +1328,19 @@ Foam::Ostream& Foam::operator<<
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
-    gf.dimensionedInternalField().writeData(os, "internalField");
+    if (isA<OFCstream<PatchField, GeoMesh> >(os))
+    {
+        OFCstream<PatchField, GeoMesh>& ofc =
+            dynamic_cast<OFCstream<PatchField, GeoMesh>& >(os);
+        ofc.prepareWrite(0);
+        gf.dimensionedInternalField().writeData(os, "internalField");
+        ofc.prepareWrite(1);
+    }
+    else
+    {
+        gf.dimensionedInternalField().writeData(os, "internalField");
+    }
+
     os  << nl;
     gf.boundaryField().writeEntry("boundaryField", os);
 

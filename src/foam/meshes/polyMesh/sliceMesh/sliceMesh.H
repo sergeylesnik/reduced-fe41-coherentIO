@@ -40,6 +40,7 @@ SourceFiles
 #include "sliceProcPatch.H"
 #include "slicePermutation.H"
 #include "polyMesh.H"
+#include "MeshObject.H"
 
 #include <vector>
 #include <algorithm>
@@ -77,6 +78,8 @@ void recvSliceFaces( std::pair<label, label> recvPair,
 
 
 class sliceMesh
+:
+    public MeshObject<polyMesh, sliceMesh>
 {
     label numBoundaries_{};
     std::vector<label> globalNeighbours_{};
@@ -89,8 +92,11 @@ class sliceMesh
     Slice cellSlice_{};
     Slice pointSlice_{};
     std::vector<sliceProcPatch> slicePatches_{};
-    slicePermutation sliceablePermutation{};
+    slicePermutation sliceablePermutation_{};
 
+
+    // Private Member Functions
+    void readMesh();
 
     // De-serialize faces
     faceList deserializeFaces( const std::vector<label>&, const std::vector<label>& );
@@ -104,14 +110,22 @@ class sliceMesh
 
 public:
 
+    TypeName("sliceMesh");
+
     // Constructors
     sliceMesh() = default;
-    sliceMesh( label );
+    sliceMesh( const polyMesh& );
 
     // Destructor
     ~sliceMesh() = default;
 
     // Member Functions
+
+        //- Access
+        inline const Offsets& cellOffsets() const
+        {
+            return cellOffsets_;
+        }
 
     labelList polyNeighbours();
     labelList polyOwner();
@@ -120,6 +134,27 @@ public:
     std::vector<label> polyPatches();
     std::vector<sliceProcPatch> procPatches();
     void polyPatches( polyBoundaryMesh& );
+
+        // Compulsory overloads resulting from the inheritance from MeshObject
+        virtual bool movePoints() const
+        {
+            // ToDoIO
+            FatalErrorInFunction
+                << "not implemented"
+                << abort(FatalError);
+
+            return true;
+        }
+
+        virtual bool updateMesh(const mapPolyMesh&) const
+        {
+            // ToDoIO
+            FatalErrorInFunction
+                << "not implemented"
+                << abort(FatalError);
+
+            return true;
+        }
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

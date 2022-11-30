@@ -492,6 +492,16 @@ public:
             const direction
         ) const;
 
+        //- Create a file stream and write
+        virtual bool writeToStream
+        (
+            const fileName&,
+            ios_base::openmode,
+            IOstream::streamFormat,
+            IOstream::versionNumber,
+            IOstream::compressionType
+        ) const;
+
         //- WriteData member function required by regIOobject
         bool writeData(Ostream&) const;
 

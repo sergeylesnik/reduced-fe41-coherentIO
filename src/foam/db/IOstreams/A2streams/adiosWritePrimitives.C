@@ -68,4 +68,20 @@ void Foam::adiosWritePrimitives( const Foam::string type,
     adiosStreamPtr->transfer( blockId, shape, start, count, buf );
 }
 
+
+void Foam::adiosWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string blockId,
+    const Foam::label shape,
+    const Foam::label start,
+    const Foam::label count,
+    const Foam::scalar* buf
+)
+{
+    auto adiosStreamPtr = adiosWriting{}.createStream();
+    adiosStreamPtr->open(type);
+    adiosStreamPtr->transfer(blockId, shape, start, count, buf);
+}
+
 // ************************************************************************* //

@@ -84,42 +84,17 @@ bool Foam::regIOobject::writeObject
             << "writing file " << objectPath() << " ..." << nl;
     }
 
+    // Try opening an OFstream for object.
+    // May open different streams in the derived classes.
+    bool osGood = writeToStream
+    (
+        objectPath(),
+        ios_base::out|ios_base::trunc,
+        fmt,
+        ver,
+        cmp
+    );
 
-    bool osGood = false;
-
-    {
-        // Try opening an OFstream for object
-        // Stream open for over-write.  HJ, 17/Aug/2010
-        OFstream os
-        (
-            objectPath(),
-            ios_base::out|ios_base::trunc,
-            fmt,
-            ver,
-            cmp
-        );
-
-        // If any of these fail, return (leave error handling to Ostream class)
-        if (!os.good())
-        {
-            return false;
-        }
-
-        if (!writeHeader(os))
-        {
-            return false;
-        }
-
-        // Write the data to the Ostream
-        if (!writeData(os))
-        {
-            return false;
-        }
-
-        writeEndDivider(os);
-
-        osGood = os.good();
-    }
 
     if (OFstream::debug)
     {
@@ -161,6 +136,49 @@ bool Foam::regIOobject::write() const
     }
 
     return ok;
+}
+
+
+bool Foam::regIOobject::writeToStream
+(
+    const fileName& pathname,
+    ios_base::openmode mode,
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp
+) const
+{
+    // Try opening an OFstream for object
+    // Stream open for over-write.  HJ, 17/Aug/2010
+    OFstream os
+    (
+        objectPath(),
+        ios_base::out|ios_base::trunc,
+        fmt,
+        ver,
+        cmp
+    );
+
+    // If any of these fail, return (leave error handling to Ostream class)
+    if (!os.good())
+    {
+        return false;
+    }
+
+    if (!writeHeader(os))
+    {
+        return false;
+    }
+
+    // Write the data to the Ostream
+    if (!writeData(os))
+    {
+        return false;
+    }
+
+    writeEndDivider(os);
+
+    return os.good();
 }
 
 // ************************************************************************* //

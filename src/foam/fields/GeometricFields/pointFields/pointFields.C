@@ -49,6 +49,9 @@ defineTemplateTypeNameAndDebug(pointSymmTensor4thOrderField, 0);
 defineTemplateTypeNameAndDebug(pointDiagTensorField, 0);
 defineTemplateTypeNameAndDebug(pointTensorField, 0);
 
+typedef OFCstream<pointPatchField, pointMesh> pointOFCstream;
+defineTemplateTypeNameAndDebug(pointOFCstream, 0);
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

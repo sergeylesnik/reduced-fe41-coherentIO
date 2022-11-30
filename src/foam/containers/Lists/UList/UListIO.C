@@ -208,11 +208,14 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
                 //reinterpret_cast<const parIOType*>(L.v_),
                 //L.byteSize()/sizeof(parIOType)
             //);
-            Foam::string type = "fields";
-            if ( os.name().find("polyMesh") != std::string::npos ) {
-                type = "mesh";
-            }
-            adiosWritePrimitives( type, id, L.size(), L.v_ );
+
+            // Foam::string type = "fields";
+            // if ( os.name().find("polyMesh") != std::string::npos ) {
+            //     type = "mesh";
+            // }
+            // adiosWritePrimitives( type, id, L.size(), L.v_ );
+
+            os.write(reinterpret_cast<const char*>(L.v_), L.byteSize());
         }
     }
 

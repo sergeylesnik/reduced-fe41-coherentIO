@@ -58,6 +58,17 @@ void adiosWritePrimitives( const string type,
                            const List<label> count,
                            const scalar* buf );
 
+//- Write global array
+void adiosWritePrimitives
+(
+    const string type,
+    const string blockId,
+    const label shape,
+    const label start,
+    const label count,
+    const scalar* buf
+);
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

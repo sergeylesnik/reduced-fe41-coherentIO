@@ -287,6 +287,16 @@ public:
             //- Write using setting from DB
             virtual bool write() const;
 
+            //- Write to file stream
+            virtual bool writeToStream
+            (
+                const fileName& pathname,
+                ios_base::openmode mode,
+                IOstream::streamFormat format,
+                IOstream::versionNumber version,
+                IOstream::compressionType compression
+            ) const;
+
 
     // Member operators
 

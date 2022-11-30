@@ -42,6 +42,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "calculatedFvPatchFields.H"
 #include "fvMatrices.H"
+#include "OFCstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,6 +63,14 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
 (
     const direction,
     const GeometricField<scalar, fvPatchField, volMesh>& sf
+);
+
+template<>
+Foam::Ostream&
+Foam::OFCstream<fvPatchField, volMesh>::write
+(
+    const char* data,
+    std::streamsize byteSize
 );
 
 

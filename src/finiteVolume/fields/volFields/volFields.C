@@ -48,6 +48,9 @@ defineTemplateTypeNameAndDebug(volSymmTensor4thOrderField, 0);
 defineTemplateTypeNameAndDebug(volDiagTensorField, 0);
 defineTemplateTypeNameAndDebug(volTensorField, 0);
 
+typedef OFCstream<fvPatchField, volMesh> volOFCstream;
+defineTemplateTypeNameAndDebug(volOFCstream, 0);
+
 template<>
 tmp<GeometricField<scalar, fvPatchField, volMesh> >
 GeometricField<scalar, fvPatchField, volMesh>::component
@@ -66,6 +69,65 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
 )
 {
     *this == gsf;
+}
+
+template<>
+Foam::Ostream&
+Foam::OFCstream<fvPatchField, volMesh>::write
+(
+    const char* data,
+    std::streamsize byteSize
+)
+{
+    Pout<< "WeAreNowSpecial\n";
+    if(fieldId_ == 0)
+    {
+        const label localSize = byteSize/sizeof(scalar);
+
+        // Ensure that "processor.*" is not in the id
+        fileName localId = this->getBlockId();
+        wordList cmpts = localId.components();
+        fileName globalId;
+        forAll(cmpts, i)
+        {
+            if (cmpts[i].find("processor") == std::string::npos)
+            {
+                globalId += cmpts[i] + '/';
+            }
+        }
+
+        // cellOffsets is a nProc long list, where each entry represents the
+        // sum of cell sizes of the current proc and all the procs below.
+        label globalCellSize =
+            sliceableMesh_.cellOffsets().upperBound(Pstream::nProcs() - 1);
+        label cellOffset =
+            sliceableMesh_.cellOffsets().lowerBound(Pstream::myProcNo());
+        label localCellSize =
+            sliceableMesh_.cellOffsets().count(Pstream::myProcNo());
+        label nCmpts = localSize/localCellSize;
+
+        adiosWritePrimitives
+        (
+            "fields",
+            globalId,
+            nCmpts*globalCellSize,
+            nCmpts*cellOffset,
+            nCmpts*localCellSize,
+            reinterpret_cast<const scalar*>(data)
+        );
+    }
+    else
+    {
+        adiosWritePrimitives
+        (
+            "fields",
+            this->getBlockId(),
+            byteSize/sizeof(scalar),
+            reinterpret_cast<const scalar*>(data)
+        );
+    }
+
+    return *this;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

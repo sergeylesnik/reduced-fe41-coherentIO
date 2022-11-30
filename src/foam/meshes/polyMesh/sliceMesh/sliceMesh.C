@@ -37,11 +37,85 @@ License
 #include <numeric>
 #include <cmath>
 
-void Foam::sendSliceFaces( std::pair<Foam::label, Foam::label> sendPair, 
-                           Foam::Offsets& cellOffsets, 
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(Foam::sliceMesh, 0);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::sliceMesh::readMesh()
+{
+    // Reading owners
+    std::vector<Foam::label> ownerStarts;
+    if ( Pstream::parRun() ) {
+        Foam::label start = Pstream::myProcNo();
+        const Foam::label count = 1;
+        std::vector<Foam::label> partitionStarts;
+        adiosReadToContainer( "mesh", "partitionStarts", partitionStarts, start, count + 1 );
+        cellOffsets_.set( partitionStarts.back() );
+        Foam::label cellStart = cellOffsets_.lowerBound( Pstream::myProcNo() );
+        Foam::label cellCount = cellOffsets_.count( Pstream::myProcNo() );
+
+        adiosReadToContainer( "mesh", "ownerStarts", ownerStarts, cellStart, cellCount + 1 );
+    } else {
+        adiosReadToContainer( "mesh", "ownerStarts", ownerStarts );
+        cellOffsets_.set( ownerStarts.size() );
+    }
+
+    // Reading neighbours and patches
+    Foam::label faceStart = ownerStarts.front();
+    Foam::label faceCount = ownerStarts.back() - ownerStarts.front();
+    newGlobalNeighbours_.resize( faceCount, 0 );
+    adiosReadPrimitives( "mesh", "neighbours", newGlobalNeighbours_.data(), faceStart, faceCount );
+    adiosReadToContainer( "mesh", "neighbours", globalNeighbours_, faceStart, faceCount );
+
+    // Reading faceStarts and faces
+    std::vector<Foam::label> faceStarts;
+    adiosReadToContainer( "mesh", "faceStarts", faceStarts, faceStart, faceCount + 1 );
+
+    std::vector<Foam::label> linearizedFaces;
+    Foam::label facePointStart = faceStarts.front();
+    Foam::label facePointCount = faceStarts.back() - faceStarts.front();
+    adiosReadToContainer( "mesh", "faces", linearizedFaces, facePointStart, facePointCount );
+
+    // Create and communicate offset lists for mesh entity exchange
+    pointOffsets_.set( *std::max_element( linearizedFaces.begin(), linearizedFaces.end() ) + 1 );
+
+    // Reading points
+    Foam::labelList pointStart{2};
+    pointStart[0] = pointOffsets_.lowerBound( Pstream::myProcNo() );
+    pointStart[1] = 0;
+    Foam::labelList pointCount{2};
+    pointCount[0] = pointOffsets_.count( Pstream::myProcNo() );
+    pointCount[1] = 3;
+    allPoints_.resize( pointOffsets_.count( Pstream::myProcNo() ) );
+    if ( pointCount[0] > 0 ) {
+        adiosReadPrimitives( "mesh", "points", allPoints_.data(), pointStart, pointCount );
+    }
+
+    localOwner_ = serializeOwner( ownerStarts );
+    globalFaces_ = deserializeFaces( faceStarts, linearizedFaces );
+
+    cellSlice_ = Foam::Slice( Pstream::myProcNo(), cellOffsets_ );
+    pointSlice_ = Foam::Slice( Pstream::myProcNo(), pointOffsets_ );
+
+    if ( Pstream::parRun() ) {
+       commSlicePatches();
+       commSharedPoints();
+       renumberFaces();
+    }
+
+    sliceablePermutation_ = slicePermutation( globalNeighbours_ );
+}
+
+
+void Foam::sendSliceFaces( std::pair<Foam::label, Foam::label> sendPair,
+                           Foam::Offsets& cellOffsets,
                            Foam::Offsets& pointOffsets,
                            std::vector<Foam::label>& globalNeighbours,
-                           Foam::faceList& globalFaces, 
+                           Foam::faceList& globalFaces,
                            Foam::DynamicList<Foam::label>& newGlobalNeighbours,
                            Foam::pointField& allPoints_,
                            std::vector<Foam::sliceProcPatch>& sliceProcPatches,
@@ -57,11 +131,11 @@ void Foam::sendSliceFaces( std::pair<Foam::label, Foam::label> sendPair,
     // Face Stuff
     auto sendFaces = procPatch.extractFaces( globalFaces );
     toPartition << sendFaces;
-                    
+
     // Owner Stuff
     auto sendNeighbours = procPatch.extractFaces( newGlobalNeighbours );
     toPartition << sendNeighbours;
-                    
+
     // Point Stuff
     procPatch.determinePointIDs( sendFaces, pointOffsets.lowerBound( myProcNo ) );
     auto sendPoints = procPatch.extractPoints( allPoints_ );
@@ -92,13 +166,13 @@ void Foam::recvSliceFaces( std::pair<Foam::label, Foam::label> recvPair,
     faceList recvFaces( numberOfPartitionFaces );
     fromPartition >> recvFaces;
     Foam::appendTransformed( globalFaces, recvFaces,
-                             [] ( auto& face ) 
+                             [] ( auto& face )
                              { return face.reverseFace(); } );
 
     // Owner Communication
     labelList recvOwner( numberOfPartitionFaces );
     fromPartition >> recvOwner;
-    Foam::appendTransformed( localOwner, recvOwner, 
+    Foam::appendTransformed( localOwner, recvOwner,
                              [ &cellSlice ]( const auto& id )
                              { return cellSlice.convert( id ); } );
 
@@ -109,7 +183,7 @@ void Foam::recvSliceFaces( std::pair<Foam::label, Foam::label> recvPair,
     // TODO: Create proper state behaviour in Slice
     pointSlice.append( pointIDs );
 
-    // Point Communication 
+    // Point Communication
     pointField recvPoints( pointIDs.size() );
     fromPartition >> recvPoints;
     allPoints_.append( recvPoints );
@@ -182,7 +256,7 @@ void Foam::sliceMesh::commSlicePatches() {
     }
 }
 
-void Foam::sliceMesh::commSharedPoints() 
+void Foam::sliceMesh::commSharedPoints()
 {
     auto myProcNo = Pstream::myProcNo();
     //TODO: Refactor
@@ -235,70 +309,13 @@ void Foam::sliceMesh::renumberFaces()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sliceMesh::sliceMesh( Foam::label numBoundaries ) 
-    : numBoundaries_{ numBoundaries } {
+Foam::sliceMesh::sliceMesh(const Foam::polyMesh& pm)
+:
+    MeshObject<polyMesh, sliceMesh>(pm),
+    numBoundaries_(pm.boundaryMesh().size())
 
-    // Reading owners
-    std::vector<Foam::label> ownerStarts;
-    if ( Pstream::parRun() ) {
-        Foam::label start = Pstream::myProcNo();
-        const Foam::label count = 1;
-        std::vector<Foam::label> partitionStarts;
-        adiosReadToContainer( "mesh", "partitionStarts", partitionStarts, start, count + 1 );
-        cellOffsets_.set( partitionStarts.back() );
-        Foam::label cellStart = cellOffsets_.lowerBound( Pstream::myProcNo() );
-        Foam::label cellCount = cellOffsets_.count( Pstream::myProcNo() );
-
-        adiosReadToContainer( "mesh", "ownerStarts", ownerStarts, cellStart, cellCount + 1 );
-    } else {
-        adiosReadToContainer( "mesh", "ownerStarts", ownerStarts );
-        cellOffsets_.set( ownerStarts.size() );
-    }
-
-    // Reading neighbours and patches
-    Foam::label faceStart = ownerStarts.front(); 
-    Foam::label faceCount = ownerStarts.back() - ownerStarts.front();
-    newGlobalNeighbours_.resize( faceCount, 0 );
-    adiosReadPrimitives( "mesh", "neighbours", newGlobalNeighbours_.data(), faceStart, faceCount );
-    adiosReadToContainer( "mesh", "neighbours", globalNeighbours_, faceStart, faceCount );
-
-    // Reading faceStarts and faces
-    std::vector<Foam::label> faceStarts;
-    adiosReadToContainer( "mesh", "faceStarts", faceStarts, faceStart, faceCount + 1 );
-
-    std::vector<Foam::label> linearizedFaces;
-    Foam::label facePointStart = faceStarts.front();
-    Foam::label facePointCount = faceStarts.back() - faceStarts.front();
-    adiosReadToContainer( "mesh", "faces", linearizedFaces, facePointStart, facePointCount );
-
-    // Create and communicate offset lists for mesh entity exchange
-    pointOffsets_.set( *std::max_element( linearizedFaces.begin(), linearizedFaces.end() ) + 1 );
-
-    // Reading points
-    Foam::labelList pointStart{2};
-    pointStart[0] = pointOffsets_.lowerBound( Pstream::myProcNo() );
-    pointStart[1] = 0;
-    Foam::labelList pointCount{2};
-    pointCount[0] = pointOffsets_.count( Pstream::myProcNo() );
-    pointCount[1] = 3; 
-    allPoints_.resize( pointOffsets_.count( Pstream::myProcNo() ) );
-    if ( pointCount[0] > 0 ) {
-        adiosReadPrimitives( "mesh", "points", allPoints_.data(), pointStart, pointCount );
-    }
-
-    localOwner_ = serializeOwner( ownerStarts );
-    globalFaces_ = deserializeFaces( faceStarts, linearizedFaces );
-
-    cellSlice_ = Foam::Slice( Pstream::myProcNo(), cellOffsets_ );
-    pointSlice_ = Foam::Slice( Pstream::myProcNo(), pointOffsets_ );
-
-    if ( Pstream::parRun() ) {
-       commSlicePatches();
-       commSharedPoints();
-       renumberFaces();
-    }
-
-    sliceablePermutation = slicePermutation( globalNeighbours_ );
+{
+    readMesh();
 }
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -309,10 +326,10 @@ Foam::sliceMesh::sliceMesh( Foam::label numBoundaries )
 Foam::labelList Foam::sliceMesh::polyNeighbours() {
     // TODO: copy poly neighbours into labelList
     std::vector<Foam::label> neighbours{};
-    sliceablePermutation.copyPolyNeighbours( neighbours );
+    sliceablePermutation_.copyPolyNeighbours( neighbours );
     cellSlice_.convert( neighbours );
     labelList polyNeighbours( neighbours.size() );
-    std::copy( std::begin( neighbours ), 
+    std::copy( std::begin( neighbours ),
                std::end( neighbours ),
                std::begin( polyNeighbours ) );
     return polyNeighbours;
@@ -320,13 +337,13 @@ Foam::labelList Foam::sliceMesh::polyNeighbours() {
 
 Foam::labelList Foam::sliceMesh::polyOwner() {
     auto owner = localOwner_;
-    sliceablePermutation.mapToPoly( owner );
+    sliceablePermutation_.mapToPoly( owner );
     return owner;
 }
 
 Foam::faceList Foam::sliceMesh::polyFaces() {
     auto faces = globalFaces_;
-    sliceablePermutation.mapToPoly( faces );
+    sliceablePermutation_.mapToPoly( faces );
     return faces;
 }
 
@@ -336,7 +353,7 @@ Foam::pointField Foam::sliceMesh::polyPoints() {
 
 std::vector<Foam::label> Foam::sliceMesh::polyPatches() {
     std::vector<label> patches{};
-    sliceablePermutation.copyPolyPatches( patches );
+    sliceablePermutation_.copyPolyPatches( patches );
     return patches;
 }
 
@@ -349,7 +366,7 @@ void Foam::sliceMesh::polyPatches( polyBoundaryMesh& boundary )
     if ( Pstream::parRun() )
     {
         label myProcNo = Pstream::myProcNo();
-        label numInternalFaces = std::count_if( std::begin( globalNeighbours_ ), 
+        label numInternalFaces = std::count_if( std::begin( globalNeighbours_ ),
                                                 std::end( globalNeighbours_ ),
                                                 [] ( const auto& id )
                                                 { return id >= 0; } );
@@ -359,7 +376,7 @@ void Foam::sliceMesh::polyPatches( polyBoundaryMesh& boundary )
         const Foam::polyPatchList& meshPatches = boundary;
         std::set<label> patchSet( patches.begin(), patches.end() );
         Foam::List<Foam::polyPatch*> procPatches( patchSet.size(), reinterpret_cast<Foam::polyPatch*>(0) );
-        Foam::label nthPatch = 0; 
+        Foam::label nthPatch = 0;
         Foam::label nLocalPatches = 0;
         for ( label patchi = 0; patchi < meshPatches.size(); ++patchi ) {
            auto slicePatchId = Foam::encodeSlicePatchId( patchi );
@@ -369,7 +386,7 @@ void Foam::sliceMesh::polyPatches( polyBoundaryMesh& boundary )
                Foam::label patchStart = numInternalFaces + std::distance( patches.begin(), patchStartIt );
                procPatches[ nLocalPatches ] = meshPatches[ patchi ].clone( boundary,
                                                                            nthPatch,
-                                                                           patchSize, 
+                                                                           patchSize,
                                                                            patchStart ).ptr();
                ++nLocalPatches;
            }
@@ -399,7 +416,7 @@ void Foam::sliceMesh::polyPatches( polyBoundaryMesh& boundary )
 
         // Copy the patch pointers
         forAll (procPatches, pI)
-        {   
+        {
             boundary.set(pI, procPatches[pI]);
         }
     }

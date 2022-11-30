@@ -48,6 +48,9 @@ defineTemplateTypeNameAndDebug(surfaceSymmTensor4thOrderField, 0);
 defineTemplateTypeNameAndDebug(surfaceDiagTensorField, 0);
 defineTemplateTypeNameAndDebug(surfaceTensorField, 0);
 
+typedef OFCstream<fvsPatchField, surfaceMesh> surfaceOFCstream;
+defineTemplateTypeNameAndDebug(surfaceOFCstream, 0);
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

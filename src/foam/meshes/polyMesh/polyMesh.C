@@ -369,7 +369,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         // Clear everything
         clearOut();
 
-        sliceMesh sliceableMesh{ boundary_.size() };
+        // Create a sliceMesh object and transfer the ownership to the registry
+        // in order to enable access later on
+        const sliceMesh& sliceableMeshConst = sliceMesh::New(*(this));
+        sliceMesh& sliceableMesh = const_cast<sliceMesh&>(sliceableMeshConst);
         neighbour_ = sliceableMesh.polyNeighbours();
         owner_ = sliceableMesh.polyOwner();
         allFaces_ = sliceableMesh.polyFaces();
@@ -1543,7 +1546,7 @@ bool Foam::polyMesh::write() const
         labelList ownerStarts{ cells().size() + 1, 0 };
         label ownerStart = 0;
         forAll( adiosOwner, i ) {
-            if( adiosOwner[i] == (ownerStart + 1) ) { 
+            if( adiosOwner[i] == (ownerStart + 1) ) {
                 ++ownerStart;
                 ownerStarts[ownerStart] = i;
             }
