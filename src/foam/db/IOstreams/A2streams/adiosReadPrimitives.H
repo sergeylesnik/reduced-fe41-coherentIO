@@ -26,51 +26,89 @@ License
 #ifndef adiosReadPrimitives_H
 #define adiosReadPrimitives_H
 
-#include "foamString.H"
+#include "List.H"
 #include "label.H"
-#include "uLabel.H"
 #include "scalar.H"
 
-#include <typeinfo>
+#include "primitives_traits.H"
+
+#include <initializer_list>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-template<typename T> class Vector;
-template<typename T> class List;
+class string;
 
-template<typename T>
-void adiosReadPrimitives( const string, const string, T* buf );
+List<Foam::label> createList( std::initializer_list<Foam::label> input );
 
-void adiosReadPrimitives( const string, const string, scalar* );
-void adiosReadPrimitives( const string, const string, scalar*, const label&, const label& );
+void adiosReadPrimitives( const string type,
+                          const string name,
+                          scalar* buf,
+                          const List<label>& start = {},
+                          const List<label>& count = {} );
 
-void adiosReadPrimitives( const string, const string, label* );
-void adiosReadPrimitives( const string, const string, label*, const label&, const label& );
+void adiosReadPrimitives( const string type,
+                          const string name,
+                          label* buf,
+                          const List<label>& start = {},
+                          const List<label>& count = {} );
 
-void adiosReadPrimitives( const string, const string, char* );
-void adiosReadPrimitives( const string, const string, char*, const label&, const label& );
-
-void adiosReadPrimitives( const string, const string, Vector<scalar>* );
-
-void adiosReadPrimitives( const string,
-                          const string,
-                          Vector<scalar>*,
-                          const List<label>&,
-                          const List<label>& );
+void adiosReadPrimitives( const string type,
+                          const string name,
+                          char* buf,
+                          const List<label>& start = {},
+                          const List<label>& count = {} );
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<typename T>
-void Foam::adiosReadPrimitives( const Foam::string type, const Foam::string name,
-                                T* buf ) {
+template< typename T, std::enable_if_t< !Foam::is_vectorspace<T>::value, void >* = nullptr >
+void Foam::adiosReadPrimitives( const Foam::string type, 
+                               const Foam::string name,
+                               T* buf, 
+                               const Foam::List<Foam::label>& start = {},
+                               const Foam::List<Foam::label>& count = {} ) {
     std::cout << "adiosReadPrimitives not implemented for this type.\n";
     std::cout << typeid( buf ).name() << "\n";
     std::cout << name << "\n";
+}
+
+
+template< typename T, std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr >
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string name,
+                                T* buf,
+                                const Foam::List<Foam::label>& start = {},
+                                const Foam::List<Foam::label>& count = {} ) {
+    auto startList = start;
+    auto countList = count;
+    if ( start.size() > 0 && count.size() > 0 ) {
+        startList = Foam::createList( { start[0], 0 } );
+        countList = Foam::createList( { count[0], buf[0].size() } );
+    }
+    Foam::adiosReadPrimitives( type, name, reinterpret_cast<scalar*>( buf ), startList, countList );
+}
+
+
+template< typename T,
+          typename Integral,
+          std::enable_if_t< std::is_arithmetic<T>::value, void >* = nullptr,
+          std::enable_if_t< std::is_integral<Integral>::value, void >* = nullptr >
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string name,
+                                T* buf,
+                                Integral start = -1,
+                                Integral count = -1 ) {
+    Foam::List<Integral> startList{};
+    Foam::List<Integral> countList{};
+    if ( start > -1 && count > -1 ) {
+        startList = Foam::createList( { start } );
+        countList = Foam::createList( { count } );
+    }
+    Foam::adiosReadPrimitives( type, name, buf, startList, countList );
 }
 
 

@@ -28,30 +28,13 @@ License
 
 #include "label.H"
 #include "scalar.H"
-#include "direction.H"
 
-#include <type_traits> // defines false_type, true_typ, enable_if, void_t
-#include <utility> // defines declval
+#include "primitives_traits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// is_vectorspace
-// primary template
-template<typename, typename = std::void_t<>>
-struct is_vectorspace : std::false_type {};
-
-// partial specialization, maybe SFINAE'd away
-template<typename T>
-struct is_vectorspace< T,
-                       std::void_t<
-                           decltype( std::declval<T>().size() ),
-                           decltype( std::declval<T>().component( std::declval<direction>() ) ),
-                           decltype( std::declval<T>()[ std::declval<direction>() ] )
-                       >
-                     > : std::true_type {};
 
 class string;
 template<typename T> class List;

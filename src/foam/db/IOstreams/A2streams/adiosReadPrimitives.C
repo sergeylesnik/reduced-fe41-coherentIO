@@ -27,85 +27,52 @@ License
 #include "adiosReading.H"
 #include "adiosFileStream.H"
 
-#include "vector.H"
-//#include "List.H"
+#include "foamString.H"
 
-void Foam::adiosReadPrimitives( const Foam::string type,
-                                const Foam::string blockId,
-                                Foam::scalar* buf ) {
-    auto adiosStreamPtr = adiosReading{}.createStream();
+#include <algorithm>
+
+Foam::List<Foam::label> Foam::createList( std::initializer_list<Foam::label> input ) {
+    Foam::List<Foam::label> ret{ input.begin(), input.end() };
+    return ret;
+}
+
+template< typename T >
+void hiddenReadPrimitives( const Foam::string type,
+                           const Foam::string blockId,
+                           T* buf,
+                           const Foam::List<Foam::label>& start,
+                           const Foam::List<Foam::label>& count ) {
+    auto adiosStreamPtr = Foam::adiosReading{}.createStream();
     adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, buf );
+    if ( start.size() > 0 && count.size() > 0 ) {
+        adiosStreamPtr->transfer( blockId, buf, start, count );
+    } else {
+        adiosStreamPtr->transfer( blockId, buf );
+    }
 }
 
 void Foam::adiosReadPrimitives( const Foam::string type,
                                 const Foam::string blockId,
                                 Foam::scalar* buf,
-                                const label& start,
-                                const label& count ) {
-    labelList startList( 1 ); startList[0] = start;
-    labelList countList( 1 ); countList[0] = count;
-    auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, buf, startList, countList );
-}
-
-void Foam::adiosReadPrimitives( const Foam::string type,
-                                const Foam::string blockId,
-                                Foam::label* buf ) {
-    auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, buf );
+                                const Foam::List<Foam::label>& start,
+                                const Foam::List<Foam::label>& count ) {
+    hiddenReadPrimitives( type, blockId, buf, start, count );
 }
 
 void Foam::adiosReadPrimitives( const Foam::string type,
                                 const Foam::string blockId,
                                 Foam::label* buf,
-                                const label& start,
-                                const label& count ) {
-    labelList startList( 1 ); startList[0] = start;
-    labelList countList( 1 ); countList[0] = count;
-    auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, buf, startList, countList );
-}
-
-void Foam::adiosReadPrimitives( const Foam::string type,
-                                const Foam::string blockId,
-                                char* buf ) {
-    auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, buf );
+                                const Foam::List<Foam::label>& start,
+                                const Foam::List<Foam::label>& count ) {
+    hiddenReadPrimitives( type, blockId, buf, start, count );
 }
 
 void Foam::adiosReadPrimitives( const Foam::string type,
                                 const Foam::string blockId,
                                 char* buf,
-                                const label& start,
-                                const label& count ) {
-    labelList startList( 1 ); startList[0] = start;
-    labelList countList( 1 ); countList[0] = count;
-    auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, buf, startList, countList );
-}
-
-void Foam::adiosReadPrimitives( const Foam::string type,
-                                const Foam::string blockId,
-                                Foam::Vector<Foam::scalar>* buf ) {
-    auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, reinterpret_cast<Foam::scalar*>( buf ) );
-}
-
-void Foam::adiosReadPrimitives( const Foam::string type,
-                                const Foam::string blockId,
-                                Foam::Vector<Foam::scalar>* buf,
                                 const Foam::List<Foam::label>& start,
                                 const Foam::List<Foam::label>& count ) {
-    auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, reinterpret_cast<Foam::scalar*>( buf ), start, count );
+    hiddenReadPrimitives( type, blockId, buf, start, count );
 }
 
 // ************************************************************************* //
