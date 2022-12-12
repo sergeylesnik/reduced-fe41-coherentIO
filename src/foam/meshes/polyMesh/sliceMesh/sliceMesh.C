@@ -26,7 +26,7 @@ License
 #include "sliceMesh.H"
 #include "sliceMeshHelper.H"
 //#include "slicePermutation.H"
-#include "exchangeSlicePatch.H"
+#include "nonblockConsensus.H"
 
 #include "adiosFileStream.H"
 #include "adiosWritePrimitives.H"
@@ -151,7 +151,7 @@ Foam::labelList Foam::sliceMesh::serializeOwner( const std::vector<Foam::label>&
 void Foam::sliceMesh::commSlicePatches() {
 
     auto sendNumPartitionFaces = Foam::numFacesToExchange( cellOffsets_, pointOffsets_, globalNeighbours_ );
-    auto recvNumPartitionFaces = Foam::exchangeSlicePatch( sendNumPartitionFaces );
+    auto recvNumPartitionFaces = Foam::nonblockConsensus( sendNumPartitionFaces );
 
     for ( const auto& sendPair : sendNumPartitionFaces )
     {
@@ -196,7 +196,7 @@ void Foam::sliceMesh::commSharedPoints()
             sendPointIDs[ partition ] = std::move( tmp );
         }
     }
-    auto recvPointIDs = Foam::exchangeSlicePatch( sendPointIDs, MPI_LONG );
+    auto recvPointIDs = Foam::nonblockConsensus( sendPointIDs, MPI_LONG );
 
     for ( const auto& commPair : recvPointIDs ) {
         auto partition = commPair.first;

@@ -1,5 +1,5 @@
 
-#include "exchangeSlicePatch.H"
+#include "nonblockConsensus.H"
 
 #include "Offsets.H"
 #include "Slice.H"
@@ -26,7 +26,7 @@ Foam::numFacesToExchange( const Foam::Offsets& cellOffsets,
 }
 
 std::map<Foam::label, Foam::label>
-Foam::exchangeSlicePatch( const std::map<Foam::label, Foam::label>& data ) 
+Foam::nonblockConsensus( const std::map<Foam::label, Foam::label>& data ) 
 {
     int tag{};
     bool barrier_activated = false;

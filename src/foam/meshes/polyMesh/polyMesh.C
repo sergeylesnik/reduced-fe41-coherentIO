@@ -53,7 +53,6 @@ License
 #include "Offsets.H"
 #include "Slice.H"
 #include "sliceMap.H"
-#include "exchangeSlicePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

@@ -497,7 +497,7 @@ $(sliceMesh)/sliceMesh.C
 $(sliceMesh)/slicePermutation.C
 $(sliceMesh)/sliceMeshHelper.C
 $(sliceMesh)/sliceProcPatch.C
-$(sliceMesh)/exchangeSlicePatch.C
+$(sliceMesh)/nonblockConsensus.C
 
 $(polyMesh)/polyMesh.C
 $(polyMesh)/polyMeshFromShapeMesh.C

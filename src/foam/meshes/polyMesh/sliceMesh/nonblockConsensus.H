@@ -1,6 +1,6 @@
 
-#ifndef exchangeSlicePatch_H
-#define exchangeSlicePatch_H
+#ifndef nonblockConsensus_H
+#define nonblockConsensus_H
 
 #include "label.H"
 
@@ -20,9 +20,9 @@ class Offsets;
 std::map<label, label> numFacesToExchange( const Offsets&, const Offsets&, const std::vector<label>& );
 
 template<class Type>
-std::map<label, std::vector<Type> > exchangeSlicePatch( const std::map<label, std::vector<Type> >&, MPI_Datatype );
+std::map<label, std::vector<Type> > nonblockConsensus( const std::map<label, std::vector<Type> >&, MPI_Datatype );
 
-std::map<label, label> exchangeSlicePatch( const std::map<label, label>& );
+std::map<label, label> nonblockConsensus( const std::map<label, label>& );
 
 
 } // End namespace Foam
@@ -32,7 +32,7 @@ std::map<label, label> exchangeSlicePatch( const std::map<label, label>& );
 // TODO: Decision of MPI_Datatype must depend on deduced Type.
 template<class Type>
 std::map<Foam::label, std::vector<Type> >
-Foam::exchangeSlicePatch( const std::map<Foam::label, std::vector<Type> >& data, MPI_Datatype dtype )
+Foam::nonblockConsensus( const std::map<Foam::label, std::vector<Type> >& data, MPI_Datatype dtype )
 {
     int tag{};
     bool barrier_activated = false;
