@@ -530,15 +530,29 @@ writeEntry(const word& keyword, Ostream& os) const
 
     forAll(*this, patchi)
     {
-        // os.incrBlock(this->operator[](patchi).patch().name());
-        // os << setw(4)
-        os  << incrBlock(this->operator[](patchi).patch().name())
-            << this->operator[](patchi)
-            << decrBlock << endl;
-        // os  << indent << this->operator[](patchi).patch().name() << nl
-        //     << indent << token::BEGIN_BLOCK << nl
-        //     << incrIndent << this->operator[](patchi) << decrIndent
-        //     << indent << token::END_BLOCK << endl;
+        if (isA<OFCstream<PatchField, GeoMesh> >(os))
+        {
+            OFCstream<PatchField, GeoMesh>& ofc =
+                dynamic_cast<OFCstream<PatchField, GeoMesh>& >(os);
+
+            // ToDoIO
+            // coupled() includes also cyclics etc => Introduce a proper
+            // identification of processor patches.
+            if (!this->operator[](patchi).coupled())
+            {
+                ofc.prepareWrite(patchi);
+                os  << incrBlock(this->operator[](patchi).patch().name())
+                    << this->operator[](patchi)
+                    << decrBlock << endl;
+                ofc.prepareWrite(-2);
+            }
+        }
+        else
+        {
+            os  << incrBlock(this->operator[](patchi).patch().name())
+                << this->operator[](patchi)
+                << decrBlock << endl;
+        }
     }
 
     os  << decrIndent << token::END_BLOCK << endl;

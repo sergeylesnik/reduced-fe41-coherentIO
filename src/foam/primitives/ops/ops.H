@@ -390,6 +390,24 @@ public:
     }
 };
 
+template<class T>
+class eqEqTuple2
+{
+public:
+
+    T operator()(const T& x, const T& y) const
+    {
+        if(!x.first() || !y.first())
+        {
+            return T(false, x.second());
+        }
+        else
+        {
+            return T(x.second() == y.second(), x.second());
+        }
+    }
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

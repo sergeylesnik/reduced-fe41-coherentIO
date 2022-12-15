@@ -51,6 +51,54 @@ defineTemplateTypeNameAndDebug(surfaceTensorField, 0);
 typedef OFCstream<fvsPatchField, surfaceMesh> surfaceOFCstream;
 defineTemplateTypeNameAndDebug(surfaceOFCstream, 0);
 
+
+template<>
+Foam::Ostream&
+Foam::OFCstream<fvsPatchField, surfaceMesh>::write
+(
+    const char* data,
+    std::streamsize byteSize
+)
+{
+    if (OFstream::debug)
+    {
+        InfoInFunction
+            << "surfaceMesh specialization with feldId_ = "
+            << fieldId_ << "\n";
+    }
+    label globalCellSize;
+    label cellOffset;
+    label nCmpts;
+    const label localTotalSize = byteSize/sizeof(scalar);
+
+    if(fieldId_ == -1)  // Internal field
+    {
+        // cellOffsets is a nProc long list, where each entry represents the
+        // sum of cell sizes of the current proc and all the procs below.
+        Info<< "Surface internal field needs to be mapped and staged here\n";
+    }
+    else if (fieldId_ >= 0)  // Boundary field
+    {
+        Info<< "A surface boundary field needs to be mapped and staged here\n";
+    }
+    // else
+    // {
+        // Write as local array
+        Info<< "Writing a surface field as local variable\n";
+
+        fieldId_ = -2;
+        adiosWritePrimitives
+        (
+            "fields",
+            this->getBlockId(),
+            localTotalSize,
+            reinterpret_cast<const scalar*>(data)
+        );
+
+        return *this;
+    // }
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

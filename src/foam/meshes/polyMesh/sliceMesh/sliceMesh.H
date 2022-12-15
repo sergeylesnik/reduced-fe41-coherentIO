@@ -41,6 +41,7 @@ SourceFiles
 #include "slicePermutation.H"
 #include "polyMesh.H"
 #include "MeshObject.H"
+#include "globalIndex.H"
 
 #include <vector>
 #include <algorithm>
@@ -93,7 +94,7 @@ class sliceMesh
     Slice pointSlice_{};
     std::vector<sliceProcPatch> slicePatches_{};
     slicePermutation sliceablePermutation_{};
-
+    PtrList<globalIndex> boundaryGlobalIndex_;
 
     // Private Member Functions
     void readMesh();
@@ -121,11 +122,12 @@ public:
 
     // Member Functions
 
-        //- Access
-        inline const Offsets& cellOffsets() const
-        {
-            return cellOffsets_;
-        }
+        // Access
+
+            inline const Offsets& cellOffsets() const
+            {
+                return cellOffsets_;
+            }
 
     labelList polyNeighbours();
     labelList polyOwner();
@@ -135,26 +137,33 @@ public:
     std::vector<sliceProcPatch> procPatches();
     void polyPatches( polyBoundaryMesh& );
 
+
         // Compulsory overloads resulting from the inheritance from MeshObject
-        virtual bool movePoints() const
-        {
-            // ToDoIO
-            FatalErrorInFunction
-                << "not implemented"
-                << abort(FatalError);
 
-            return true;
-        }
+            virtual bool movePoints() const
+            {
+                // ToDoIO
+                FatalErrorInFunction
+                    << "not implemented"
+                    << abort(FatalError);
 
-        virtual bool updateMesh(const mapPolyMesh&) const
-        {
-            // ToDoIO
-            FatalErrorInFunction
-                << "not implemented"
-                << abort(FatalError);
+                return true;
+            }
 
-            return true;
-        }
+            virtual bool updateMesh(const mapPolyMesh&) const
+            {
+                // ToDoIO
+                FatalErrorInFunction
+                    << "not implemented"
+                    << abort(FatalError);
+
+                return true;
+            }
+
+
+        // Field infrastructure
+
+            const globalIndex& boundaryGlobalIndex(label patchId);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

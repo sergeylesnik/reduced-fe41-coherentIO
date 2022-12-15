@@ -182,7 +182,7 @@ public:
             {}
 
             //- Get block identifier
-            virtual string getBlockId()
+            virtual string getBlockId() const
             {
                 return "none (called Ostream Member)";
             }

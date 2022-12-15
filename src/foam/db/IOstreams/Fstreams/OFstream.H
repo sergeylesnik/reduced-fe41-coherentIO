@@ -125,7 +125,7 @@ public:
 
     // Destructor
 
-        ~OFstream();
+        virtual ~OFstream();
 
 
     // Member functions
@@ -145,13 +145,13 @@ public:
             }
 
             //- Return the file name as a path relative to the root case
-            inline string getRelativeFileName()
+            inline string getRelativeFileName() const
             {
                 return pathname_.caseName("");
             }
 
             //- Get block identifier
-            virtual string getBlockId();
+            virtual string getBlockId() const;
 
 
         // STL stream
@@ -184,6 +184,8 @@ public:
             virtual Ostream& parwrite(const parIOType*, const label);
 
             virtual Ostream& stringStream();
+
+            void writeLocalString(const fileName&, const string&, const label);
 };
 
 

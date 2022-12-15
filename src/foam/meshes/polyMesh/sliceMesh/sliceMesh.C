@@ -312,8 +312,8 @@ void Foam::sliceMesh::renumberFaces()
 Foam::sliceMesh::sliceMesh(const Foam::polyMesh& pm)
 :
     MeshObject<polyMesh, sliceMesh>(pm),
-    numBoundaries_(pm.boundaryMesh().size())
-
+    numBoundaries_(pm.boundaryMesh().size()),
+    boundaryGlobalIndex_(pm.boundaryMesh().size())
 {
     readMesh();
 }
@@ -421,5 +421,22 @@ void Foam::sliceMesh::polyPatches( polyBoundaryMesh& boundary )
         }
     }
 }
+
+
+const Foam::globalIndex&
+Foam::sliceMesh::boundaryGlobalIndex(label patchId)
+{
+    if (!boundaryGlobalIndex_.set(patchId))
+    {
+        boundaryGlobalIndex_.set
+        (
+            patchId,
+            new globalIndex(mesh().boundaryMesh()[patchId].size())
+        );
+    }
+
+    return boundaryGlobalIndex_[patchId];
+}
+
 
 // ************************************************************************* //

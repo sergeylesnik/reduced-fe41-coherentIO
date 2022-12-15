@@ -66,8 +66,7 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
 );
 
 template<>
-Foam::Ostream&
-Foam::OFCstream<fvPatchField, volMesh>::write
+Ostream& OFCstream<fvPatchField, volMesh>::write
 (
     const char* data,
     std::streamsize byteSize

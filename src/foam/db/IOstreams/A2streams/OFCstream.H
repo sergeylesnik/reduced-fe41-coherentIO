@@ -55,7 +55,7 @@ class OFCstream
     // Private data
 
         fileName pathname_;
-        const sliceMesh& sliceableMesh_;
+        sliceMesh& sliceableMesh_;
 
         //- Identifier for the field to be written
         label fieldId_;
@@ -82,16 +82,28 @@ public:
 
     // Destructor
 
-        ~OFCstream();
+        virtual ~OFCstream();
 
 
     // Member functions
 
+        //- Get variable id without "processor.*" if writing a global field
+        virtual string getBlockId() const;
+
         //- Write field with the scalar primitive type
         virtual Ostream& write(const char*, std::streamsize);
 
+        //- Write global field as a single variable
+        void writeGlobalField
+        (
+            const label,
+            const label,
+            const label,
+            const scalar*
+        ) const;
+
         //- Prepare the stream to write a certain field
-        void prepareWrite(label);
+        void prepareWrite(const label);
 
 };
 

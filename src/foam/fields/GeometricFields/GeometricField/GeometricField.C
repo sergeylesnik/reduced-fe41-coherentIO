@@ -1332,9 +1332,9 @@ Foam::Ostream& Foam::operator<<
     {
         OFCstream<PatchField, GeoMesh>& ofc =
             dynamic_cast<OFCstream<PatchField, GeoMesh>& >(os);
-        ofc.prepareWrite(0);
+        ofc.prepareWrite(-1);
         gf.dimensionedInternalField().writeData(os, "internalField");
-        ofc.prepareWrite(1);
+        ofc.prepareWrite(-2);
     }
     else
     {

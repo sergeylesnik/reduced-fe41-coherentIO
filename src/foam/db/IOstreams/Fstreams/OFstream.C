@@ -88,7 +88,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
             // The buffer is written to ADIOS in the destructor.
             ofPtr_ = new std::ostringstream();
 
-            adiosWriting adiosCreator{}; 
+            adiosWriting adiosCreator{};
             adiosStreamPtr_ = adiosCreator.createStream();
             Foam::string type = "fields";
             if ( pathname.find("polyMesh") != std::string::npos ) {
@@ -153,18 +153,6 @@ Foam::OFstream::OFstream
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-void writeLocalString( const Foam::fileName& varName,
-                       const Foam::string& str,
-                       const Foam::label size ) {
-    if ( Foam::Pstream::master() ) {
-        std::ofstream outFile;
-        Foam::mkDir( "fields/" );
-        outFile.open( "fields/" + varName.name(), ios_base::out|ios_base::trunc );
-        outFile << str;
-        outFile.close();
-    }
-}
-
 Foam::OFstream::~OFstream()
 {
     if (isA<std::ostringstream>(*ofPtr_) && format() == IOstream::PARALLEL)
@@ -188,9 +176,9 @@ Foam::OFstream::~OFstream()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::string Foam::OFstream::getBlockId()
+Foam::string Foam::OFstream::getBlockId() const
 {
-    string id = "";
+    fileName id;
     bool firstEntry = true;
 
     forAllConstIter(SLList<word>, blockNamesStack_, iter)
@@ -252,7 +240,7 @@ Foam::word Foam::OFstream::incrBlock(const word name)
 {
     blockNamesStack_.push(name);
 
-    if(debug)
+    if(debug > 1)
     {
         Pout
             << "Add word to the block name LIFO stack: " << name << '\n';
@@ -287,7 +275,7 @@ void Foam::OFstream::decrBlock()
 
 Foam::Ostream& Foam::OFstream::writeKeyword(const keyType& kw)
 {
-    if (debug)
+    if (debug > 1)
     {
         Pout
             << "Add keyType to the block name LIFO stack: " << kw << "\n";
@@ -313,7 +301,7 @@ void Foam::OFstream::popBlockNamesStack()
     }
     else
     {
-        if(debug)
+        if(debug > 1)
         {
             Pout
                 << "Pop block name LIFO stack: "
@@ -342,7 +330,7 @@ Foam::Ostream& Foam::OFstream::parwrite(const parIOType* buf, const label count)
     shapeList[0] = count;
     startList[0] = 0;
     countList[0] = count;
-    
+
     adiosStreamPtr_->beginStep();
     adiosStreamPtr_->transfer( blockId, shapeList, startList, countList, buf );
     adiosStreamPtr_->endStep();
@@ -370,5 +358,27 @@ Foam::Ostream& Foam::OFstream::stringStream()
     tmpOssPtr_ = new OStringStream();
     return *tmpOssPtr_;
 }
+
+
+void Foam::OFstream::writeLocalString
+(
+    const Foam::fileName& varName,
+    const Foam::string& str,
+    const Foam::label size
+)
+{
+    if (Foam::Pstream::master())
+    {
+        std::ofstream outFile;
+        Foam::mkDir("fields/");
+        outFile.open
+        (
+            "fields/" + varName.name(), ios_base::out|ios_base::trunc
+        );
+        outFile << str;
+        outFile.close();
+    }
+}
+
 
 // ************************************************************************* //

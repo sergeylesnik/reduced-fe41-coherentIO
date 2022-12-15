@@ -44,11 +44,15 @@ Foam::OFCstream<PatchField, GeoMesh>::OFCstream
 :
     OFstream(pathname, mode, format, version, compression),
     pathname_(pathname),
-    sliceableMesh_(registry.lookupObject<sliceMesh>(sliceMesh::typeName)),
-    fieldId_(-1)
-{
-    std::cout << "OFCstream I am\n";
-}
+    sliceableMesh_
+    (
+        const_cast<sliceMesh&>
+        (
+            registry.lookupObject<sliceMesh>(sliceMesh::typeName)
+        )
+    ),
+    fieldId_(-2)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
@@ -61,6 +65,32 @@ Foam::OFCstream<PatchField, GeoMesh>::~OFCstream()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<template<class> class PatchField, class GeoMesh>
+Foam::string
+Foam::OFCstream<PatchField, GeoMesh>::getBlockId() const
+{
+    const fileName id = OFstream::getBlockId();
+
+    if (fieldId_ < -1)
+    {
+        return id;
+    }
+
+    const wordList cmpts = id.components();
+    fileName globalId;
+
+    forAll(cmpts, i)
+    {
+        if (cmpts[i].find("processor") == std::string::npos)
+        {
+            globalId += cmpts[i] + '/';
+        }
+    }
+
+    return globalId;
+}
+
+
+template<template<class> class PatchField, class GeoMesh>
 Foam::Ostream&
 Foam::OFCstream<PatchField, GeoMesh>::write
 (
@@ -68,6 +98,14 @@ Foam::OFCstream<PatchField, GeoMesh>::write
     std::streamsize byteSize
 )
 {
+    if (OFstream::debug)
+    {
+        InfoInFunction
+            << "Non-specialized write\n";
+    }
+
+    fieldId_ = -2;
+
     adiosWritePrimitives
     (
         "fields",
@@ -81,7 +119,28 @@ Foam::OFCstream<PatchField, GeoMesh>::write
 
 
 template<template<class> class PatchField, class GeoMesh>
-void Foam::OFCstream<PatchField, GeoMesh>::prepareWrite(label id)
+void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalField
+(
+    const label globalSize,
+    const label offset,
+    const label localSize,
+    const scalar* data
+) const
+{
+    adiosWritePrimitives
+    (
+        "fields",
+        getBlockId(),
+        globalSize,
+        offset,
+        localSize,
+        reinterpret_cast<const scalar*>(data)
+    );
+}
+
+
+template<template<class> class PatchField, class GeoMesh>
+void Foam::OFCstream<PatchField, GeoMesh>::prepareWrite(const label id)
 {
     fieldId_ = id;
 }
