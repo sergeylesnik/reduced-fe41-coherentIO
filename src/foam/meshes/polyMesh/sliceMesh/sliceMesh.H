@@ -89,6 +89,9 @@ class sliceMesh
     faceList globalFaces_{};
     pointField allPoints_{};
     Offsets cellOffsets_{};
+    Offsets faceOffsets_{};
+    Offsets internalSurfaceFieldOffsets_{};
+    std::vector<Offsets> boundarySurfacePatchOffsets_{};
     Offsets pointOffsets_{};
     Slice cellSlice_{};
     Slice pointSlice_{};

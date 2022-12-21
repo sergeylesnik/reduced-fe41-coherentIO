@@ -71,6 +71,25 @@ void Foam::sliceMesh::readMesh()
     adiosReadPrimitives( "mesh", "neighbours", newGlobalNeighbours_.data(), faceStart, faceCount );
     adiosReadToContainer( "mesh", "neighbours", globalNeighbours_, faceStart, faceCount );
 
+    // Offsets for surfaceFields ( owning faces )
+    // Offsets of all faces
+    Foam::Offsets faceOffsets_;
+    faceOffsets_.set( globalNeighbours_.size() );
+    // Offsets of all internal faces
+    auto internal = []( label index ) { return index >= 0; };
+    internalSurfaceFieldOffsets_.set( std::count_if( std::begin( globalNeighbours_ ),
+                                                     std::end( globalNeighbours_ ),
+                                                     internal ) );
+    // Offsets of all physical boundary faces
+    for ( Foam::label patchi = 0; patchi < numBoundaries_; ++patchi ) {
+        auto slicePatchId = Foam::encodeSlicePatchId( patchi );
+        auto boundary = [ slicePatchId ]( Foam::label index ) { return index == slicePatchId; };
+        Foam::Offsets tmpOffsets( std::count_if( std::begin( globalNeighbours_ ),
+                                                 std::end( globalNeighbours_ ),
+                                                 boundary ) );
+        boundarySurfacePatchOffsets_.push_back( tmpOffsets );
+    }
+
     // Reading faceStarts and faces
     std::vector<Foam::label> faceStarts;
     adiosReadToContainer( "mesh", "faceStarts", faceStarts, faceStart, faceCount + 1 );
