@@ -1,14 +1,35 @@
 
 #include "Offsets.H"
 
-Foam::Offsets::Offsets( label value, bool parRun ) {
-    set( value );
+void Foam::Offsets::do_reduce() {
+    label offset = 0;
+    forAll(offsets_, procI)
+    {
+        label oldOffset = offset;
+        offset += offsets_[procI];
+
+        if (offset < oldOffset)
+        {
+            FatalErrorIn("Foam::Offsets")
+                << "Overflow : sum of sizes " << offsets_
+                << " exceeds capability of label (" << labelMax
+                << "). Please recompile with larger datatype for label."
+                << exit(FatalError);
+        }
+        offsets_[procI] = offset;
+    }
 }
 
-void Foam::Offsets::set( Foam::label value ) {
+Foam::Offsets::Offsets( label value, bool parRun, bool reduce ) {
+    set( value, reduce );
+}
+
+void Foam::Offsets::set( Foam::label value, bool reduce ) {
     offsets_[ Foam::Pstream::myProcNo() ] = value;
     Foam::Pstream::gatherList( offsets_ );
     Foam::Pstream::scatterList( offsets_ );
+
+    if ( reduce ) { do_reduce(); }
 
     // If processor does not own corresponding
     // mesh entities. Problem first arised with points.
@@ -30,3 +51,5 @@ Foam::label Foam::Offsets::upperBound( Foam::label myProcNo ) const {
 Foam::label Foam::Offsets::count( Foam::label myProcNo ) const {
     return upperBound( myProcNo ) - lowerBound( myProcNo );
 }
+
+
