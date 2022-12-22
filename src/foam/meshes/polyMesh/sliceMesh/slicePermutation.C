@@ -46,6 +46,13 @@ Foam::label Foam::sliceNeighbourId( const Foam::label& polyFaceId, const Foam::p
     return (patchId != -1) ? encodeSlicePatchId( patchId ) : mesh.faceNeighbour()[ polyFaceId ];
 }
 
+std::vector<Foam::label>
+Foam::createSortedPermutation( const Foam::labelList& input ) {
+    std::vector<Foam::label> indices{};
+    indexIota( indices, input.size(), 0 );
+    indexSort( indices, input );
+    return indices;
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -77,10 +84,7 @@ Foam::slicePermutation::createPolyNeighbourPermutation( const std::vector<Foam::
 
 std::vector<Foam::label>
 Foam::slicePermutation::createSlicePermutation( const Foam::labelList& polyOwner ) {
-    std::vector<Foam::label> indices{};
-    indexIota( indices, polyOwner.size(), 0 );
-    indexSort( indices, polyOwner );
-    return indices;
+    return createSortedPermutation( polyOwner );
 }
 
 

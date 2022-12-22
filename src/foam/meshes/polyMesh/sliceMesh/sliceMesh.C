@@ -124,6 +124,44 @@ void Foam::sliceMesh::readMesh()
     pointSlice_ = Foam::Slice( Pstream::myProcNo(), pointOffsets_ );
 
     if ( Pstream::parRun() ) {
+
+        // permute before processor boundaries have been identified
+        auto permutation = slicePermutation( globalNeighbours_ );
+        std::vector<Foam::label> neighbours{};
+        permutation.copyPolyNeighbours( neighbours );
+        // Identify neighbouring processor and number of shared faces
+        auto procPatchIDsAndSizes = Foam::numFacesToExchange( cellOffsets_, pointOffsets_, neighbours );
+        Foam::label totalSize = std::accumulate( procPatchIDsAndSizes.begin(),
+                                                 procPatchIDsAndSizes.end(),
+                                                 0,
+                                                 [] ( label size, const auto& pair )
+                                                 { return std::move( size ) + pair.second; } );
+        // Resize container for internal face and boundary indices
+        internalFaceIDs_.resize( totalSize );
+        procBoundaryIDs_.resize( totalSize );
+
+        // Loop and fill internal face and boundary indices
+        auto internalFaceIDsIter = internalFaceIDs_.begin();
+        auto procBoundaryIDsIter = procBoundaryIDs_.begin();
+        for ( const auto& procPatchIdAndSize : procPatchIDsAndSizes ) {
+            // Identify processor boundaries in neighbour list
+            Foam::Slice slice( procPatchIdAndSize.first, cellOffsets_ );
+            Foam::sliceProcPatch owningProcPatch( slice, neighbours, numBoundaries_ );
+            // Copy the index to internal face list
+            std::copy( owningProcPatch.begin(),
+                       owningProcPatch.end(),
+                       internalFaceIDsIter );
+            // Copy the boundary index to the corresponding faces
+            std::fill_n( procBoundaryIDsIter,
+                         owningProcPatch.size(),
+                         owningProcPatch.id() );
+        }
+        // Sort the face indices to the internal list and
+        // permute the processor boundary indices accordingly
+        auto sortedPermutation = createSortedPermutation( internalFaceIDs_ );
+        applyPermutation( internalFaceIDs_, sortedPermutation );
+        applyPermutation( procBoundaryIDs_, sortedPermutation );
+
        commSlicePatches();
        commSharedPoints();
        renumberFaces();

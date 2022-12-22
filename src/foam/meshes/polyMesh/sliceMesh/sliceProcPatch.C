@@ -13,7 +13,7 @@ Foam::sliceProcPatch::sliceProcPatch( const Foam::Slice& slice,
                                       const Foam::label& numBoundaries )
     : numNonProcPatches_{ numBoundaries }
     , slice_{ slice }
-    , localFaceIDs_{ countFaces( neighbours ) }
+    , localFaceIDs_{ countNeighOfSlice( neighbours, slice_ ) }
     , procBoundaryName_{ word("procBoundary") +
                          Foam::name( Pstream::myProcNo() ) +
                          word("to") +
@@ -35,6 +35,7 @@ Foam::sliceProcPatch::sliceProcPatch( const sliceProcPatch& other ) :
     ++instanceCount_; 
 }
 
+//TODO: Must not be copyable because of instanceCount_ consider move semantics only
 Foam::sliceProcPatch&
 Foam::sliceProcPatch::operator=( Foam::sliceProcPatch const& other ) 
 {

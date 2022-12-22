@@ -52,6 +52,7 @@ class pointMesh;
 label encodeSlicePatchId( const label& );
 label decodeSlicePatchId( const label& );
 label sliceNeighbourId( const label&, const polyMesh&);
+std::vector<label> createSortedPermutation( const labelList& input );
 
 /*---------------------------------------------------------------------------*\
                        Class slicePermutation Declaration

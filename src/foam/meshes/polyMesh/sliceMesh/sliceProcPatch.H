@@ -18,10 +18,18 @@ namespace Foam
 template<typename SomeList, typename IndexList>
 SomeList extractor( const SomeList& input, const IndexList& extractorList );
 
+template<typename Container>
+label countNeighOfSlice( const Container& neighbours, const Slice& slice ) {
+    return std::count_if( neighbours.begin(), neighbours.end(), slice );
+}
+
 // Forward declaration
 class Offsets;
 
 class sliceProcPatch {
+
+    using index_container = labelList;
+    using iterator = index_container::iterator;
 
     static label instanceCount_;
 
@@ -30,8 +38,13 @@ class sliceProcPatch {
 
     Slice slice_{};
 
-    labelList localFaceIDs_{};
-    labelList localPointIDs_{};
+    // Indices in face ordered list
+    // that belong to this processor boundary
+    index_container localFaceIDs_{};
+
+    // Indices in point ordered list
+    // that belong to this processor boundary
+    index_container localPointIDs_{};
 
     word procBoundaryName_{};
 
@@ -41,7 +54,6 @@ public:
     sliceProcPatch( const Foam::Slice&,
                     const std::vector<label>&,
                     const Foam::label& );
-
 
     // Copy constructor
     sliceProcPatch( const sliceProcPatch& );
@@ -54,16 +66,14 @@ public:
 
     void swap( sliceProcPatch& ) noexcept;
 
+    // Returns the processor boundary index
+    // with account of physical boundaries
     label id() { return id_; }
 
     word name() { return procBoundaryName_; }
 
+    // Returns the neighbouring processor
     label partner() { return slice_.partition(); }
-
-    template<typename Container>
-    label countFaces( const Container& neighbours ) {
-        return std::count_if( neighbours.begin(), neighbours.end(), slice_ );
-    }
 
     void determineFaceIDs( const std::vector<label>& );
 
@@ -80,6 +90,10 @@ public:
     }
 
     pointField extractPoints( const pointField& input );
+
+    iterator begin() { return localFaceIDs_.begin(); }
+    iterator end() { return localFaceIDs_.end(); }
+    label size() { return localFaceIDs_.size(); }
 };
 
 void swap( sliceProcPatch&, sliceProcPatch& ) noexcept;

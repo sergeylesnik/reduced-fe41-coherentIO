@@ -99,6 +99,13 @@ class sliceMesh
     slicePermutation sliceablePermutation_{};
     PtrList<globalIndex> boundaryGlobalIndex_;
 
+    // Internal face indices
+    // in processor boundaries
+    Foam::labelList internalFaceIDs_;
+    // Processor boundary indices of internal faces
+    // participating in a processor boundary
+    Foam::labelList procBoundaryIDs_;
+
     // Private Member Functions
     void readMesh();
 
@@ -131,6 +138,17 @@ public:
             {
                 return cellOffsets_;
             }
+
+            inline const labelList& internalFaceIDsFromBoundaries() const
+            {
+                return internalFaceIDs_;
+            }
+
+            inline const labelList& boundryIDsFromInternalFaces() const
+            {
+                return procBoundaryIDs_;
+            }
+
 
     labelList polyNeighbours();
     labelList polyOwner();
