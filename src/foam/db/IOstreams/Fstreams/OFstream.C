@@ -246,13 +246,13 @@ Foam::word Foam::OFstream::incrBlock(const word name)
             << "Add word to the block name LIFO stack: " << name << '\n';
     }
 
-    this->indent();
-    this->write(name);
-    this->write(nl);
-    this->indent();
-    this->write(char(token::BEGIN_BLOCK));
-    this->write(nl);
-    this->incrIndent();
+    OSstream::indent();
+    OSstream::write(name);
+    OSstream::write(nl);
+    OSstream::indent();
+    OSstream::write(char(token::BEGIN_BLOCK));
+    OSstream::write(nl);
+    OSstream::incrIndent();
 
     return name;
 }
@@ -267,9 +267,9 @@ void Foam::OFstream::decrBlock()
 
     popBlockNamesStack();
 
-    this->decrIndent();
-    this->indent();
-    this->write(char(token::END_BLOCK));
+    OSstream::decrIndent();
+    OSstream::indent();
+    OSstream::write(char(token::END_BLOCK));
 }
 
 
@@ -310,6 +310,24 @@ void Foam::OFstream::popBlockNamesStack()
 
         blockNamesStack_.pop();
     }
+}
+
+
+Foam::Ostream& Foam::OFstream::write
+(
+    const char* data,
+    std::streamsize byteSize
+)
+{
+    adiosWritePrimitives
+    (
+        "fields",
+        this->getBlockId(),
+        byteSize/sizeof(scalar),
+        reinterpret_cast<const scalar*>(data)
+    );
+
+    return *this;
 }
 
 

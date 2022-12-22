@@ -181,6 +181,9 @@ public:
 
             virtual void popBlockNamesStack();
 
+            //- Write field with the scalar primitive type
+            virtual Ostream& write(const char*, std::streamsize);
+
             virtual Ostream& parwrite(const parIOType*, const label);
 
             virtual Ostream& stringStream();
