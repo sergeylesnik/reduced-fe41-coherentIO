@@ -41,25 +41,32 @@ namespace Foam
 
 class string;
 
-List<Foam::label> createList( std::initializer_list<Foam::label> input );
+void adiosReadPrimitives
+(
+    const string type,
+    const string name,
+    scalar* buf,
+    const List<label>& start = {},
+    const List<label>& count = {}
+);
 
-void adiosReadPrimitives( const string type,
-                          const string name,
-                          scalar* buf,
-                          const List<label>& start = {},
-                          const List<label>& count = {} );
+void adiosReadPrimitives
+(
+    const string type,
+    const string name,
+    label* buf,
+    const List<label>& start = {},
+    const List<label>& count = {}
+);
 
-void adiosReadPrimitives( const string type,
-                          const string name,
-                          label* buf,
-                          const List<label>& start = {},
-                          const List<label>& count = {} );
-
-void adiosReadPrimitives( const string type,
-                          const string name,
-                          char* buf,
-                          const List<label>& start = {},
-                          const List<label>& count = {} );
+void adiosReadPrimitives
+(
+    const string type,
+    const string name,
+    char* buf,
+    const List<label>& start = {},
+    const List<label>& count = {}
+);
 
 } // End namespace Foam
 
@@ -86,13 +93,14 @@ void Foam::adiosReadPrimitives( const Foam::string type,
     auto startList = start;
     auto countList = count;
     if ( start.size() > 0 && count.size() > 0 ) {
-        startList = Foam::createList( { start[0], 0 } );
-        countList = Foam::createList( { count[0], buf[0].size() } );
+        startList = Foam::List<Foam::label>( { start[0], 0 } );
+        countList = Foam::List<Foam::label>( { count[0], buf[0].size() } );
     }
     Foam::adiosReadPrimitives( type, name, reinterpret_cast<scalar*>( buf ), startList, countList );
 }
 
 
+// if T is arithmetic
 template< typename T,
           typename Integral,
           std::enable_if_t< std::is_arithmetic<T>::value, void >* = nullptr,
@@ -105,9 +113,25 @@ void Foam::adiosReadPrimitives( const Foam::string type,
     Foam::List<Integral> startList{};
     Foam::List<Integral> countList{};
     if ( start > -1 && count > -1 ) {
-        startList = Foam::createList( { start } );
-        countList = Foam::createList( { count } );
+        startList = Foam::List<Foam::label>( { start } );
+        countList = Foam::List<Foam::label>( { count } );
     }
+    Foam::adiosReadPrimitives( type, name, buf, startList, countList );
+}
+
+
+// if T is vector space
+template< typename T,
+          typename Integral,
+          std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr,
+          std::enable_if_t< std::is_integral<Integral>::value, void >* = nullptr >
+void Foam::adiosReadPrimitives( const Foam::string type,
+                                const Foam::string name,
+                                T* buf,
+                                Integral start = -1,
+                                Integral count = -1 ) {
+    Foam::List<Integral> startList( { start } );
+    Foam::List<Integral> countList( { count } );
     Foam::adiosReadPrimitives( type, name, buf, startList, countList );
 }
 

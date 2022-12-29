@@ -31,44 +31,85 @@ License
 #include "foamString.H"
 #include "labelList.H"
 
-Foam::List<Foam::label> Foam::create2DList( const Foam::label& val0,
-                                            const Foam::label& val1 ) {
-    Foam::List<Foam::label> ret{2};
-    ret[0] = val0;
-    ret[1] = val1;
-    return ret;
-};
-
-void Foam::adiosWritePrimitives( const Foam::string type,
-                                 const Foam::string blockId,
-                                 const Foam::label count,
-                                 const Foam::scalar* buf ) {
-    auto adiosStreamPtr = adiosWriting{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, count, 0, count, buf );
-}
-
-void Foam::adiosWritePrimitives( const Foam::string type,
-                                 const Foam::string blockId,
-                                 const Foam::label count,
-                                 const Foam::label* buf ) {
-    auto adiosStreamPtr = adiosWriting{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->transfer( blockId, count, 0, count, buf );
-}
-
-void Foam::adiosWritePrimitives( const Foam::string type,
-                                 const Foam::string blockId,
-                                 const Foam::List<label> shape,
-                                 const Foam::List<label> start,
-                                 const Foam::List<label> count,
-                                 const Foam::scalar* buf ) {
-    auto adiosStreamPtr = adiosWriting{}.createStream();
+template< typename T >
+void _implWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string blockId,
+    const Foam::labelList& shape,
+    const Foam::labelList& start,
+    const Foam::labelList& count,
+    const T* buf
+)
+{
+    auto adiosStreamPtr = Foam::adiosWriting{}.createStream();
     adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, shape, start, count, buf );
 }
 
+//- Write local array
+void Foam::adiosWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string blockId,
+    const Foam::label count,
+    const Foam::scalar* buf
+)
+{
+    _implWritePrimitives
+    (
+        type,
+        blockId,
+        { count },
+        { 0 },
+        { count },
+        buf
+    );
+}
 
+//- Write local array
+void Foam::adiosWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string blockId,
+    const Foam::label count,
+    const Foam::label* buf
+)
+{
+    _implWritePrimitives
+    (
+        type,
+        blockId,
+        { count },
+        { 0 },
+        { count },
+        buf
+    );
+}
+
+//- Write global n-dimensional array
+void Foam::adiosWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string blockId,
+    const Foam::List<label> shape,
+    const Foam::List<label> start,
+    const Foam::List<label> count,
+    const Foam::scalar* buf
+)
+{
+    _implWritePrimitives
+    (
+        type,
+        blockId,
+        shape,
+        start,
+        count,
+        buf
+    );
+}
+
+//- Write global array
 void Foam::adiosWritePrimitives
 (
     const Foam::string type,
@@ -79,9 +120,15 @@ void Foam::adiosWritePrimitives
     const Foam::scalar* buf
 )
 {
-    auto adiosStreamPtr = adiosWriting{}.createStream();
-    adiosStreamPtr->open(type);
-    adiosStreamPtr->transfer(blockId, shape, start, count, buf);
+    _implWritePrimitives
+    (
+        type,
+        blockId,
+        { shape },
+        { start },
+        { count },
+        buf
+    );
 }
 
 // ************************************************************************* //

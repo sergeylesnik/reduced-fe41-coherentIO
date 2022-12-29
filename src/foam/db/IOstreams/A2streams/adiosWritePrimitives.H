@@ -39,24 +39,34 @@ namespace Foam
 class string;
 template<typename T> class List;
 
-List<label> create2DList( const label& val0, const label& val1 );
+//- Write local array
+void adiosWritePrimitives
+(
+    const string type,
+    const string blockId,
+    const label count,
+    const scalar* buf
+);
 
-void adiosWritePrimitives( const string type,
-                           const string blockId,
-                           const label count,
-                           const scalar* buf );
+//- Write local array
+void adiosWritePrimitives
+(
+    const string type,
+    const string blockId,
+    const label count,
+    const label* buf
+);
 
-void adiosWritePrimitives( const string type,
-                           const string blockId,
-                           const label count,
-                           const label* buf );
-
-void adiosWritePrimitives( const string type,
-                           const string blockId,
-                           const List<label> shape,
-                           const List<label> start,
-                           const List<label> count,
-                           const scalar* buf );
+//- Write global n-dimensional array
+void adiosWritePrimitives
+(
+    const string type,
+    const string blockId,
+    const List<label> shape,
+    const List<label> start,
+    const List<label> count,
+    const scalar* buf
+);
 
 //- Write global array
 void adiosWritePrimitives
@@ -83,14 +93,34 @@ void Foam::adiosWritePrimitives( const Foam::string type,
     std::cout << name << "\n";
 }
 
+//- Write local array
 template< typename T, std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr >
 void Foam::adiosWritePrimitives( const Foam::string type,
                                  const Foam::string name,
                                  const Foam::label count,
                                  const T* buf ) {
-    Foam::List<Foam::label> shapeList = create2DList( count, buf[0].size() );
-    Foam::List<Foam::label> startList = create2DList( 0, 0 );
+    Foam::List<Foam::label> shapeList( { count, buf[0].size() } );
+    Foam::List<Foam::label> startList( { 0, 0 } );
     Foam::List<Foam::label> countList{ shapeList };
+    adiosWritePrimitives( type,
+                          name,
+                          shapeList,
+                          startList,
+                          countList,
+                          reinterpret_cast<const Foam::scalar*>( buf ) );
+}
+
+//- Write global array
+template< typename T, std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr >
+void Foam::adiosWritePrimitives( const Foam::string type,
+                                 const Foam::string name,
+                                 const Foam::label shape,
+                                 const Foam::label start,
+                                 const Foam::label count,
+                                 const T* buf ) {
+    Foam::List<Foam::label> shapeList( { shape, buf[0].size() } );
+    Foam::List<Foam::label> startList( { start, 0 } );
+    Foam::List<Foam::label> countList( { count, buf[0].size() } );
     adiosWritePrimitives( type,
                           name,
                           shapeList,

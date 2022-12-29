@@ -1490,7 +1490,7 @@ template<typename T>
 Foam::labelList determineOffsets2D( const T& input2DList )
 {
     Foam::label offset = 0;
-    Foam::labelList offsets{ input2DList.size() + 1, 0 };
+    Foam::labelList offsets( input2DList.size() + 1, 0 );
     forAll( input2DList, i )
     {
        offset += input2DList[i].size();
