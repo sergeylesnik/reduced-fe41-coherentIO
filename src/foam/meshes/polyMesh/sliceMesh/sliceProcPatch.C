@@ -13,7 +13,7 @@ Foam::sliceProcPatch::sliceProcPatch( const Foam::Slice& slice,
                                       const Foam::label& numBoundaries )
     : numNonProcPatches_{ numBoundaries }
     , slice_{ slice }
-    , localFaceIDs_{ countNeighOfSlice( neighbours, slice_ ) }
+    , localFaceIDs_{ labelList( countNeighOfSlice( neighbours, slice_ ) ) }
     , procBoundaryName_{ word("procBoundary") +
                          Foam::name( Pstream::myProcNo() ) +
                          word("to") +
@@ -28,8 +28,8 @@ Foam::sliceProcPatch::sliceProcPatch( const Foam::Slice& slice,
 Foam::sliceProcPatch::sliceProcPatch( const sliceProcPatch& other ) :
     id_{ other.id_ },
     slice_{ other.slice_ },
-    localFaceIDs_{ other.localFaceIDs_ },
-    localPointIDs_{ other.localPointIDs_ },
+    localFaceIDs_{ other.localFaceIDs_.begin(), other.localFaceIDs_.end() },
+    localPointIDs_{ other.localPointIDs_.begin(), other.localPointIDs_.end()},
     procBoundaryName_{ other.procBoundaryName_ }
 { 
     ++instanceCount_; 

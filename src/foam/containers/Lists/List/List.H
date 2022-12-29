@@ -46,6 +46,8 @@ SourceFiles
 
 #include "className.H"
 
+#include <initializer_list>
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -173,6 +175,9 @@ public:
 
         //- Construct from Istream.
         List(Istream&);
+
+        //- Construct from std::initializer_list.
+        List(std::initializer_list<T>&& lst);
 
         //- Clone
         inline autoPtr<List<T> > clone() const;

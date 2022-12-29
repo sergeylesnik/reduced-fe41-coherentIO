@@ -257,6 +257,12 @@ Foam::List<T>::List(const BiIndirectList<T>& lst)
     allocCopyList(lst);
 }
 
+// Construct from std::initializer_list
+template<class T>
+Foam::List<T>::List(std::initializer_list<T>&& lst)
+:
+    List<T>(lst.begin(), lst.end())
+{}
 
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 

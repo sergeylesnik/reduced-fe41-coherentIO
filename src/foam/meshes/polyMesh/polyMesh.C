@@ -1512,17 +1512,17 @@ bool Foam::polyMesh::write() const
         slicePermutation sliceablePermutation{ *this };
 
         // Re-order faces
-        faceList adiosFaces{ allFaces_ };
+        faceList adiosFaces( allFaces_ );
         sliceablePermutation.generateSlice( adiosFaces );
-        Foam::labelList adiosOwner{ owner_ };
+        Foam::labelList adiosOwner( owner_ );
         sliceablePermutation.generateSlice( adiosOwner );
-        Foam::pointField adiosPoints{ allPoints_ };
+        Foam::pointField adiosPoints( allPoints_ );
         sliceablePermutation.generateSlice( adiosPoints );
 
         // Linearize faces and points
         label k = 0;
         Foam::label linearSizeOfFaces = allFaces_.linearSize();
-        Foam::List<Foam::label> linearizedAdiosFaces{ linearSizeOfFaces, 0 };
+        Foam::List<Foam::label> linearizedAdiosFaces( linearSizeOfFaces, 0 );
         forAll( adiosFaces, i ) {
            forAll( adiosFaces[i], j ) {
                linearizedAdiosFaces[k] = adiosFaces[i][j];
@@ -1530,7 +1530,7 @@ bool Foam::polyMesh::write() const
            }
         }
 
-        Foam::List<Foam::scalar> linearizedPoints{ 3*allPoints_.size(), 0.0 };
+        Foam::List<Foam::scalar> linearizedPoints( 3*allPoints_.size(), 0.0 );
         forAll( adiosPoints, i ) {
            linearizedPoints[i*3] = adiosPoints[i][0];
            linearizedPoints[i*3+1] = adiosPoints[i][1];
@@ -1543,7 +1543,7 @@ bool Foam::polyMesh::write() const
         adiosWritePrimitives( "mesh", "points", adiosPoints.size(), adiosPoints.cdata() );
 
         // Generate ownerStarts
-        labelList ownerStarts{ cells().size() + 1, 0 };
+        labelList ownerStarts( cells().size() + 1, 0 );
         label ownerStart = 0;
         forAll( adiosOwner, i ) {
             if( adiosOwner[i] == (ownerStart + 1) ) {

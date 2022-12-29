@@ -106,10 +106,10 @@ void Foam::sliceMesh::readMesh()
     pointOffsets_.set( *std::max_element( linearizedFaces.begin(), linearizedFaces.end() ) + 1 );
 
     // Reading points
-    Foam::labelList pointStart{2};
+    Foam::labelList pointStart( 2 );
     pointStart[0] = pointOffsets_.lowerBound( Pstream::myProcNo() );
     pointStart[1] = 0;
-    Foam::labelList pointCount{2};
+    Foam::labelList pointCount( 2 );
     pointCount[0] = pointOffsets_.count( Pstream::myProcNo() );
     pointCount[1] = 3;
     allPoints_.resize( pointOffsets_.count( Pstream::myProcNo() ) );

@@ -110,7 +110,7 @@ Foam::slicePermutation::slicePermutation( const std::vector<Foam::label>& sliceN
 Foam::slicePermutation::slicePermutation( const polyMesh& mesh ) :
     permutationToSlice_{ createSlicePermutation( mesh.faceOwner() ) }
 {
-    Foam::faceList sliceFaces{ mesh.allFaces() };
+    Foam::faceList sliceFaces( mesh.allFaces() );
     mapToSlice( sliceFaces );
     createPointPermutation( sliceFaces, mesh.nPoints() );
 }
@@ -120,7 +120,7 @@ Foam::slicePermutation::slicePermutation( const Foam::labelList& faceOwner,
                             const Foam::label& nPoints ) :
     permutationToSlice_{ createSlicePermutation( faceOwner ) }
 {
-    Foam::faceList sliceFaces{ allFaces };
+    Foam::faceList sliceFaces( allFaces );
     mapToSlice( sliceFaces );
     createPointPermutation( sliceFaces, nPoints );
 }
