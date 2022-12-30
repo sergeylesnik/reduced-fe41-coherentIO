@@ -1,9 +1,16 @@
 #ifndef adiosRepo_H
 #define adiosRepo_H
 
-#include "adios2.h"
-
 #include "label.H"
+
+#include <map>
+#include <memory>
+
+namespace adios2 {
+    class ADIOS;
+    class IO;
+    class Engine;
+}
 
 namespace Foam
 {
@@ -14,11 +21,9 @@ class adiosBuffer;
 
 class adiosRepo {
 
-    static std::unique_ptr<adios2::ADIOS> adiosPtr_;
-    static std::unique_ptr<std::map<Foam::string, std::shared_ptr<adios2::IO> > > ioMap_;
-    static std::unique_ptr<std::map<Foam::string, std::shared_ptr<adios2::Engine> > > engineMap_;
-    static std::unique_ptr<std::map<Foam::string, std::shared_ptr<adiosBuffer> > > bufferMap_;
-    
+    class Impl;
+    static std::unique_ptr<Impl> pimpl_;
+
     std::map<Foam::string, std::shared_ptr<adios2::IO> >* get( const std::shared_ptr<adios2::IO>& );
     std::map<Foam::string, std::shared_ptr<adios2::Engine> >* get( const std::shared_ptr<adios2::Engine>& );
     std::map<Foam::string, std::shared_ptr<adiosBuffer> >* get( const std::shared_ptr<adiosBuffer>& );
@@ -28,6 +33,7 @@ class adiosRepo {
 public:
 
     adiosRepo();
+    ~adiosRepo();
 
     adios2::ADIOS* pullADIOS();
 

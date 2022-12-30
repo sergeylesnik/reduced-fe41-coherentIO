@@ -2,7 +2,13 @@
 #ifndef adiosFeatures_H
 #define adiosFeatures_H
 
-#include "adios2.h"
+#include <memory>
+
+namespace adios2 {
+    class ADIOS;
+    class IO;
+    class Engine;
+}
 
 namespace Foam
 {

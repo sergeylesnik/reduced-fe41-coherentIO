@@ -1,6 +1,7 @@
 
 #include "adiosInputFeatures.H"
 
+#include "adios2.h"
 #include "IO.h"
 #include "Engine.h"
 
