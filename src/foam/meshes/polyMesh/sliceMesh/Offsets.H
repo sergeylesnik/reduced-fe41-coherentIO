@@ -27,6 +27,9 @@ public:
     label upperBound( label ) const;
     label count( label ) const;
 
+    label front() const { return lowerBound( Pstream::myProcNo() ); };
+    label back() const { return upperBound( Pstream::myProcNo() ); };
+    label size() const { return count( Pstream::myProcNo() ); };
 };
 
 }

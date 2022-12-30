@@ -34,8 +34,15 @@ License
 
 #include "processorPolyPatch.H"
 
+#include "DataComponent.H"
+#include "OffsetStrategies.H"
+#include "IndexComponent.H"
+#include "FieldComponent.H"
+#include "SliceDecorator.H"
+
 #include <numeric>
 #include <cmath>
+#include <functional> // std::bind, std::placeholders
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -47,121 +54,103 @@ defineTypeNameAndDebug(Foam::sliceMesh, 0);
 
 void Foam::sliceMesh::readMesh()
 {
-    // Reading owners
-    std::vector<Foam::label> ownerStarts;
+    Foam::IndexComponent meshSlice{};
     if ( Pstream::parRun() ) {
-        Foam::label start = Pstream::myProcNo();
-        const Foam::label count = 1;
-        std::vector<Foam::label> partitionStarts;
-        adiosReadToContainer( "mesh", "partitionStarts", partitionStarts, start, count + 1 );
-        cellOffsets_.set( partitionStarts.back() );
-        Foam::label cellStart = cellOffsets_.lowerBound( Pstream::myProcNo() );
-        Foam::label cellCount = cellOffsets_.count( Pstream::myProcNo() );
-
-        adiosReadToContainer( "mesh", "ownerStarts", ownerStarts, cellStart, cellCount + 1 );
+        meshSlice.add( "mesh",
+                       "partitionStarts",
+                       Foam::start_from_myProcNo,
+                       Foam::count_two );
+        meshSlice.node( "partitionStarts" )->add( "mesh",
+                                                  "ownerStarts",
+                                                  Foam::start_from_front,
+                                                  Foam::count_from_front_plus_one );
     } else {
-        adiosReadToContainer( "mesh", "ownerStarts", ownerStarts );
-        cellOffsets_.set( ownerStarts.size() );
+        meshSlice.add( "mesh", "ownerStarts" );
     }
 
-    // Reading neighbours and patches
-    Foam::label faceStart = ownerStarts.front();
-    Foam::label faceCount = ownerStarts.back() - ownerStarts.front();
-    newGlobalNeighbours_.resize( faceCount, 0 );
-    adiosReadPrimitives( "mesh", "neighbours", newGlobalNeighbours_.data(), faceStart, faceCount );
-    adiosReadToContainer( "mesh", "neighbours", globalNeighbours_, faceStart, faceCount );
+    meshSlice.node( "ownerStarts" )->add( "offsets",
+                                          "cellOffsets",
+                                          nullptr,
+                                          Foam::offset_by_size_minus_one );
+    meshSlice.decorate<Foam::SliceDecorator>( "cellOffsets" );
 
-    // Offsets for surfaceFields ( owning faces )
-    // Offsets of all faces
-    Foam::Offsets faceOffsets_;
-    faceOffsets_.set( globalNeighbours_.size() );
-    // Offsets of all internal faces
-    auto internal = []( label index ) { return index >= 0; };
-    Foam::label numInternalFaces = std::count_if( std::begin( globalNeighbours_ ),
-                                                  std::end( globalNeighbours_ ),
-                                                  internal );
-    internalSurfaceFieldOffsets_.set( numInternalFaces, true );
-    // Offsets of all physical boundary faces
+    meshSlice.node( "ownerStarts" )->add( "mesh",
+                                          "neighbours",
+                                          Foam::start_from_front,
+                                          Foam::count_from_front );
+
+    meshSlice.node( "neighbours" )->add( "offsets",
+                                         "faceOffsets",
+                                         nullptr,
+                                         Foam::count_from_size );
+
+    meshSlice.node( "neighbours" )->add( "offsets",
+                                         "internalFaceOffsets",
+                                         nullptr,
+                                         Foam::count_geq( 0 ) );
+
     for ( Foam::label patchi = 0; patchi < numBoundaries_; ++patchi ) {
         auto slicePatchId = Foam::encodeSlicePatchId( patchi );
-        auto boundary = [ slicePatchId ]( Foam::label index ) { return index == slicePatchId; };
-        Foam::Offsets patchOffsets;
-        Foam::label numBoundaryPatchFaces = std::count_if( std::begin( globalNeighbours_ ),
-                                                           std::end( globalNeighbours_ ),
-                                                           boundary );
-        patchOffsets.set( numBoundaryPatchFaces, true );
-        boundarySurfacePatchOffsets_.push_back( patchOffsets );
+        meshSlice.node( "neighbours")->add( "offsets",
+                                            "boundaryFaceOffsets" + std::to_string( patchi ),
+                                            nullptr,
+                                            Foam::count_eq( slicePatchId ) );
     }
 
-    // Reading faceStarts and faces
-    std::vector<Foam::label> faceStarts;
-    adiosReadToContainer( "mesh", "faceStarts", faceStarts, faceStart, faceCount + 1 );
+    meshSlice.node( "ownerStarts" )->add( "mesh",
+                                          "faceStarts",
+                                          Foam::start_from_front,
+                                          Foam::count_from_front_plus_one );
 
-    std::vector<Foam::label> linearizedFaces;
-    Foam::label facePointStart = faceStarts.front();
-    Foam::label facePointCount = faceStarts.back() - faceStarts.front();
-    adiosReadToContainer( "mesh", "faces", linearizedFaces, facePointStart, facePointCount );
+    meshSlice.node( "faceStarts" )->add( "mesh",
+                                         "faces",
+                                         Foam::start_from_front,
+                                         Foam::count_from_front );
 
-    // Create and communicate offset lists for mesh entity exchange
-    pointOffsets_.set( *std::max_element( linearizedFaces.begin(), linearizedFaces.end() ) + 1 );
+    meshSlice.node( "faces" )->add( "offsets",
+                                    "pointOffsets",
+                                     Foam::offset_by_max_plus_one,
+                                     nullptr );
+    meshSlice.decorate<Foam::SliceDecorator>( "pointOffsets" );
 
-    // Reading points
-    Foam::labelList pointStart( 2 );
-    pointStart[0] = pointOffsets_.lowerBound( Pstream::myProcNo() );
-    pointStart[1] = 0;
-    Foam::labelList pointCount( 2 );
-    pointCount[0] = pointOffsets_.count( Pstream::myProcNo() );
-    pointCount[1] = 3;
-    allPoints_.resize( pointOffsets_.count( Pstream::myProcNo() ) );
-    if ( pointCount[0] > 0 ) {
-        adiosReadPrimitives( "mesh", "points", allPoints_.data(), pointStart, pointCount );
-    }
+    meshSlice.node( "pointOffsets" )->add<FieldComponent<pointField> >( "mesh",
+                                                                        "points",
+                                                                        Foam::start_from_front,
+                                                                        Foam::count_from_front );
 
+    meshSlice.initialize();
+
+    std::vector<Foam::label> ownerStarts;
+    meshSlice.node( "ownerStarts" )->extract( ownerStarts );
     localOwner_ = serializeOwner( ownerStarts );
+
+    meshSlice.node( "neighbours" )->extract( globalNeighbours_ );
+    meshSlice.node( "neighbours" )->extract( newGlobalNeighbours_ );
+
+    std::vector<Foam::label> faceStarts;
+    std::vector<Foam::label> linearizedFaces;
+    meshSlice.node( "faceStarts" )->extract( faceStarts );
+    meshSlice.node( "faces" )->extract( linearizedFaces );
     globalFaces_ = deserializeFaces( faceStarts, linearizedFaces );
 
-    cellSlice_ = Foam::Slice( Pstream::myProcNo(), cellOffsets_ );
-    pointSlice_ = Foam::Slice( Pstream::myProcNo(), pointOffsets_ );
+    meshSlice.node( "points" )->extract( allPoints_ );
+
+    meshSlice.node( "cellOffsets" )->extract( cellOffsets_ );
+    meshSlice.node( "faceOffsets" )->extract( faceOffsets_ );
+    meshSlice.node( "internalFaceOffsets" )->extract( internalSurfaceFieldOffsets_ );
+    for ( Foam::label patchi = 0; patchi < numBoundaries_; ++patchi ) {
+        Foam::Offsets patchOffsets;
+        meshSlice.node( "boundaryFaceOffsets" + std::to_string( patchi ) )
+            ->extract( patchOffsets );
+        boundarySurfacePatchOffsets_.push_back( patchOffsets );
+    }
+    meshSlice.node( "pointOffsets" )->extract( pointOffsets_ );
+
+    meshSlice.node( "cellOffsets" )->extract( cellSlice_ );
+    meshSlice.node( "pointOffsets" )->extract( pointSlice_ );
 
     if ( Pstream::parRun() ) {
-
-        // permute before processor boundaries have been identified
-        auto permutation = slicePermutation( globalNeighbours_ );
-        std::vector<Foam::label> neighbours{};
-        permutation.copyPolyNeighbours( neighbours );
-        // Identify neighbouring processor and number of shared faces
-        auto procPatchIDsAndSizes = Foam::numFacesToExchange( cellOffsets_, pointOffsets_, neighbours );
-        Foam::label totalSize = std::accumulate( procPatchIDsAndSizes.begin(),
-                                                 procPatchIDsAndSizes.end(),
-                                                 0,
-                                                 [] ( label size, const auto& pair )
-                                                 { return std::move( size ) + pair.second; } );
-        // Resize container for internal face and boundary indices
-        internalFaceIDs_.resize( totalSize );
-        procBoundaryIDs_.resize( totalSize );
-
-        // Loop and fill internal face and boundary indices
-        auto internalFaceIDsIter = internalFaceIDs_.begin();
-        auto procBoundaryIDsIter = procBoundaryIDs_.begin();
-        for ( const auto& procPatchIdAndSize : procPatchIDsAndSizes ) {
-            // Identify processor boundaries in neighbour list
-            Foam::Slice slice( procPatchIdAndSize.first, cellOffsets_ );
-            Foam::sliceProcPatch owningProcPatch( slice, neighbours, numBoundaries_ );
-            // Copy the index to internal face list
-            std::copy( owningProcPatch.begin(),
-                       owningProcPatch.end(),
-                       internalFaceIDsIter );
-            // Copy the boundary index to the corresponding faces
-            std::fill_n( procBoundaryIDsIter,
-                         owningProcPatch.size(),
-                         owningProcPatch.id() );
-        }
-        // Sort the face indices to the internal list and
-        // permute the processor boundary indices accordingly
-        auto sortedPermutation = createSortedPermutation( internalFaceIDs_ );
-        applyPermutation( internalFaceIDs_, sortedPermutation );
-        applyPermutation( procBoundaryIDs_, sortedPermutation );
-
+       initializeSurfaceFieldMappings();
        commSlicePatches();
        commSharedPoints();
        renumberFaces();
@@ -365,6 +354,45 @@ void Foam::sliceMesh::renumberFaces()
                         [ this ] ( const auto& id )
                         { return pointSlice_.convert( id ); } );
     }
+}
+
+void Foam::sliceMesh::initializeSurfaceFieldMappings() {
+    // permute before processor boundaries have been identified
+    auto permutation = slicePermutation( globalNeighbours_ );
+    std::vector<Foam::label> neighbours{};
+    permutation.copyPolyNeighbours( neighbours );
+    // Identify neighbouring processor and number of shared faces
+    auto procPatchIDsAndSizes = Foam::numFacesToExchange( cellOffsets_, pointOffsets_, neighbours );
+    Foam::label totalSize = std::accumulate( procPatchIDsAndSizes.begin(),
+                                             procPatchIDsAndSizes.end(),
+                                             0,
+                                             [] ( label size, const auto& pair )
+                                             { return std::move( size ) + pair.second; } );
+    // Resize container for internal face and boundary indices
+    internalFaceIDs_.resize( totalSize );
+    procBoundaryIDs_.resize( totalSize );
+
+    // Loop and fill internal face and boundary indices
+    auto internalFaceIDsIter = internalFaceIDs_.begin();
+    auto procBoundaryIDsIter = procBoundaryIDs_.begin();
+    for ( const auto& procPatchIdAndSize : procPatchIDsAndSizes ) {
+        // Identify processor boundaries in neighbour list
+        Foam::Slice slice( procPatchIdAndSize.first, cellOffsets_ );
+        Foam::sliceProcPatch owningProcPatch( slice, neighbours, numBoundaries_ );
+        // Copy the index to internal face list
+        std::copy( owningProcPatch.begin(),
+                   owningProcPatch.end(),
+                   internalFaceIDsIter );
+        // Copy the boundary index to the corresponding faces
+        std::fill_n( procBoundaryIDsIter,
+                     owningProcPatch.size(),
+                     owningProcPatch.id() );
+    }
+    // Sort the face indices to the internal list and
+    // permute the processor boundary indices accordingly
+    auto sortedPermutation = createSortedPermutation( internalFaceIDs_ );
+    applyPermutation( internalFaceIDs_, sortedPermutation );
+    applyPermutation( procBoundaryIDs_, sortedPermutation );
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

@@ -115,8 +115,12 @@ class sliceMesh
     // Serialize owner list
     labelList serializeOwner( const std::vector<label>& );
 
+    // TODO: lengthy functions that must be refactored
+    //       (structure and design still pending)
+    void initializeSurfaceFieldMappings();
     void commSlicePatches();
     void commSharedPoints();
+
     void renumberFaces();
 
 public:

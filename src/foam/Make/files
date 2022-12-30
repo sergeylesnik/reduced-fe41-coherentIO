@@ -499,6 +499,18 @@ $(sliceMesh)/sliceMeshHelper.C
 $(sliceMesh)/sliceProcPatch.C
 $(sliceMesh)/nonblockConsensus.C
 
+CoherenceComposite = $(sliceMesh)/CoherenceComposite
+$(CoherenceComposite)/DataComponent.C
+$(CoherenceComposite)/IndexComponent.C
+$(CoherenceComposite)/DataComponentFree.C
+
+CoherenceStrategies = $(CoherenceComposite)/strategies
+$(CoherenceStrategies)/InitStrategies.C
+$(CoherenceStrategies)/OffsetStrategies.C
+
+CoherenceDecorators = $(CoherenceComposite)/decorators
+$(CoherenceDecorators)/SliceDecorator.C
+
 $(polyMesh)/polyMesh.C
 $(polyMesh)/polyMeshFromShapeMesh.C
 $(polyMesh)/polyMeshIO.C
