@@ -19,11 +19,11 @@ template<class adiosFactory> void adiosBeginStep( const Foam::string& );
 template<class adiosFactory> void adiosEndStep( const Foam::string& );
 
 template<typename Container>
-void adiosReadToContainer( const string&, const string&, Container& );
-template<typename Container>
-void adiosReadToContainer( const string&, const string&, Container&, const labelList&, const labelList& );
-template<typename Container>
-void adiosReadToContainer( const string&, const string&, Container&, const label&, const label& );
+void adiosReadToContainer( const Foam::string& type,
+                           const Foam::string& blockId,
+                           Container& container,
+                           const labelList& start = {},
+                           const labelList& count = {});
 
 
 class adiosStream {
@@ -135,38 +135,13 @@ void Foam::adiosEndStep( const Foam::string& type ) {
 template <typename Container>
 void Foam::adiosReadToContainer( const Foam::string& type,
                                  const Foam::string& blockId,
-                                 Container& container ) {
-    auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
-    adiosStreamPtr->transfer( blockId, container );
-    adiosStreamPtr->endStep();
-}
-
-template <typename Container>
-void Foam::adiosReadToContainer( const Foam::string& type,
-                                 const Foam::string& blockId,
                                  Container& container,
-                                 const Foam::labelList& start,
+                                 const Foam::labelList& start ,
                                  const Foam::labelList& count ) {
     auto adiosStreamPtr = adiosReading{}.createStream();
     adiosStreamPtr->open( std::move( type ) );
     adiosStreamPtr->transfer( blockId, container, start, count );
     adiosStreamPtr->endStep();
-}
-
-template <typename Container>
-void Foam::adiosReadToContainer( const Foam::string& type,
-                                 const Foam::string& blockId,
-                                 Container& container,
-                                 const Foam::label& start,
-                                 const Foam::label& count ) {
-    if ( start == -1 || count == -1 ) {
-        adiosReadToContainer( type, blockId, container );
-        return;
-    }
-    Foam::labelList listedStart( { start } );
-    Foam::labelList listedCount( { count } );
-    Foam::adiosReadToContainer( type, blockId, container, listedStart, listedCount);
 }
 
 #endif

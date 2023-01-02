@@ -91,13 +91,19 @@ struct InitFromADIOS : public InitStrategy {
         Foam::InitStrategy::labelPair& start_count
     ) final
     {
+        labelList start = ( start_count.first != -1 ) ?
+                          labelList( { start_count.first } ) 
+                          : labelList( {} );
+        labelList count = ( start_count.second != -1 ) ?
+                          labelList( { start_count.second } )
+                          : labelList( {} );
         Foam::adiosReadToContainer
         (
             type_,
             name_,
             data,
-            start_count.first,
-            start_count.second
+            start,
+            count
         );
     }
 
