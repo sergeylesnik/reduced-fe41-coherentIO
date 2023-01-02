@@ -1538,8 +1538,16 @@ bool Foam::polyMesh::write() const
         }
 
         auto faceStarts = determineOffsets2D( adiosFaces ); // Generate offsets of linearized face list
-        adiosStreamPtr->transfer( "faceStarts", faceStarts.size(), 0, faceStarts.size(), faceStarts.cdata() );
-        adiosStreamPtr->transfer( "faces", linearizedAdiosFaces.size(), 0, linearizedAdiosFaces.size(), linearizedAdiosFaces.cdata() );
+        adiosStreamPtr->transfer( "faceStarts",
+                                  { faceStarts.size() },
+                                  { 0 },
+                                  { faceStarts.size() },
+                                  faceStarts.cdata() );
+        adiosStreamPtr->transfer( "faces",
+                                  { linearizedAdiosFaces.size() },
+                                  { 0 },
+                                  { linearizedAdiosFaces.size() },
+                                  linearizedAdiosFaces.cdata() );
         adiosWritePrimitives( "mesh", "points", adiosPoints.size(), adiosPoints.cdata() );
 
         // Generate ownerStarts
@@ -1553,12 +1561,20 @@ bool Foam::polyMesh::write() const
         }
         ++ownerStart;
         ownerStarts[ownerStart] = adiosOwner.size();
-        adiosStreamPtr->transfer( "ownerStarts", ownerStarts.size(), 0, ownerStarts.size(), ownerStarts.cdata() );
+        adiosStreamPtr->transfer( "ownerStarts",
+                                  { ownerStarts.size() },
+                                  { 0 },
+                                  { ownerStarts.size() },
+                                  ownerStarts.cdata() );
 
         // Generate local neighbours
         Foam::labelList adiosNeighbours;
         sliceablePermutation.generateSlice( adiosNeighbours, *this );
-        adiosStreamPtr->transfer( "neighbours", adiosNeighbours.size(), 0, adiosNeighbours.size(), adiosNeighbours.cdata() );
+        adiosStreamPtr->transfer( "neighbours",
+                                  { adiosNeighbours.size() },
+                                  { 0 },
+                                  { adiosNeighbours.size() },
+                                  adiosNeighbours.cdata() );
 
         adiosStreamPtr->endStep();
 

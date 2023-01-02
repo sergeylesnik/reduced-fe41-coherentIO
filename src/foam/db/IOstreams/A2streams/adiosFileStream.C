@@ -1,6 +1,9 @@
 
+
 #include "adiosFileStream.H"
 #include "adiosFeatures.H"
+
+#include "adiosStreamImpl.H"
 
 #include "foamString.H"
 

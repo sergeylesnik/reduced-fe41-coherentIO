@@ -1,8 +1,6 @@
 #ifndef variableBuffer_H
 #define variableBuffer_H
 
-#include "adios2.h"
-
 #include <memory>
 #include <type_traits>
 
