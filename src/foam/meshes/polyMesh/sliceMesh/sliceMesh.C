@@ -375,18 +375,22 @@ void Foam::sliceMesh::initializeSurfaceFieldMappings() {
     // Loop and fill internal face and boundary indices
     auto internalFaceIDsIter = internalFaceIDs_.begin();
     auto procBoundaryIDsIter = procBoundaryIDs_.begin();
+    std::vector<Foam::sliceProcPatch> tmp{};
     for ( const auto& procPatchIdAndSize : procPatchIDsAndSizes ) {
         // Identify processor boundaries in neighbour list
         Foam::Slice slice( procPatchIdAndSize.first, cellOffsets_ );
         Foam::sliceProcPatch owningProcPatch( slice, neighbours, numBoundaries_ );
+        tmp.push_back( owningProcPatch );
         // Copy the index to internal face list
         std::copy( owningProcPatch.begin(),
                    owningProcPatch.end(),
                    internalFaceIDsIter );
+        internalFaceIDsIter += owningProcPatch.size();
         // Copy the boundary index to the corresponding faces
         std::fill_n( procBoundaryIDsIter,
                      owningProcPatch.size(),
                      owningProcPatch.id() );
+        procBoundaryIDsIter += owningProcPatch.size();
     }
     // Sort the face indices to the internal list and
     // permute the processor boundary indices accordingly
