@@ -389,7 +389,7 @@ void Foam::sliceMesh::initializeSurfaceFieldMappings() {
         // Copy the boundary index to the corresponding faces
         std::fill_n( procBoundaryIDsIter,
                      owningProcPatch.size(),
-                     owningProcPatch.id() );
+                     decodeSlicePatchId( owningProcPatch.id() ) );
         procBoundaryIDsIter += owningProcPatch.size();
     }
     // Sort the face indices to the internal list and
