@@ -55,12 +55,18 @@ class variableBuffer : public adiosBuffer {
     adios2::Variable<DataType> variable_;
 
     // Reading
-    void v_transfer( adios2::Engine* engine, DataType* data ) final {
+    void v_transfer( adios2::Engine* engine,
+                     DataType* data,
+                     const labelList& mapping = {},
+                     const bool masked = false ) final {
         transferFromVariable( engine, variable_, shape_, start_, count_, data );
     }
 
     // Writing
-    void v_transfer( adios2::Engine* engine, const DataType* data ) final {
+    void v_transfer( adios2::Engine* engine,
+                     const DataType* data,
+                     const labelList& mapping = {},
+                     const bool masked = false ) final {
         transferToVariable( engine, variable_, shape_, start_, count_, data );
     }
 
@@ -87,14 +93,6 @@ public:
                     const Foam::labelList& shape,
                     const Foam::labelList& start,
                     const Foam::labelList& count );
-
-    std::shared_ptr<adiosBuffer>
-    clone( adios2::IO* io,
-           adios2::Engine* engine,
-           const Foam::string blockId,
-           const Foam::labelList& shape,
-           const Foam::labelList& start,
-           const Foam::labelList& count ) final;
 
     label size() final;
 };
@@ -135,18 +133,6 @@ Foam::variableBuffer<DataType>::variableBuffer( adios2::IO* io,
     , start_{ toDims( start ) } 
     , count_{ toDims( count ) } {
     variable_ = io->DefineVariable<DataType>( blockId, shape_, start_, count_ );
-}
-
-
-template<typename DataType>
-std::shared_ptr<Foam::adiosBuffer>
-Foam::variableBuffer<DataType>::clone( adios2::IO* io,
-                                        adios2::Engine* engine,
-                                        const Foam::string blockId,
-                                        const Foam::labelList& shape,
-                                        const Foam::labelList& start,
-                                        const Foam::labelList& count ) {
-    return std::make_shared<Foam::variableBuffer<DataType> >( io, engine, blockId, shape, start, count );
 }
 
 template<typename DataType>

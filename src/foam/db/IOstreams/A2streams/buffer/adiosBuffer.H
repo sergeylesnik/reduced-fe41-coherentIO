@@ -18,12 +18,12 @@ adios2::Dims toDims( const Foam::labelList& list );
 
 class adiosBuffer
 {
-  virtual void v_transfer( adios2::Engine*, const char*) {};
-  virtual void v_transfer( adios2::Engine*, char*) {};
-  virtual void v_transfer( adios2::Engine*, const label*) {};
-  virtual void v_transfer( adios2::Engine*, label*) {};
-  virtual void v_transfer( adios2::Engine*, const scalar*) {};
-  virtual void v_transfer( adios2::Engine*, scalar*) {};
+  virtual void v_transfer( adios2::Engine*, const char*, const labelList& = {}, const bool = false ) {};
+  virtual void v_transfer( adios2::Engine*, char*, const labelList& = {}, const bool = false ) {};
+  virtual void v_transfer( adios2::Engine*, const label*, const labelList& = {}, const bool = false ) {};
+  virtual void v_transfer( adios2::Engine*, label*, const labelList& = {}, const bool = false ) {};
+  virtual void v_transfer( adios2::Engine*, const scalar*, const labelList& = {}, const bool = false ) {};
+  virtual void v_transfer( adios2::Engine*, scalar*, const labelList& = {}, const bool = false ) {};
 
 public:
 
@@ -31,17 +31,14 @@ public:
 
   virtual ~adiosBuffer() = default;
 
-  virtual std::shared_ptr<adiosBuffer> clone( adios2::IO* io,
-                                              adios2::Engine* engine,
-                                              const Foam::string blockId,
-                                              const Foam::labelList& shape,
-                                              const Foam::labelList& start,
-                                              const Foam::labelList& count ) = 0;
-
   virtual label size() = 0;
 
+  // Note: constness is included in with type deduction of DataType
   template<typename DataType>
-  void transfer( adios2::Engine* engine, DataType* const data ) {
+  void transfer( adios2::Engine* engine,
+                 DataType* const data,
+                 const labelList& mapping = {},
+                 const bool masked = false ) {
     if ( !engine ) {
         FatalErrorIn("adiosBuffer::transfer( adios2::Engine*, DataType* const ) engine is nullptr")
             << abort(FatalError);
@@ -50,8 +47,9 @@ public:
         FatalErrorIn("adiosBuffer::transfer( adios2::Engine*, DataType* const ) data is nullptr")
             << abort(FatalError);
     }
-    v_transfer( engine, data );
+    v_transfer( engine, data, mapping, masked );
   }
+
 };
 
 }

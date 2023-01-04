@@ -4,6 +4,7 @@
 #include "adiosStream.H"
 
 #include "variableBuffer.H"
+#include "spanBuffer.H"
 
 template<typename BufferType>
 std::shared_ptr<Foam::adiosBuffer>
@@ -108,17 +109,23 @@ struct Foam::adiosStream::Impl {
         }
     }
 
+    // Writing local/global array
     template<class DataType>
     void transfer( adios2::IO* const ioPtr,
                    adios2::Engine* const enginePtr,
-                    const Foam::string& blockId,
+                   const Foam::string& blockId,
                    const labelList& shape,
                    const labelList& start,
                    const labelList& count,
-                   const DataType* data ) {
-        writingBuffer<variableBuffer<DataType> >( ioPtr, enginePtr, blockId, shape, start, count );
-        if ( bufferPtr_ ) {
+                   const DataType* data,
+                   const labelList& mapping = {},
+                   const bool masked = false ) {
+        if ( mapping.empty() ) {
+            writingBuffer<variableBuffer<DataType> >( ioPtr, enginePtr, blockId, shape, start, count );
             bufferPtr_->transfer( enginePtr, data );
+        } else {
+            writingBuffer<spanBuffer<DataType> >( ioPtr, enginePtr, blockId, shape, start, count );
+            bufferPtr_->transfer( enginePtr, data, mapping, masked );
         }
     }
 
