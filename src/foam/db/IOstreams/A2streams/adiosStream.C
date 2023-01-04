@@ -101,23 +101,53 @@ void Foam::adiosStream::transfer( const Foam::string& blockId,
                                   const Foam::labelList& shape,
                                   const Foam::labelList& start,
                                   const Foam::labelList& count,
-                                  const scalar* data ) {
-    pimpl_->transfer( ioPtr_.get(), enginePtr_.get(), blockId, shape, start, count, data );
+                                  const scalar* data,
+                                  const Foam::labelList& mapping,
+                                  const bool masked ) {
+    pimpl_->transfer( ioPtr_.get(),
+                      enginePtr_.get(),
+                      blockId,
+                      shape,
+                      start,
+                      count,
+                      data,
+                      mapping,
+                      masked );
 }
 
 void Foam::adiosStream::transfer( const Foam::string& blockId,
                                   const Foam::labelList& shape,
                                   const Foam::labelList& start,
                                   const Foam::labelList& count,
-                                  const label* data ) {
-    pimpl_->transfer( ioPtr_.get(), enginePtr_.get(), blockId, shape, start, count, data );
+                                  const label* data,
+                                  const Foam::labelList& mapping,
+                                  const bool masked ) {
+    pimpl_->transfer( ioPtr_.get(),
+                      enginePtr_.get(),
+                      blockId,
+                      shape,
+                      start,
+                      count,
+                      data,
+                      mapping,
+                      masked );
 }
 
 void Foam::adiosStream::transfer( const Foam::string& blockId,
                                   const Foam::labelList& shape,
                                   const Foam::labelList& start,
                                   const Foam::labelList& count,
-                                  const char* data ) {
-    pimpl_->transfer( ioPtr_.get(), enginePtr_.get(), blockId, shape, start, count, data );
+                                  const char* data,
+                                  const Foam::labelList& mapping,
+                                  const bool masked ) {
+    pimpl_->transfer( ioPtr_.get(),
+                      enginePtr_.get(),
+                      blockId,
+                      shape,
+                      start,
+                      count,
+                      data,
+                      mapping,
+                      masked );
 }
 

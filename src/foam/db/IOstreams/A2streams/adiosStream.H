@@ -85,17 +85,23 @@ public:
                    const Foam::labelList& shape,
                    const Foam::labelList& start,
                    const Foam::labelList& count,
-                   const scalar* buf );
+                   const scalar* buf,
+                   const labelList& mapping = {},
+                   const bool masked = false );
     void transfer( const Foam::string& blockId,
                    const Foam::labelList& shape,
                    const Foam::labelList& start,
                    const Foam::labelList& count,
-                   const label* buf );
+                   const label* buf,
+                   const labelList& mapping = {},
+                   const bool masked = false );
     void transfer( const Foam::string& blockId,
                    const Foam::labelList& shape,
                    const Foam::labelList& start,
                    const Foam::labelList& count,
-                   const char* buf );
+                   const char* buf,
+                   const labelList& mapping = {},
+                   const bool masked = false );
 
     void close();
 };
