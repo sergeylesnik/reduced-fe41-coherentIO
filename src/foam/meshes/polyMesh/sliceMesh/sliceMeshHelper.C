@@ -1,23 +1,6 @@
 
 #include "sliceMeshHelper.H"
 
-
-std::vector<std::pair<Foam::label, Foam::label> >
-Foam::generateIndexedPairs( const std::vector<Foam::label>& input ) {
-    std::vector<Foam::label> indices{};
-    indexIota( indices, input.size(), 0 );
-    std::vector<std::pair<Foam::label, Foam::label> > indexedPairs{};
-    indexedPairs.reserve( input.size() );
-    std::transform( input.begin(),
-                    input.end(),
-                    indices.begin(),
-                    std::back_inserter( indexedPairs ),
-                    []( const auto& inputId, const auto& index )
-                    { return std::make_pair( inputId, index ); } );
-    return indexedPairs;
-}
-
-
 void Foam::partitionByFirst( std::vector<std::pair<Foam::label, Foam::label> >& input ) {
     std::stable_partition( input.begin(),
                            input.end(),

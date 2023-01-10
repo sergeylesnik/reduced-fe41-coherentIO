@@ -58,9 +58,8 @@ namespace Foam
 void sendSliceFaces( std::pair<label, label> sendPair,
                      Offsets& cellOffsets,
                      Offsets& pointOffsets,
-                     std::vector<label>& globalNeighbours,
+                     labelList& globalNeighbours,
                      faceList& globalFaces,
-                     DynamicList<label>& newGlobalNeighbours,
                      pointField& allPoints_,
                      std::vector<sliceProcPatch>& sliceProcPatches,
                      label numBoundaries );
@@ -74,7 +73,7 @@ void recvSliceFaces( std::pair<label, label> recvPair,
                      Slice& pointSlice,
                      pointField& allPoints_,
                      std::vector<sliceProcPatch>& sliceProcPatches,
-                     std::vector<label>& globalNeighbours,
+                     labelList& globalNeighbours,
                      label numBoundaries );
 
 
@@ -83,8 +82,7 @@ class sliceMesh
     public MeshObject<polyMesh, sliceMesh>
 {
     label numBoundaries_{};
-    std::vector<label> globalNeighbours_{};
-    DynamicList<label> newGlobalNeighbours_{};
+    labelList globalNeighbours_{};
     labelList localOwner_{};
     faceList globalFaces_{};
     pointField allPoints_{};

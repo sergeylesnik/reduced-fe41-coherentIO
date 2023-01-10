@@ -125,7 +125,6 @@ void Foam::sliceMesh::readMesh()
     localOwner_ = serializeOwner( ownerStarts );
 
     meshSlice.node( "neighbours" )->extract( globalNeighbours_ );
-    meshSlice.node( "neighbours" )->extract( newGlobalNeighbours_ );
 
     std::vector<Foam::label> faceStarts;
     std::vector<Foam::label> linearizedFaces;
@@ -163,9 +162,8 @@ void Foam::sliceMesh::readMesh()
 void Foam::sendSliceFaces( std::pair<Foam::label, Foam::label> sendPair,
                            Foam::Offsets& cellOffsets,
                            Foam::Offsets& pointOffsets,
-                           std::vector<Foam::label>& globalNeighbours,
+                           Foam::labelList& globalNeighbours,
                            Foam::faceList& globalFaces,
-                           Foam::DynamicList<Foam::label>& newGlobalNeighbours,
                            Foam::pointField& allPoints_,
                            std::vector<Foam::sliceProcPatch>& sliceProcPatches,
                            Foam::label numBoundaries )
@@ -182,7 +180,7 @@ void Foam::sendSliceFaces( std::pair<Foam::label, Foam::label> sendPair,
     toPartition << sendFaces;
 
     // Owner Stuff
-    auto sendNeighbours = procPatch.extractFaces( newGlobalNeighbours );
+    auto sendNeighbours = procPatch.extractFaces( globalNeighbours );
     toPartition << sendNeighbours;
 
     // Point Stuff
@@ -204,7 +202,7 @@ void Foam::recvSliceFaces( std::pair<Foam::label, Foam::label> recvPair,
                            Foam::Slice& pointSlice,
                            Foam::pointField& allPoints_,
                            std::vector<Foam::sliceProcPatch>& sliceProcPatches,
-                           std::vector<Foam::label>& globalNeighbours,
+                           Foam::labelList& globalNeighbours,
                            Foam::label numBoundaries )
 {
     label partition = recvPair.first;
@@ -283,7 +281,6 @@ void Foam::sliceMesh::commSlicePatches() {
                         pointOffsets_,
                         globalNeighbours_,
                         globalFaces_,
-                        newGlobalNeighbours_,
                         allPoints_,
                         slicePatches_,
                         numBoundaries_ );
@@ -359,7 +356,7 @@ void Foam::sliceMesh::renumberFaces()
 void Foam::sliceMesh::initializeSurfaceFieldMappings() {
     // permute before processor boundaries have been identified
     auto permutation = slicePermutation( globalNeighbours_ );
-    std::vector<Foam::label> neighbours{};
+    Foam::labelList neighbours{};
     permutation.copyPolyNeighbours( neighbours );
     // Identify neighbouring processor and number of shared faces
     auto procPatchIDsAndSizes = Foam::numFacesToExchange( cellOffsets_, pointOffsets_, neighbours );

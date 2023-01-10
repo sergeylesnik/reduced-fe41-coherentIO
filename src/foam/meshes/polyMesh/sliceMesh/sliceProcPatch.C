@@ -9,7 +9,7 @@
 Foam::label Foam::sliceProcPatch::instanceCount_ = 0;
 
 Foam::sliceProcPatch::sliceProcPatch( const Foam::Slice& slice,
-                                      const std::vector<label>& neighbours,
+                                      const Foam::labelList& neighbours,
                                       const Foam::label& numBoundaries )
     : numNonProcPatches_{ numBoundaries }
     , slice_{ slice }
@@ -55,7 +55,7 @@ void Foam::sliceProcPatch::swap( Foam::sliceProcPatch& other ) noexcept
     swap( procBoundaryName_, other.procBoundaryName_ );
 }
 
-void Foam::sliceProcPatch::determineFaceIDs( const std::vector<label>& neighbours )
+void Foam::sliceProcPatch::determineFaceIDs( const Foam::labelList& neighbours )
 {
     auto faceIdIter = localFaceIDs_.begin();
     for ( auto neighboursIter = std::begin( neighbours );
@@ -92,7 +92,7 @@ void Foam::sliceProcPatch::appendOwner( Foam::labelList& owner,
     owner.append( recvOwner );
 }
 
-void Foam::sliceProcPatch::encodePatch( std::vector<Foam::label>& neighbours ) {
+void Foam::sliceProcPatch::encodePatch( Foam::labelList& neighbours ) {
     std::transform( std::begin( neighbours ), std::end( neighbours ),
                     std::begin( neighbours ),
                     [ this ] ( const auto& cellId ) 
@@ -103,6 +103,13 @@ void Foam::sliceProcPatch::encodePatch( std::vector<Foam::label>& neighbours ) {
 void Foam::sliceProcPatch::encodePatch( std::vector<Foam::label>& neighbours,
                                         const Foam::label& numPatchFaces ) {
     std::fill_n( std::back_inserter( neighbours ), numPatchFaces, id_ );
+}
+
+void Foam::sliceProcPatch::encodePatch( Foam::labelList& neighbours,
+                                        const Foam::label& numPatchFaces ) {
+    auto curr_size = neighbours.size();
+    neighbours.resize( curr_size + numPatchFaces );
+    std::fill_n( neighbours.begin() + curr_size, numPatchFaces, id_ );
 }
 
 Foam::pointField Foam::sliceProcPatch::extractPoints( const Foam::pointField& input ) {

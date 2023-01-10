@@ -75,7 +75,7 @@ void Foam::slicePermutation::createPointPermutation( Foam::faceList& faces, cons
 
 
 std::vector<std::pair<Foam::label, Foam::label> >
-Foam::slicePermutation::createPolyNeighbourPermutation( const std::vector<Foam::label>& sliceNeighbours ) {
+Foam::slicePermutation::createPolyNeighbourPermutation( const Foam::labelList& sliceNeighbours ) {
     auto polySlicePairs{ generateIndexedPairs( sliceNeighbours ) };
     partitionByFirst( polySlicePairs );
     return polySlicePairs;
@@ -95,7 +95,7 @@ void Foam::slicePermutation::renumberToSlice( Foam::faceList& input ) {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::slicePermutation::slicePermutation( const std::vector<Foam::label>& sliceNeighbours ) :
+Foam::slicePermutation::slicePermutation( const Foam::labelList& sliceNeighbours ) :
     polyNeighboursPermutation_{ createPolyNeighbourPermutation( sliceNeighbours ) },
     polyNeighboursAndPatches_{ extractNth( polyNeighboursPermutation_,
                                  [](const auto& pair)

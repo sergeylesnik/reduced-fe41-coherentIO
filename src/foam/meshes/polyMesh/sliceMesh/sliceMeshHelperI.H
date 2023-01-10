@@ -4,6 +4,22 @@
 #include <numeric>
 
 template<typename Container>
+std::vector<std::pair<Foam::label, Foam::label> >
+Foam::generateIndexedPairs( const Container& input ) {
+    std::vector<Foam::label> indices{};
+    indexIota( indices, input.size(), 0 );
+    std::vector<std::pair<Foam::label, Foam::label> > indexedPairs{};
+    indexedPairs.reserve( input.size() );
+    std::transform( input.begin(),
+                    input.end(),
+                    indices.begin(),
+                    std::back_inserter( indexedPairs ),
+                    []( const auto& inputId, const auto& index )
+                    { return std::make_pair( inputId, index ); } );
+    return indexedPairs;
+}
+
+template<typename Container>
 void Foam::indexIota( Container& input,
                       const size_t& size,
                       const typename Container::value_type& start ) {

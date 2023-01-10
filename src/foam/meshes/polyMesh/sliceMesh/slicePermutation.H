@@ -71,7 +71,7 @@ class slicePermutation
     std::vector<label> permutationToPolyPoint_{};
 
     std::vector<std::pair<label, label> >
-    createPolyNeighbourPermutation( const std::vector<label>& );
+    createPolyNeighbourPermutation( const labelList& );
 
     std::vector<label> createSlicePermutation( const labelList& );
 
@@ -106,7 +106,7 @@ public:
     slicePermutation() = default;
 
     //- Construct from slicePermutation neighbour and patch list
-    explicit slicePermutation( const std::vector<label>& );
+    explicit slicePermutation( const labelList& );
 
     //- Construct from polyMesh
     explicit slicePermutation( const polyMesh& );

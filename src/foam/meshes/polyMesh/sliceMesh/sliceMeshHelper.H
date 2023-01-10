@@ -18,8 +18,9 @@ namespace Foam
                        Helper Functions Declaration
 \*---------------------------------------------------------------------------*/
 
+template<typename Container>
 std::vector<std::pair<label, label> >
-generateIndexedPairs( const std::vector<label>& );
+generateIndexedPairs( const Container& );
 
 void partitionByFirst( std::vector<std::pair<label, label> >& );
 

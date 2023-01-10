@@ -3,6 +3,7 @@
 #define nonblockConsensus_H
 
 #include "label.H"
+#include "labelList.H"
 
 #include <vector>
 #include <map>
@@ -17,7 +18,7 @@ namespace Foam
 // Forward declarations
 class Offsets;
 
-std::map<label, label> numFacesToExchange( const Offsets&, const Offsets&, const std::vector<label>& );
+std::map<label, label> numFacesToExchange( const Offsets&, const Offsets&, const labelList& );
 
 template<class Type>
 std::map<label, std::vector<Type> > nonblockConsensus( const std::map<label, std::vector<Type> >&, MPI_Datatype );

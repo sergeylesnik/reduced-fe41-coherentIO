@@ -52,7 +52,7 @@ public:
 
     // Constructors
     sliceProcPatch( const Foam::Slice&,
-                    const std::vector<label>&,
+                    const Foam::labelList&,
                     const Foam::label& );
 
     // Copy constructor
@@ -75,14 +75,15 @@ public:
     // Returns the neighbouring processor
     label partner() { return slice_.partition(); }
 
-    void determineFaceIDs( const std::vector<label>& );
+    void determineFaceIDs( const labelList& );
 
     void determinePointIDs( const faceList&, const label& );
 
     void appendOwner( Foam::labelList&, Foam::labelList& );
 
-    void encodePatch( std::vector<label>& );
+    void encodePatch( labelList& );
     void encodePatch( std::vector<label>&, const label& );
+    void encodePatch( labelList&, const label& );
 
     template<typename FaceList>
     FaceList extractFaces( const FaceList& input ) {

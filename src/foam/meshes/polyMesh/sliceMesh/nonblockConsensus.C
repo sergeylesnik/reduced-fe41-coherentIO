@@ -9,7 +9,7 @@
 std::map<Foam::label, Foam::label>
 Foam::numFacesToExchange( const Foam::Offsets& cellOffsets, 
                           const Foam::Offsets& pointOffsets, 
-                          const std::vector<Foam::label>& globalNeighbours )
+                          const Foam::labelList& globalNeighbours )
 {
     Foam::label myProcNo = Pstream::myProcNo();
     std::map<Foam::label, Foam::label> data{};
