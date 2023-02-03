@@ -28,7 +28,7 @@ Foam::numFacesToExchange( const Foam::Offsets& cellOffsets,
 std::map<Foam::label, Foam::label>
 Foam::nonblockConsensus( const std::map<Foam::label, Foam::label>& data ) 
 {
-    int tag{};
+    int tag = 314159;
     bool barrier_activated = false;
     MPI_Barrier( MPI_COMM_WORLD );
     std::vector<MPI_Request> issRequests{};
@@ -74,7 +74,6 @@ Foam::nonblockConsensus( const std::map<Foam::label, Foam::label>& data )
         }
     }
    
-    MPI_Barrier( MPI_COMM_WORLD );
     return recvBuffer;
 }
 

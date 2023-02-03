@@ -35,7 +35,7 @@ template<class Type>
 std::map<Foam::label, std::vector<Type> >
 Foam::nonblockConsensus( const std::map<Foam::label, std::vector<Type> >& data, MPI_Datatype dtype )
 {
-    int tag{};
+    int tag = 314159;
     bool barrier_activated = false;
     MPI_Barrier( MPI_COMM_WORLD );
     std::vector<MPI_Request> issRequests{};
@@ -87,7 +87,6 @@ Foam::nonblockConsensus( const std::map<Foam::label, std::vector<Type> >& data, 
         }
     }
 
-    MPI_Barrier( MPI_COMM_WORLD );
     return recvBuffer;
 }
 
