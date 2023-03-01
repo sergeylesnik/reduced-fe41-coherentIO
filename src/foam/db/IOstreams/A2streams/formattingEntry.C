@@ -23,26 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "parRun.H"
-#include "adiosRepo.H"
+#include "formattingEntry.H"
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::ParRunControl::~ParRunControl()
+void Foam::formattingEntry::write(Ostream& os) const
 {
-    Foam::adiosRepo* repo = Foam::adiosRepo::instance();
-    repo->close();
-    if (RunPar)
-    {
-        Info<< "Finalising parallel run" << endl;
-        Pstream::exit(0);
-    }
+    // os << "This is a formattingEntry\n";
+    primitiveEntry::write(os, true);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

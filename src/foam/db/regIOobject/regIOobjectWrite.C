@@ -118,8 +118,8 @@ bool Foam::regIOobject::write() const
 
     if (time().writeFormat() == IOstream::PARALLEL)
     {
-        auto type = Foam::adiosStreamType( objectPath() );
-        Foam::adiosBeginStep< Foam::adiosWriting >( std::move( type ) );
+        //auto type = Foam::adiosStreamType( objectPath() );
+        //Foam::adiosBeginStep< Foam::adiosWriting >( std::move( type ) );
     }
 
     bool ok = writeObject
@@ -131,8 +131,8 @@ bool Foam::regIOobject::write() const
 
     if (time().writeFormat() == IOstream::PARALLEL)
     {
-        auto type = Foam::adiosStreamType( objectPath() );
-        Foam::adiosEndStep< Foam::adiosWriting >( std::move( type ) );
+        //auto type = Foam::adiosStreamType( objectPath() );
+        //Foam::adiosEndStep< Foam::adiosWriting >( std::move( type ) );
     }
 
     return ok;

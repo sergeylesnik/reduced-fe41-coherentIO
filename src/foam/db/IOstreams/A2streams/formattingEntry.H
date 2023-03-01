@@ -21,28 +21,62 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::formattingEntry
+
+Description
+    A dictionary entry writing only contents by default, used to save
+    formatting symbols for the final output
+
+SourceFiles
+    formattingEntry.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "parRun.H"
-#include "adiosRepo.H"
+#ifndef formattingEntry_H
+#define formattingEntry_H
 
+#include "primitiveEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::ParRunControl::~ParRunControl()
+namespace Foam
 {
-    Foam::adiosRepo* repo = Foam::adiosRepo::instance();
-    repo->close();
-    if (RunPar)
-    {
-        Info<< "Finalising parallel run" << endl;
-        Pstream::exit(0);
-    }
-}
+
+/*---------------------------------------------------------------------------*\
+                       Class formattingEntry Declaration
+\*---------------------------------------------------------------------------*/
+
+class formattingEntry
+:
+    public primitiveEntry
+{
+
+public:
+
+    // Constructors
+
+        //- Inherit all constructors from primitiveEntry
+        using primitiveEntry::primitiveEntry;
+
+        virtual autoPtr<entry> clone(const dictionary&) const
+        {
+            return autoPtr<entry>(new formattingEntry(*this));
+        }
+
+    // Member functions
+
+        //- Write
+        virtual void write(Ostream&) const;
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// End namespace Foam
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

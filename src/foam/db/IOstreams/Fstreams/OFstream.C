@@ -285,7 +285,8 @@ Foam::Ostream& Foam::OFstream::writeKeyword(const keyType& kw)
     // Inform adiosRepo that n'th boundary is being written.
     if( kw == "type" ) {
        ++boundaryCounter_;
-       adiosRepo{}.push( boundaryCounter_ );
+       Foam::adiosRepo* repo = Foam::adiosRepo::instance();
+       repo->push( boundaryCounter_ );
     }
 
     return this->Ostream::writeKeyword(kw);
@@ -349,9 +350,7 @@ Foam::Ostream& Foam::OFstream::parwrite(const char* data, std::streamsize byteSi
     startList[0] = 0;
     countList[0] = count;
 
-    adiosStreamPtr_->beginStep();
     adiosStreamPtr_->transfer( blockId, shapeList, startList, countList, data );
-    adiosStreamPtr_->endStep();
 
     return *this;
 }

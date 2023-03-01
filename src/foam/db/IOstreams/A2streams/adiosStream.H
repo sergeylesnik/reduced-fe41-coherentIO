@@ -49,10 +49,6 @@ public:
 
     void open( const Foam::string& );
 
-    void beginStep();
-
-    void endStep();
-
     // Reading local/global array
     void transfer( const string& blockId,
                    scalar* data,

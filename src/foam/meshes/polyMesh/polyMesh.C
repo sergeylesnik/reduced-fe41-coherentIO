@@ -1507,7 +1507,6 @@ bool Foam::polyMesh::write() const
         // Write mesh to a separate file
         auto adiosStreamPtr = adiosWriting{}.createStream();
         adiosStreamPtr->open( "mesh" );
-        adiosStreamPtr->beginStep();
 
         slicePermutation sliceablePermutation{ *this };
 
@@ -1530,13 +1529,6 @@ bool Foam::polyMesh::write() const
            }
         }
 
-        Foam::List<Foam::scalar> linearizedPoints( 3*allPoints_.size(), 0.0 );
-        forAll( adiosPoints, i ) {
-           linearizedPoints[i*3] = adiosPoints[i][0];
-           linearizedPoints[i*3+1] = adiosPoints[i][1];
-           linearizedPoints[i*3+2] = adiosPoints[i][2];
-        }
-
         auto faceStarts = determineOffsets2D( adiosFaces ); // Generate offsets of linearized face list
         adiosStreamPtr->transfer( "faceStarts",
                                   { faceStarts.size() },
@@ -1548,7 +1540,6 @@ bool Foam::polyMesh::write() const
                                   { 0 },
                                   { linearizedAdiosFaces.size() },
                                   linearizedAdiosFaces.cdata() );
-        adiosWritePrimitives( "mesh", "points", adiosPoints.size(), adiosPoints.cdata() );
 
         // Generate ownerStarts
         labelList ownerStarts( cells().size() + 1, 0 );
@@ -1576,9 +1567,16 @@ bool Foam::polyMesh::write() const
                                   { adiosNeighbours.size() },
                                   adiosNeighbours.cdata() );
 
-        adiosStreamPtr->endStep();
+        adiosStreamPtr->close();
 
-   }
+        Foam::List<Foam::scalar> linearizedPoints( 3*allPoints_.size(), 0.0 );
+        forAll( adiosPoints, i ) {
+           linearizedPoints[i*3] = adiosPoints[i][0];
+           linearizedPoints[i*3+1] = adiosPoints[i][1];
+           linearizedPoints[i*3+2] = adiosPoints[i][2];
+        }
+        adiosWritePrimitives( "mesh", "points", adiosPoints.size(), adiosPoints.cdata() );
+    }
 
     return regIOobject::write();
 }

@@ -141,6 +141,11 @@ public:
                 return cellOffsets_;
             }
 
+            inline const Offsets& internalSurfaceFieldOffsets() const
+            {
+                return internalSurfaceFieldOffsets_;
+            }
+
             inline const labelList& internalFaceIDsFromBoundaries() const
             {
                 return internalFaceIDs_;
