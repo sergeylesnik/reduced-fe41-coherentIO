@@ -21,19 +21,38 @@ class adiosBuffer;
 
 class adiosRepo {
 
-    class Impl;
-    static std::unique_ptr<Impl> pimpl_;
+    // Singelton instance
+    static adiosRepo* repoInstance_;
 
-    std::map<Foam::string, std::shared_ptr<adios2::IO> >* get( const std::shared_ptr<adios2::IO>& );
-    std::map<Foam::string, std::shared_ptr<adios2::Engine> >* get( const std::shared_ptr<adios2::Engine>& );
-    std::map<Foam::string, std::shared_ptr<adiosBuffer> >* get( const std::shared_ptr<adiosBuffer>& );
+    // Private default constructor in singelton
+    adiosRepo();
+
+    using IO_map = std::map<Foam::string, std::shared_ptr<adios2::IO> >;
+    using Engine_map = std::map<Foam::string, std::shared_ptr<adios2::Engine> >;
+    using Buffer_map = std::map<Foam::string, std::shared_ptr<adiosBuffer> >;
+
+    // Private members
+
+    // Bridge to ADIOS2 dependencies (PImple idiom)
+    class Impl;
+    std::unique_ptr<Impl> pimpl_{ nullptr };
 
     label boundaryCounter_{ 0 };
 
-public:
+    // Private methods
+    IO_map* get( const std::shared_ptr<adios2::IO>& );
+    Engine_map* get( const std::shared_ptr<adios2::Engine>& );
+    Buffer_map* get( const std::shared_ptr<adiosBuffer>& ); // TODO: Buffer repo entry not required. IO is a repo for itself
 
-    adiosRepo();
+  public:
+
+    static adiosRepo* instance();
+
     ~adiosRepo();
+
+    adiosRepo(adiosRepo& other) = delete;
+
+    adiosRepo& operator=( const adiosRepo& other ) = delete;
 
     adios2::ADIOS* pullADIOS();
 
@@ -53,6 +72,7 @@ public:
 };
 
 }
+
 
 template <typename FeatureType>
 void Foam::adiosRepo::pull( std::shared_ptr<FeatureType>& featurePtr,

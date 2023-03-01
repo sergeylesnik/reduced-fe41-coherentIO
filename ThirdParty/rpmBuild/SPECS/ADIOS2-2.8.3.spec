@@ -22,13 +22,13 @@
 #     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     RPM spec file for ADIOS2-2.7.1
+#     RPM spec file for ADIOS2-2.8.3
 #
 # Description
 #     RPM spec file for creating a relocatable RPM
 #
 # Authors:
-#     Gregor Weiss, HLRS (2021)
+#     Gregor Weiss, HLRS (2023)
 #
 #------------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@
 
 %define name		ADIOS2
 %define release		%{_WM_OPTIONS}
-%define version 	2.7.1
+%define version 	2.8.3
 
 %define buildroot       %{_topdir}/BUILD/%{name}-%{version}-root
 
@@ -84,7 +84,7 @@ Group: 			Development/Tools
 %{summary}
 
 %prep
-%setup -q 
+%setup -q
 
 %build
 #

@@ -45,6 +45,7 @@ void _implWritePrimitives
     auto adiosStreamPtr = Foam::adiosWriting{}.createStream();
     adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, shape, start, count, buf );
+    adiosStreamPtr->close();
 }
 
 //- Write local array

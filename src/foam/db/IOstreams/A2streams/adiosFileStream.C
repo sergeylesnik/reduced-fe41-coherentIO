@@ -12,7 +12,8 @@ Foam::adiosFileStream::adiosFileStream( std::unique_ptr<adiosFeatures>& fileFeat
 {}
 
 void Foam::adiosFileStream::v_open() {
-    ioPtr_ = adiosFile_->createIO( repo_.pullADIOS() );
+    Foam::adiosRepo* repo = Foam::adiosRepo::instance();
+    ioPtr_ = adiosFile_->createIO( repo->pullADIOS() );
     enginePtr_ = adiosFile_->createEngine( ioPtr_.get(), paths_.getPathName() );
 }
 

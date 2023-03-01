@@ -30,10 +30,6 @@ struct Foam::adiosStream::Impl {
 
     Impl() = default;
 
-    adiosRepo repo_{};
-
-    //std::shared_ptr<adios2::IO> ioPtr_{ nullptr };
-    //std::shared_ptr<adios2::Engine> enginePtr_{ nullptr };
     std::shared_ptr<adiosBuffer> bufferPtr_{ nullptr };
 
     template<typename BufferType>
@@ -43,14 +39,15 @@ struct Foam::adiosStream::Impl {
                          const labelList& start = {},
                          const labelList& count = {} ) {
         std::shared_ptr<adiosBuffer> bufferPtr{ nullptr };
-        repo_.pull( bufferPtr, blockId );
+        Foam::adiosRepo* repo = Foam::adiosRepo::instance();
+        repo->pull( bufferPtr, blockId );
         if ( !bufferPtr && ioPtr && enginePtr ) {
             bufferPtr = createInputBuffer<BufferType>( ioPtr,
                                                        enginePtr,
                                                        blockId,
                                                        start,
                                                        count );
-            repo_.push( bufferPtr, blockId );
+            repo->push( bufferPtr, blockId );
         }
         bufferPtr_ = bufferPtr;
         return bufferPtr_->size();
@@ -64,7 +61,8 @@ struct Foam::adiosStream::Impl {
                         const labelList& start,
                         const labelList& count ) {
         std::shared_ptr<adiosBuffer> bufferPtr{ nullptr };
-        repo_.pull( bufferPtr, blockId );
+        Foam::adiosRepo* repo = Foam::adiosRepo::instance();
+        repo->pull( bufferPtr, blockId );
         if ( !bufferPtr && ioPtr && enginePtr ) {
             bufferPtr = std::make_shared<BufferType>( ioPtr,
                                                       enginePtr,
@@ -72,7 +70,7 @@ struct Foam::adiosStream::Impl {
                                                       shape,
                                                       start,
                                                       count );
-            repo_.push( bufferPtr, blockId );
+            repo->push( bufferPtr, blockId );
         }
         bufferPtr_ = bufferPtr;
     }

@@ -45,6 +45,7 @@ void _implReadPrimitives
     } else {
         adiosStreamPtr->transfer( blockId, buf );
     }
+    adiosStreamPtr->close();
 }
 
 void Foam::adiosReadPrimitives

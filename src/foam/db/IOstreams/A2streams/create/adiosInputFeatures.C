@@ -10,25 +10,35 @@
 #include "fileName.H"
 
 std::shared_ptr<adios2::IO> Foam::adiosInputFeatures::createIO( adios2::ADIOS* const adiosPtr ) {
-    adiosRepo repo{};
+    Foam::adiosRepo* repo = Foam::adiosRepo::instance();
     std::shared_ptr<adios2::IO> ioPtr{ nullptr };
-    repo.pull( ioPtr, "read" );
+    repo->pull( ioPtr, "read" );
     if ( !ioPtr ) {
         ioPtr = std::make_shared<adios2::IO>( adiosPtr->DeclareIO( "read" ) );
-        ioPtr->SetEngine( "BP4" );
-        repo.push( ioPtr, "read" );
+        ioPtr->SetEngine( "BP5" );
+        repo->push( ioPtr, "read" );
     }
     return ioPtr;
 }
 
-std::shared_ptr<adios2::Engine> Foam::adiosInputFeatures::createEngine( adios2::IO* const ioPtr, const Foam::fileName& path ) {
-    adiosRepo repo{};
+std::shared_ptr<adios2::Engine>
+Foam::adiosInputFeatures::createEngine( adios2::IO* const ioPtr, const Foam::fileName& path ) {
+    Foam::adiosRepo* repo = Foam::adiosRepo::instance();
     std::shared_ptr<adios2::Engine> enginePtr{ nullptr };
     auto size = path.length();
-    repo.pull( enginePtr, "read"+path( size ) );
+    repo->pull( enginePtr, "read"+path( size ) );
     if ( !enginePtr ) {
-        enginePtr = std::make_shared<adios2::Engine>( ioPtr->Open( path, adios2::Mode::Read ) );
-        repo.push( enginePtr, "read"+path( size ) );
+        enginePtr = std::make_shared<adios2::Engine>( ioPtr->Open( path, adios2::Mode::ReadRandomAccess ) );
+        //auto num_steps = enginePtr->Steps();
+        //enginePtr->BeginStep();
+        //std::cout << "MY TOTAL NUMBER OF STEPS IS " << enginePtr->Steps() << "\n";
+        //while (enginePtr->CurrentStep() != enginePtr->Steps())
+        //{
+            //enginePtr->EndStep();
+            //enginePtr->BeginStep();
+        //std::cout << "MY TOTAL NUMBER OF STEPS IS " << enginePtr->Steps() << "\n";
+        //}
+        repo->push( enginePtr, "read"+path( size ) );
     }
     return enginePtr;
 }

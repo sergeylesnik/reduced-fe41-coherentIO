@@ -19,7 +19,9 @@ void transferFromVariable( adios2::Engine* const engine,
                            adios2::Dims& start,
                            adios2::Dims& count,
                            DataType* data ) {
-    engine->Get( variable, data, adios2::Mode::Sync );
+    if (variable) {
+        engine->Get( variable, data, adios2::Mode::Deferred );
+    }
 }
 
 template<typename VariableType, typename DataType>
@@ -29,7 +31,7 @@ void transferToVariable( adios2::Engine* const engine,
                          adios2::Dims& start,
                          adios2::Dims& count,
                          DataType* data ) {
-    engine->Put( variable, data, adios2::Mode::Sync );
+    engine->Put( variable, data, adios2::Mode::Deferred );
 }
 
 template<typename VariableType, typename DataType>
@@ -104,6 +106,14 @@ Foam::variableBuffer<DataType>::variableBuffer( adios2::IO* io,
                                                 adios2::Engine* engine,
                                                 const Foam::string blockId ) {
     variable_ = io->InquireVariable<DataType>( blockId );
+    if ( variable_ ) {
+        // Set to last step by default
+        auto step = variable_.Steps() - 1;
+        variable_.SetStepSelection( { step, 1 } ) ;
+        shape_ = variable_.Shape();
+        start_ = variable_.Start();
+        count_ = variable_.Count();
+    }
 }
 
 template<typename DataType>
@@ -115,11 +125,13 @@ Foam::variableBuffer<DataType>::variableBuffer( adios2::IO* io,
     : start_{ toDims( start ) }
     , count_{ toDims( count ) } {
     variable_ = io->InquireVariable<DataType>( blockId );
-    // Set to last step by default
-    auto step = variable_.Steps() - 1;
-    variable_.SetStepSelection( { step, 1 } ) ;
-    variable_.SetSelection( { start_, count_ } ) ;
-    shape_ = variable_.Shape();
+    if ( variable_ ) {
+        // Set to last step by default
+        auto step = variable_.Steps() - 1;
+        variable_.SetStepSelection( { step, 1 } ) ;
+        variable_.SetSelection( { start_, count_ } ) ;
+        shape_ = variable_.Shape();
+    }
 }
 
 template<typename DataType>

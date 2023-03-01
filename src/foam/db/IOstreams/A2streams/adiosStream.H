@@ -36,7 +36,6 @@ protected:
     std::unique_ptr<Impl> pimpl_{ nullptr };
 
     adiosPaths paths_{};
-    adiosRepo repo_{};
     Foam::string type_{};
     std::shared_ptr<adios2::IO> ioPtr_{ nullptr };
     std::shared_ptr<adios2::Engine> enginePtr_{ nullptr };
@@ -124,19 +123,6 @@ Foam::adiosStream::transfer( const Foam::string& blockId,
     transfer( blockId, container.data(), start, count );
 }
 
-template <class adiosFactory>
-void Foam::adiosBeginStep( const Foam::string& type ) {
-    auto adiosStreamPtr = adiosFactory{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->beginStep();
-}
-
-template <class adiosFactory>
-void Foam::adiosEndStep( const Foam::string& type ) {
-    auto adiosStreamPtr = adiosFactory{}.createStream();
-    adiosStreamPtr->open( type );
-    adiosStreamPtr->endStep();
-}
 
 template <typename Container>
 void Foam::adiosReadToContainer( const Foam::string& type,
@@ -145,9 +131,9 @@ void Foam::adiosReadToContainer( const Foam::string& type,
                                  const Foam::labelList& start ,
                                  const Foam::labelList& count ) {
     auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open( std::move( type ) );
+    adiosStreamPtr->open( type );
     adiosStreamPtr->transfer( blockId, container, start, count );
-    adiosStreamPtr->endStep();
+    adiosStreamPtr->close();
 }
 
 #endif

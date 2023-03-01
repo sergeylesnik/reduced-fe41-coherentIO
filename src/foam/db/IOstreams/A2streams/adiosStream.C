@@ -6,7 +6,6 @@
 Foam::adiosStream::adiosStream()
     : pimpl_{ new Impl() }
     , paths_{}
-    , repo_{}
     , type_{}
     , ioPtr_{ nullptr }
     , enginePtr_{ nullptr } {}
@@ -42,17 +41,14 @@ void Foam::adiosStream::open( const Foam::string& type ) {
     v_open();
 }
 
-void Foam::adiosStream::beginStep() {
-    enginePtr_->BeginStep();
-}
-
-void Foam::adiosStream::endStep() {
-    enginePtr_->EndStep();
-}
-
 void Foam::adiosStream::close() {
-    enginePtr_->Close();
-    repo_.remove( enginePtr_, type_ );
+    if (enginePtr_->OpenMode() == adios2::Mode::Read
+        ||
+        enginePtr_->OpenMode() == adios2::Mode::ReadRandomAccess) {
+        enginePtr_->PerformGets();
+    } else {
+        enginePtr_->PerformPuts();
+    }
 }
 
 Foam::label Foam::adiosStream::getBufferSize( const Foam::string& blockId,
