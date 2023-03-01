@@ -168,7 +168,7 @@ public:
             Ostream& write(const char*, std::streamsize);
 
             //- Write binary block into second stream
-            Ostream& parwrite(const parIOType*, const label);
+            Ostream& parwrite(const char*, std::streamsize, label);
 
             Ostream& stringStream();
 

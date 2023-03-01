@@ -143,7 +143,7 @@ public:
             virtual Ostream& write(const char*, std::streamsize) = 0;
 
             //- Write binary block into second stream
-            virtual Ostream& parwrite(const parIOType*, const label) = 0;
+            virtual Ostream& parwrite(const char*, std::streamsize, label) = 0;
 
             virtual Ostream& stringStream() = 0;
 

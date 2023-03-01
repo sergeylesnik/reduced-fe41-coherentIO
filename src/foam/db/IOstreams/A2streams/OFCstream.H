@@ -37,6 +37,8 @@ SourceFiles
 
 #include "OFstream.H"
 #include "sliceMesh.H"
+#include "dictionary.H"
+#include "fieldDataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,8 +59,37 @@ class OFCstream
         fileName pathname_;
         sliceMesh& sliceableMesh_;
 
-        //- Identifier for the field to be written
-        label fieldId_;
+        //- Dictionary holding both entries for the ASCII file and pointer,
+        //  size data for the BLOBs.
+        dictionary dict_;
+
+        //- Pointer to the (sub-)dictionary the ofstream currently writes to
+        dictionary* currentSubDictPtr_;
+
+        //- The last keyword seen on the stream
+        keyType currentKeyword_;
+
+        //- Entry counter used for the formatting entries
+        label currentEntryI_;
+
+        //- The last compound token senn on the stream
+        token currentCompoundToken_;
+
+        // Pointers to data chunks contributing to a single array staged until
+        // all data is gathered and the consolidated data array is filled
+        scalarList consolidatedData_;
+
+
+    // Private member functions
+
+        void gatherFieldDataEntries
+        (
+            dictionary&,
+            DynamicList<fieldDataEntry*>&
+        );
+
+        void removeProcPatchesFromDict();
+        void writeGlobalGeometricField();
 
 public:
 
@@ -90,23 +121,32 @@ public:
         //- Get variable id without "processor.*" if writing a global field
         virtual string getBlockId() const;
 
-        //- Write field with the scalar primitive type
-        virtual Ostream& write(const char*, std::streamsize);
+        //- Get variable id without "processor.*"
+        string getGlobalId() const;
+
+        virtual Ostream& writeKeyword(const keyType&);
+        virtual Ostream& write(const token&);
+        virtual Ostream& write(const word&);
+        virtual word incrBlock(const word);
+        virtual void decrBlock();
+        virtual Ostream& parwrite(const char*, std::streamsize, label);
 
         //- Write global field as a single variable
         void writeGlobalField
         (
-            const label,
-            const label,
-            const label,
-            const scalar*
+            const label globalSize,
+            const label offset,
+            const label localSize,
+            const scalar* data,
+            const string name
         ) const;
 
-        //- Prepare the stream to write a certain field
-        void prepareWrite(const label);
+        //- Put current stream buffer to a dictionary as an entry
+        void moveStreamBufferToDict();
 
+        //- Write the dictionary manually for correct formatting
+        void writeDict(Ostream& os, const dictionary& dict, bool subDict) const;
 };
-
 
 
 } // End namespace Foam

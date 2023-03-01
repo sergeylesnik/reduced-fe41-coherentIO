@@ -177,6 +177,9 @@ $(A2streams)/create/adiosWriting.C
 $(A2streams)/create/adiosReading.C
 $(A2streams)/buffer/adiosBuffer.C
 $(A2streams)/buffer/variableBuffer.C
+$(A2streams)/fieldDataEntry.C
+$(A2streams)/formattingEntry.C
+$(A2streams)/fieldTag.C
 
 
 dictionary = db/dictionary

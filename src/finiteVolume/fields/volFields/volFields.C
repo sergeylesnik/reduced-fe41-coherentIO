@@ -71,67 +71,6 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
     *this == gsf;
 }
 
-template<>
-Foam::Ostream&
-Foam::OFCstream<fvPatchField, volMesh>::write
-(
-    const char* data,
-    std::streamsize byteSize
-)
-{
-    if (OFstream::debug)
-    {
-        InfoInFunction
-            << "volMesh specialization with fieldId_ = "
-            << fieldId_ << "\n";
-    }
-
-    label globalCellSize;
-    label cellOffset;
-    label nCmpts;
-    const label localTotalSize = byteSize/sizeof(scalar);
-
-    if(fieldId_ == -1)  // Internal field
-    {
-        // cellOffsets is a nProc long list, where each entry represents the
-        // sum of cell sizes of the current proc and all the procs below.
-        const Offsets& co = sliceableMesh_.cellOffsets();
-        globalCellSize = co.upperBound(Pstream::nProcs() - 1);
-        cellOffset = co.lowerBound(Pstream::myProcNo());
-        nCmpts = localTotalSize/co.count(Pstream::myProcNo());
-    }
-    else if (fieldId_ >= 0)  // Boundary field
-    {
-        const globalIndex& bgi = sliceableMesh_.boundaryGlobalIndex(fieldId_);
-        globalCellSize = bgi.size();
-        cellOffset = bgi.offset(Pstream::myProcNo());
-        nCmpts = localTotalSize/bgi.localSize();
-    }
-    else
-    {
-        // Write as local array
-        adiosWritePrimitives
-        (
-            "fields",
-            this->getBlockId(),
-            byteSize/sizeof(scalar),
-            reinterpret_cast<const scalar*>(data)
-        );
-
-        return *this;
-    }
-
-    writeGlobalField
-    (
-        nCmpts*globalCellSize,
-        nCmpts*cellOffset,
-        localTotalSize,
-        reinterpret_cast<const scalar*>(data)
-    );
-
-    return *this;
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

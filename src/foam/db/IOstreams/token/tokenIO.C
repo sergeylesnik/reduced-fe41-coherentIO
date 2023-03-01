@@ -29,9 +29,6 @@ Description
 #include "error.H"
 #include "token.H"
 
-#include "IOstreams.H"
-#include "scalar.H"
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::token::token(Istream& is)
@@ -121,17 +118,23 @@ ostream& Foam::operator<<(ostream& os, const token::punctuationToken& pt)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const token::punctuationToken& pt)
 {
-    if (pt == token::END_STATEMENT)
+    if
+    (
+        (pt == token::END_STATEMENT || pt == token::NL)
+     && os.format() == Ostream::streamFormat::PARALLEL
+    )
     {
         if (Ostream::debug)
         {
             Pout<< "Found token END_STATEMENT."
                 << " Poping stack with block names.\n";
         }
-        // ToDoIO Temporary hack. Will also pop if the END_STATEMENT is printed
-        // to the screen.
-        os.popBlockNamesStack();
+        // ToDoIO Remove old handling of the id
+        // os.popBlockNamesStack();
+        os.write(static_cast<const token>(pt));
+        return os;
     }
+
     return os << char(pt);
 }
 

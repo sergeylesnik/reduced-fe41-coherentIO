@@ -526,36 +526,17 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
 writeEntry(const word& keyword, Ostream& os) const
 {
     // os  << keyword << nl << token::BEGIN_BLOCK << incrIndent << nl;
-    os  << incrBlock(keyword) << nl;
+    os  << incrBlock(keyword);
 
     forAll(*this, patchi)
     {
-        if (isA<OFCstream<PatchField, GeoMesh> >(os))
-        {
-            OFCstream<PatchField, GeoMesh>& ofc =
-                dynamic_cast<OFCstream<PatchField, GeoMesh>& >(os);
-
-            // ToDoIO
-            // coupled() includes also cyclics etc => Introduce a proper
-            // identification of processor patches.
-            if (!this->operator[](patchi).coupled())
-            {
-                ofc.prepareWrite(patchi);
-                os  << incrBlock(this->operator[](patchi).patch().name())
-                    << this->operator[](patchi)
-                    << decrBlock << endl;
-                ofc.prepareWrite(-2);
-            }
-        }
-        else
-        {
-            os  << incrBlock(this->operator[](patchi).patch().name())
-                << this->operator[](patchi)
-                << decrBlock << endl;
-        }
+        os  << incrBlock(this->operator[](patchi).patch().name())
+            << this->operator[](patchi)
+            << decrBlock;
     }
 
-    os  << decrIndent << token::END_BLOCK << endl;
+    os << decrBlock;
+    // os  << decrIndent << token::END_BLOCK << endl;
 
     // Check state of IOstream
     os.check

@@ -122,7 +122,7 @@ public:
         template<class T>
         primitiveEntry(const keyType&, const T&);
 
-        autoPtr<entry> clone(const dictionary&) const
+        virtual autoPtr<entry> clone(const dictionary&) const
         {
             return autoPtr<entry>(new primitiveEntry(*this));
         }
@@ -172,7 +172,7 @@ public:
         virtual bool read(const dictionary&, Istream&);
 
         //- Write
-        void write(Ostream&) const;
+        virtual void write(Ostream&) const;
 
         //- Write, optionally with contents only (no keyword, etc)
         void write(Ostream&, const bool contentsOnly) const;

@@ -168,7 +168,7 @@ public:
             virtual Ostream& write(const char*, std::streamsize);
 
             //- Write binary block into paros_
-            virtual Ostream& parwrite(const parIOType*, const label);
+            virtual Ostream& parwrite(const char*, std::streamsize, label);
 
             virtual Ostream& stringStream();
 

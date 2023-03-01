@@ -237,7 +237,7 @@ Foam::Ostream& Foam::OPstream::write(const char* data, std::streamsize count)
 }
 
 
-Foam::Ostream& Foam::OPstream::parwrite(const parIOType* data, const label count)
+Foam::Ostream& Foam::OPstream::parwrite(const char*, const std::streamsize, label)
 {
     notImplemented("Ostream& OPstream::parwrite(const parIOType*, const label)");
     setBad();

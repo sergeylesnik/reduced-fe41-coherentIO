@@ -53,50 +53,86 @@ defineTemplateTypeNameAndDebug(surfaceOFCstream, 0);
 
 
 template<>
-Foam::Ostream&
-Foam::OFCstream<fvsPatchField, surfaceMesh>::write
-(
-    const char* data,
-    std::streamsize byteSize
-)
+void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
 {
-    if (OFstream::debug)
-    {
-        InfoInFunction
-            << "surfaceMesh specialization with feldId_ = "
-            << fieldId_ << "\n";
-    }
-    label globalCellSize;
-    label cellOffset;
-    label nCmpts;
-    const label localTotalSize = byteSize/sizeof(scalar);
+    const Offsets& iso = sliceableMesh_.internalSurfaceFieldOffsets();
+    const label localTotalSize = iso.count(Pstream::myProcNo());
 
-    if(fieldId_ == -1)  // Internal field
-    {
-        // cellOffsets is a nProc long list, where each entry represents the
-        // sum of cell sizes of the current proc and all the procs below.
-        Info<< "Surface internal field needs to be mapped and staged here\n";
-    }
-    else if (fieldId_ >= 0)  // Boundary field
-    {
-        Info<< "A surface boundary field needs to be mapped and staged here\n";
-    }
-    // else
-    // {
-        // Write as local array
-        Info<< "Writing a surface field as local variable\n";
+    const label nAllPatches = sliceableMesh_.mesh().boundaryMesh().size();
+    const label nProcPatches = sliceableMesh_.procPatches().size();
+    const label nNonProcPatches = nAllPatches - nProcPatches;
 
-        fieldId_ = -2;
-        adiosWritePrimitives
+    consolidatedData_.resize(localTotalSize);
+
+    // Store internal and processor patch fields pointers in a list
+    List<const fieldDataEntry*> procPatchFDEPtrs(nProcPatches + 1);
+    procPatchFDEPtrs[0] =
+        dynamic_cast<const fieldDataEntry*>
         (
-            "fields",
-            this->getBlockId(),
-            localTotalSize,
-            reinterpret_cast<const scalar*>(data)
+            dict_.lookupEntryPtr("internalField", false, false)
         );
 
-        return *this;
-    // }
+    dictionary& bfDict = dict_.subDict("boundaryField");
+    forAll(sliceableMesh_.procPatches(), i)
+    {
+        const label ppI = i + 1;
+        const dictionary& ppDict =
+            bfDict.subDict(sliceableMesh_.procPatches()[i].name());
+
+        procPatchFDEPtrs[ppI] =
+            dynamic_cast<const fieldDataEntry*>
+            (
+                ppDict.lookupEntryPtr("value", false, false)
+            );
+    }
+
+    // Initialize iterator for each subfield
+    labelList fieldIters(procPatchFDEPtrs.size(), 0);
+
+    // processorFaces
+    const labelList& pf = sliceableMesh_.internalFaceIDsFromBoundaries();
+    // processorFacesPatchIds
+    const labelList& pfpi = sliceableMesh_.boundryIDsFromInternalFaces();
+
+    label j = 0;
+    forAll(consolidatedData_, i)
+    {
+        label id;
+
+        if (!pf.empty() && i == pf[j])  // Processor field
+        {
+            id = -pfpi[j] - nNonProcPatches;
+            j++;
+        }
+        else  // Internal field
+        {
+            id = 0;
+        }
+
+        consolidatedData_[i] = *(procPatchFDEPtrs[id]->data() + fieldIters[id]);
+        fieldIters[id]++;
+    }
+
+    // Create new entry for the consolidated internalField
+    fieldDataEntry* newInternal =
+    new fieldDataEntry
+    (
+        "internalField",
+        procPatchFDEPtrs[0]->compoundToken(),
+        consolidatedData_.data(),
+        localTotalSize*sizeof(scalar),
+        localTotalSize/procPatchFDEPtrs[0]->nCmpts()
+    );
+
+    // Set the new internalField in the dictionary replacing the old one
+    dict_.set(newInternal);
+
+    // Remove processor patches from the dictionary
+    forAll(sliceableMesh_.procPatches(), i)
+    {
+        word ppName = sliceableMesh_.procPatches()[i].name();
+        bfDict.remove(ppName);
+    }
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

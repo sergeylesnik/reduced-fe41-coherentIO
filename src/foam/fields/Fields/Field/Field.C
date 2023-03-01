@@ -27,7 +27,6 @@ License
 #include "FieldM.H"
 #include "dictionary.H"
 #include "contiguous.H"
-#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -624,13 +623,10 @@ void Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 
     if (os.format() == IOstream::PARALLEL)
     {
-        // Check whether the Field is uniform on all ranks. If so, verify that
-        // the uniform value is the same for all ranks. Efficient
-        // implementation with a single reduce using a tuple.
-        Tuple2<bool, Type> globalUniform(uniform, this->operator[](0));
-        globalUniform =
-            returnReduce(globalUniform, eqEqTuple2<Tuple2<bool, Type> >());
-        uniform = globalUniform.first();
+        // Trigger write, the uniformity check will be performed later
+        List<Type>::writeEntry(os);
+
+        return;
     }
 
     if (uniform)

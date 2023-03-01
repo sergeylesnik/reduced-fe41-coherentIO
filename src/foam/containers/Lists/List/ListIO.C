@@ -193,7 +193,6 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
             string id;
             is >> id;
 
-            Pout<< "Reading via PARALLEL id = " << id << endl;
             if (List<T>::debug)
             {
                 Pout<< "Reading via PARALLEL id = " << id << endl;

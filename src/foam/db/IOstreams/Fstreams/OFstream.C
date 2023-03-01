@@ -159,9 +159,9 @@ Foam::OFstream::~OFstream()
     {
         std::ostringstream& os = dynamic_cast<std::ostringstream&>(*ofPtr_);
 
-        writeLocalString( getRelativeFileName(),
-                          os.str().data(),
-                          os.str().size() );
+        // writeLocalString( getRelativeFileName(),
+        //                   os.str().data(),
+        //                   os.str().size() );
     }
 
     if (tmpOssPtr_)
@@ -331,7 +331,7 @@ Foam::Ostream& Foam::OFstream::write
 }
 
 
-Foam::Ostream& Foam::OFstream::parwrite(const parIOType* buf, const label count)
+Foam::Ostream& Foam::OFstream::parwrite(const char* data, std::streamsize byteSize, label count)
 {
     if (format() != PARALLEL)
     {
@@ -350,7 +350,7 @@ Foam::Ostream& Foam::OFstream::parwrite(const parIOType* buf, const label count)
     countList[0] = count;
 
     adiosStreamPtr_->beginStep();
-    adiosStreamPtr_->transfer( blockId, shapeList, startList, countList, buf );
+    adiosStreamPtr_->transfer( blockId, shapeList, startList, countList, data );
     adiosStreamPtr_->endStep();
 
     return *this;

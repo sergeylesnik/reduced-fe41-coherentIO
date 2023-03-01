@@ -65,14 +65,6 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
     const GeometricField<scalar, fvPatchField, volMesh>& sf
 );
 
-template<>
-Ostream& OFCstream<fvPatchField, volMesh>::write
-(
-    const char* data,
-    std::streamsize byteSize
-);
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

@@ -189,34 +189,21 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
     }
     else if (os.format() == IOstream::PARALLEL)
     {
-        const string id = os.getBlockId();
         if(UList<T>::debug)
         {
+            const string id = os.getBlockId();
             Pout<< "Writing a field of size " << L.byteSize()
                 << " via PARALLEL IO with identifier:\n    "
                 << id << endl;
             Pout<< "L = " << L << endl;
         }
 
-        os  << nl << L.size() << id << nl;
-
-        if (L.size())
-        {
-            //os.parwrite(reinterpret_cast<const char*>(L.v_), L.byteSize());
-            //os.parwrite
-            //(
-                //reinterpret_cast<const parIOType*>(L.v_),
-                //L.byteSize()/sizeof(parIOType)
-            //);
-
-            // Foam::string type = "fields";
-            // if ( os.name().find("polyMesh") != std::string::npos ) {
-            //     type = "mesh";
-            // }
-            // adiosWritePrimitives( type, id, L.size(), L.v_ );
-
-            os.write(reinterpret_cast<const char*>(L.v_), L.byteSize());
-        }
+        os.parwrite
+        (
+            reinterpret_cast<const char*>(L.v_),
+            L.byteSize(),
+            L.size()
+        );
     }
 
     // Check state of IOstream

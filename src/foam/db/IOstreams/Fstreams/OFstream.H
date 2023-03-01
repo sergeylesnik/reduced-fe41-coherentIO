@@ -153,6 +153,10 @@ public:
             //- Get block identifier
             virtual string getBlockId() const;
 
+            inline ostream& getStreamBuffer()
+            {
+                return *ofPtr_;
+            }
 
         // STL stream
 
@@ -184,7 +188,7 @@ public:
             //- Write field with the scalar primitive type
             virtual Ostream& write(const char*, std::streamsize);
 
-            virtual Ostream& parwrite(const parIOType*, const label);
+            virtual Ostream& parwrite(const char*, std::streamsize, label);
 
             virtual Ostream& stringStream();
 

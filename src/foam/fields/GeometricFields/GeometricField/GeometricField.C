@@ -1328,19 +1328,7 @@ Foam::Ostream& Foam::operator<<
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
-    if (isA<OFCstream<PatchField, GeoMesh> >(os))
-    {
-        OFCstream<PatchField, GeoMesh>& ofc =
-            dynamic_cast<OFCstream<PatchField, GeoMesh>& >(os);
-        ofc.prepareWrite(-1);
-        gf.dimensionedInternalField().writeData(os, "internalField");
-        ofc.prepareWrite(-2);
-    }
-    else
-    {
-        gf.dimensionedInternalField().writeData(os, "internalField");
-    }
-
+    gf.dimensionedInternalField().writeData(os, "internalField");
     os  << nl;
     gf.boundaryField().writeEntry("boundaryField", os);
 
