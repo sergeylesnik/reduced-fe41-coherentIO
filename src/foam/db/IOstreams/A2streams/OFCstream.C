@@ -271,6 +271,7 @@ Foam::word Foam::OFCstream<PatchField, GeoMesh>::incrBlock(const word name)
     currentSubDictPtr_->add(name, subDict);
     currentSubDictPtr_ =
         const_cast<dictionary*>(currentSubDictPtr_->subDictPtr(name));
+
     return name;
 }
 
@@ -393,7 +394,8 @@ const
                 const primitiveEntry& pe = dynamicCast<const primitiveEntry>(e);
                 os.writeKeyword(key);
                 pe.write(os, true);
-                os << token::END_STATEMENT;
+                // ToDoIO Let formattingEntry take care over semicolon?
+                // os << token::END_STATEMENT;
             }
         }
         else  // fieldDataEntry

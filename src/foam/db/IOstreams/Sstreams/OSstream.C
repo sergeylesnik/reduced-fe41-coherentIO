@@ -40,11 +40,11 @@ Foam::Ostream& Foam::OSstream::write(const token& t)
 {
     if (debug)
     {
-        Pout
+        std::cout
         << "From function " << __PRETTY_FUNCTION__ << nl
         << " in file " << __FILE__ << nl
         << " at line " << __LINE__
-        << " Token: " << t.stringToken() << '\n';
+        << " Token: " << t.info() << '\n';
     }
 
     if (t.isPunctuation())
@@ -75,11 +75,11 @@ Foam::Ostream& Foam::OSstream::write(const char c)
 {
     if (debug > 1)
     {
-        Pout
+        std::cout
         << "From function " << __PRETTY_FUNCTION__ << nl
         << " in file " << __FILE__ << nl
         << " at line " << __LINE__
-        << ": " << c << "\n";
+        << ": '" << c << "'\n";
     }
 
     os_ << c;
@@ -97,7 +97,7 @@ Foam::Ostream& Foam::OSstream::write(const char* str)
     // Assign higher debug level since mostly file headers are written here
     if (debug > 2)
     {
-        Pout
+        std::cout
         << "From function " << __PRETTY_FUNCTION__ << nl
         << " in file " << __FILE__ << nl
         << " at line " << __LINE__
@@ -115,7 +115,7 @@ Foam::Ostream& Foam::OSstream::write(const word& str)
 {
     if (debug)
     {
-        Pout
+        std::cout
         << "From function " << __PRETTY_FUNCTION__ << nl
         << " in file " << __FILE__ << nl
         << " at line " << __LINE__
@@ -132,7 +132,7 @@ Foam::Ostream& Foam::OSstream::write(const string& str)
 {
     if (debug)
     {
-        Pout
+        std::cout
         << "From function " << __PRETTY_FUNCTION__ << nl
         << " in file " << __FILE__ << nl
         << " at line " << __LINE__
@@ -190,7 +190,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
 {
     if (debug > 2)
     {
-        Pout
+        std::cout
         << "From function " << __PRETTY_FUNCTION__ << nl
         << " in file " << __FILE__ << nl
         << " at line " << __LINE__

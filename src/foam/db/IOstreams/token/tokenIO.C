@@ -132,7 +132,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token::punctuationToken& pt)
         // ToDoIO Remove old handling of the id
         // os.popBlockNamesStack();
         os.write(static_cast<const token>(pt));
-        return os;
+        // return os;
     }
 
     return os << char(pt);

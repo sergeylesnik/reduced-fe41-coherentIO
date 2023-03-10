@@ -127,6 +127,11 @@ Foam::OFstream::OFstream
     blockNamesStack_(),
     tmpOssPtr_(nullptr)
 {
+    if (debug)
+    {
+        InfoInFunction
+            << "Constructing a stream with format " << format << Foam::endl;
+    }
     setClosed();
     setState(ofPtr_->rdstate());
 
@@ -159,9 +164,12 @@ Foam::OFstream::~OFstream()
     {
         std::ostringstream& os = dynamic_cast<std::ostringstream&>(*ofPtr_);
 
-        // writeLocalString( getRelativeFileName(),
-        //                   os.str().data(),
-        //                   os.str().size() );
+        if (!os.str().empty())
+        {
+            writeLocalString( getRelativeFileName(),
+                              os.str().data(),
+                              os.str().size() );
+        }
     }
 
     if (tmpOssPtr_)
@@ -342,6 +350,9 @@ Foam::Ostream& Foam::OFstream::parwrite(const char* data, std::streamsize byteSi
     }
 
     string blockId = getBlockId();
+
+    std::ostringstream& os = dynamic_cast<std::ostringstream&>(*ofPtr_);
+    os << count << token::BEGIN_STRING << blockId << token::BEGIN_STRING;
 
     labelList shapeList{1};
     labelList startList{1};
