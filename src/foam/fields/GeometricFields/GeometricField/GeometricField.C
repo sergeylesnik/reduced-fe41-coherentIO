@@ -1006,6 +1006,11 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::writeToStream
     IOstream::compressionType cmp
 ) const
 {
+    if (fmt != IOstream::PARALLEL)
+    {
+        return regIOobject::writeToStream(pathname, mode, fmt, ver, cmp);
+    }
+
     OFCstream<PatchField, GeoMesh> os
     (
         pathname,
