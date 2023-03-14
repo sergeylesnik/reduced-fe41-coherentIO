@@ -101,7 +101,7 @@ void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
 
         if (!pf.empty() && i == pf[j])  // Processor field
         {
-            id = -pfpi[j] - nNonProcPatches;
+            id = pfpi[j] - nNonProcPatches;
             j++;
         }
         else  // Internal field
