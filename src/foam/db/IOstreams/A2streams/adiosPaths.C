@@ -20,12 +20,12 @@ const Foam::fileName& Foam::adiosPaths::getPathName() const {
     return pathname_;
 }
 
-const Foam::fileName& Foam::adiosPaths::meshPathname() {
-    return meshPathname_;
+Foam::fileName Foam::adiosPaths::meshPathname( const Foam::fileName& path ) {
+    return path/meshPathname_;
 }
 
-const Foam::fileName& Foam::adiosPaths::dataPathname() {
-    return dataPathname_;
+Foam::fileName Foam::adiosPaths::dataPathname( const Foam::fileName& path ) {
+    return path/dataPathname_;
 }
 
 bool Foam::adiosPaths::dataPresent() {

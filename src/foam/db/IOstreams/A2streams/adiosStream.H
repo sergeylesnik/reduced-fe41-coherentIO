@@ -40,14 +40,14 @@ protected:
     std::shared_ptr<adios2::IO> ioPtr_{ nullptr };
     std::shared_ptr<adios2::Engine> enginePtr_{ nullptr };
 
-    void setPath( const Foam::string& );
+    void setPath( const Foam::string& type, const Foam::string& path = "" );
 
 public:
 
     adiosStream();
     virtual ~adiosStream();
 
-    void open( const Foam::string& );
+    void open( const Foam::string& type, const Foam::string& path = "" );
 
     // Reading local/global array
     void transfer( const string& blockId,

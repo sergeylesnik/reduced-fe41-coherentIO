@@ -20,9 +20,9 @@ public:
 
     const fileName& getPathName() const;
 
-    const fileName& meshPathname();
+    fileName meshPathname( const fileName& path = "" );
 
-    const fileName& dataPathname();
+    fileName dataPathname( const fileName& path = "" );
 
     bool dataPresent();
 

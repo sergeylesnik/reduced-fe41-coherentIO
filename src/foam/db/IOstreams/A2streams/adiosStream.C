@@ -23,21 +23,21 @@ std::string Foam::adiosStreamType( const std::string& id ) {
 }
 
 
-void Foam::adiosStream::setPath( const Foam::string& type ) {
+void Foam::adiosStream::setPath( const Foam::string& type, const Foam::string& path ) {
     if ( type == "mesh" ) {
         //paths_.setPathName( "constant/polyMesh.bp" );
         // Enable this later
-        paths_.setPathName( paths_.meshPathname() );
+        paths_.setPathName( paths_.meshPathname( path ) );
     } else if ( type == "fields" ) {
         //paths_.setPathName( "fields.bp" );
         // Enable this later
-        paths_.setPathName( paths_.dataPathname() );
+        paths_.setPathName( paths_.dataPathname( path ) );
     }
 }
 
-void Foam::adiosStream::open( const Foam::string& type ) {
+void Foam::adiosStream::open( const Foam::string& type, const Foam::string& path ) {
     type_ = type;
-    setPath( type );
+    setPath( type, path );
     v_open();
 }
 
