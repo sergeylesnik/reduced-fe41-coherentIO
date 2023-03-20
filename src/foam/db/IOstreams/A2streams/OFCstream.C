@@ -27,6 +27,8 @@ License
 #include "dictionaryEntry.H"
 #include "formattingEntry.H"
 
+#include "adiosStream.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // defineTypeNameAndDebug(Foam::OFCstream, 0);
@@ -320,15 +322,14 @@ void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalField
     const string name
 ) const
 {
-    adiosWritePrimitives
-    (
-        "fields",
-        name,
-        globalSize,
-        offset,
-        localSize,
-        reinterpret_cast<const scalar*>(data)
-    );
+    auto adiosStreamPtr = Foam::adiosWriting{}.createStream();
+    adiosStreamPtr->open( "fields", pathname_.path() );
+    adiosStreamPtr->transfer( name,
+                              { globalSize },
+                              { offset },
+                              { localSize },
+                              data );
+    adiosStreamPtr->close();
 }
 
 

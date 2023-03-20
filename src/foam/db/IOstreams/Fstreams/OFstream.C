@@ -94,7 +94,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
             if ( pathname.find("polyMesh") != std::string::npos ) {
                 type = "mesh";
             }
-            adiosStreamPtr_->open( std::move( type ) );
+            adiosStreamPtr_->open( std::move( type ), pathname );
         }
         else
         {
