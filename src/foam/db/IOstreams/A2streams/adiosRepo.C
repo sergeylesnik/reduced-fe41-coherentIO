@@ -6,8 +6,6 @@
 #include "Pstream.H"
 #include "foamString.H"
 
-#include "adiosBuffer.H"
-
 Foam::adiosRepo*
 Foam::adiosRepo::repoInstance_ = nullptr;
 
@@ -20,13 +18,11 @@ struct Foam::adiosRepo::Impl {
     using ADIOS_uPtr = std::unique_ptr<adios2::ADIOS>;
     using IO_map_uPtr = std::unique_ptr<Foam::adiosRepo::IO_map>;
     using Engine_map_uPtr = std::unique_ptr<Foam::adiosRepo::Engine_map>;
-    using Buffer_map_uPtr = std::unique_ptr<Foam::adiosRepo::Buffer_map>;
 
     Impl()
         : adiosPtr_{ nullptr }
         , ioMap_{ std::make_unique< Foam::adiosRepo::IO_map >() }
         , engineMap_{ std::make_unique< Foam::adiosRepo::Engine_map >() }
-        , bufferMap_{ std::make_unique< Foam::adiosRepo::Buffer_map >() }
     {
         if( !adiosPtr_ ) {
             if ( Pstream::parRun() ) {
@@ -40,7 +36,6 @@ struct Foam::adiosRepo::Impl {
     ADIOS_uPtr adiosPtr_{};
     IO_map_uPtr ioMap_{};
     Engine_map_uPtr engineMap_{};
-    Buffer_map_uPtr bufferMap_{};
 
 };
 
@@ -66,11 +61,6 @@ Foam::adiosRepo::get( const std::shared_ptr<adios2::IO>& ) {
 Foam::adiosRepo::Engine_map*
 Foam::adiosRepo::get( const std::shared_ptr<adios2::Engine>& ) {
     return pimpl_->engineMap_.get();
-}
-
-Foam::adiosRepo::Buffer_map*
-Foam::adiosRepo::get( const std::shared_ptr<Foam::adiosBuffer>& ) {
-    return pimpl_->bufferMap_.get();
 }
 
 void Foam::adiosRepo::push( const Foam::label& input ) {

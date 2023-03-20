@@ -144,7 +144,16 @@ Foam::variableBuffer<DataType>::variableBuffer( adios2::IO* io,
     : shape_{ toDims( shape ) }
     , start_{ toDims( start ) } 
     , count_{ toDims( count ) } {
-    variable_ = io->DefineVariable<DataType>( blockId, shape_, start_, count_ );
+    variable_ = io->InquireVariable<DataType>( blockId );
+    if ( variable_ ) {
+        // Set to last step by default
+        auto step = variable_.Steps() - 1;
+        variable_.SetStepSelection( { step, 1 } ) ;
+        variable_.SetSelection( { start_, count_ } ) ;
+        shape_ = variable_.Shape();
+    } else if ( !variable_ ) {
+        variable_ = io->DefineVariable<DataType>( blockId, shape_, start_, count_ );
+    }
 }
 
 template<typename DataType>

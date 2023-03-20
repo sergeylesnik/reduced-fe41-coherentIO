@@ -17,7 +17,6 @@ namespace Foam
 
 // Forward declaration
 class string;
-class adiosBuffer;
 
 class adiosRepo {
 
@@ -29,7 +28,6 @@ class adiosRepo {
 
     using IO_map = std::map<Foam::string, std::shared_ptr<adios2::IO> >;
     using Engine_map = std::map<Foam::string, std::shared_ptr<adios2::Engine> >;
-    using Buffer_map = std::map<Foam::string, std::shared_ptr<adiosBuffer> >;
 
     // Private members
 
@@ -42,7 +40,6 @@ class adiosRepo {
     // Private methods
     IO_map* get( const std::shared_ptr<adios2::IO>& );
     Engine_map* get( const std::shared_ptr<adios2::Engine>& );
-    Buffer_map* get( const std::shared_ptr<adiosBuffer>& ); // TODO: Buffer repo entry not required. IO is a repo for itself
 
   public:
 

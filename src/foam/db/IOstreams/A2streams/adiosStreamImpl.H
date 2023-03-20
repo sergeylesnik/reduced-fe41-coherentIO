@@ -39,15 +39,12 @@ struct Foam::adiosStream::Impl {
                          const labelList& start = {},
                          const labelList& count = {} ) {
         std::shared_ptr<adiosBuffer> bufferPtr{ nullptr };
-        Foam::adiosRepo* repo = Foam::adiosRepo::instance();
-        repo->pull( bufferPtr, blockId );
-        if ( !bufferPtr && ioPtr && enginePtr ) {
+        if ( ioPtr && enginePtr ) {
             bufferPtr = createInputBuffer<BufferType>( ioPtr,
                                                        enginePtr,
                                                        blockId,
                                                        start,
                                                        count );
-            repo->push( bufferPtr, blockId );
         }
         bufferPtr_ = bufferPtr;
         return bufferPtr_->size();
@@ -61,16 +58,13 @@ struct Foam::adiosStream::Impl {
                         const labelList& start,
                         const labelList& count ) {
         std::shared_ptr<adiosBuffer> bufferPtr{ nullptr };
-        Foam::adiosRepo* repo = Foam::adiosRepo::instance();
-        repo->pull( bufferPtr, blockId );
-        if ( !bufferPtr && ioPtr && enginePtr ) {
+        if ( ioPtr && enginePtr ) {
             bufferPtr = std::make_shared<BufferType>( ioPtr,
                                                       enginePtr,
                                                       blockId,
                                                       shape,
                                                       start,
                                                       count );
-            repo->push( bufferPtr, blockId );
         }
         bufferPtr_ = bufferPtr;
     }
