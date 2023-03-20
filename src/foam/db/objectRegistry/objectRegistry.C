@@ -26,6 +26,8 @@ License
 #include "objectRegistry.H"
 #include "foamTime.H"
 
+#include "adiosRepo.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::objectRegistry, 0);
@@ -405,6 +407,8 @@ bool Foam::objectRegistry::writeObject
             ok = iter()->writeObject(fmt, ver, cmp) && ok;
         }
     }
+    auto repo = adiosRepo::instance();
+    repo->close();
 
     return ok;
 }

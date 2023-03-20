@@ -31,8 +31,6 @@ License
 
 Foam::ParRunControl::~ParRunControl()
 {
-    Foam::adiosRepo* repo = Foam::adiosRepo::instance();
-    repo->close();
     if (RunPar)
     {
         Info<< "Finalising parallel run" << endl;
