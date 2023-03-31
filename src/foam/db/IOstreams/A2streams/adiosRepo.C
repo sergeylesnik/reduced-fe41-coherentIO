@@ -78,3 +78,9 @@ void Foam::adiosRepo::close() {
     }
     pimpl_->engineMap_->clear();
 }
+
+void Foam::adiosRepo::clear() {
+    close();
+    pimpl_->adiosPtr_->RemoveAllIOs();
+    pimpl_->ioMap_->clear();
+}

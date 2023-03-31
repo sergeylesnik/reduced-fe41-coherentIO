@@ -94,7 +94,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
             if ( pathname.find("polyMesh") != std::string::npos ) {
                 type = "mesh";
             }
-            adiosStreamPtr_->open( std::move( type ), pathname );
+            //adiosStreamPtr_->open( std::move( type ), pathname );
         }
         else
         {
@@ -361,7 +361,7 @@ Foam::Ostream& Foam::OFstream::parwrite(const char* data, std::streamsize byteSi
     startList[0] = 0;
     countList[0] = count;
 
-    adiosStreamPtr_->transfer( blockId, shapeList, startList, countList, data );
+    //adiosStreamPtr_->transfer( blockId, shapeList, startList, countList, data );
 
     return *this;
 }

@@ -59,6 +59,26 @@ void mapped_copy( ForwardIterator input_iter,
 }
 
 template<typename DataType>
+adios2::Variable<DataType>
+inquire_define_variable
+(
+    adios2::IO* io,
+    adios2::Variable<DataType>& variable,
+    const Foam::string blockId,
+    const adios2::Dims& shape,
+    const adios2::Dims& start,
+    const adios2::Dims& count
+)
+{
+    variable = io->InquireVariable<DataType>( blockId );
+    if ( !variable )
+    {
+        variable = io->DefineVariable<DataType>( blockId, shape, start, count );
+    }
+    return variable;
+}
+
+template<typename DataType>
 class spanBuffer : public adiosBuffer {
 
     adios2::Dims shape_;
@@ -121,7 +141,7 @@ Foam::spanBuffer<DataType>::spanBuffer( adios2::IO* io,
     , serialization_{ std::accumulate( count_.begin() + 1,
                                        count_.end(),
                                        1, std::multiplies<label>() ) }
-    , variable_{ io->DefineVariable<DataType>( blockId, shape_, start_, count_ ) }
+    , variable_{ inquire_define_variable( io, variable_, blockId, shape_, start_, count_ ) }
     , span_{ engine->Put( variable_ ) } {}
 
 template<typename DataType>

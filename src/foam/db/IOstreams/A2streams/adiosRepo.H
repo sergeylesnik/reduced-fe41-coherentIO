@@ -66,6 +66,8 @@ class adiosRepo {
 
     void close();
 
+    void clear();
+
 };
 
 }

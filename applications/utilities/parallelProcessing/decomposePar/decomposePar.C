@@ -283,6 +283,8 @@ int main(int argc, char *argv[])
         meshDecomp.decomposeMesh(filterPatches);
 
         meshDecomp.writeDecomposition();
+
+        adiosRepo::instance()->clear();
     }
 
     if (!decomposeMeshOnly)
@@ -338,6 +340,72 @@ int main(int argc, char *argv[])
 
     Info<< endl;
 
+    if ( mesh.time().writeFormat() == IOstream::PARALLEL ) {
+
+        Time myDb( Time::controlDictName,
+                   mesh.time().rootPath(),
+                   mesh.time().caseName(),
+                   "system",
+                   "constant",
+                   true );
+
+        // Read the mesh
+        fvMesh coherentMesh
+        (
+            IOobject
+            (
+                regionName,
+                myDb.timeName(),
+                myDb
+            )
+        );
+
+        auto coherentFaceAddressing = meshDecomp.coherentFaceAddressing();
+        auto coherentCellAddressing = meshDecomp.coherentCellAddressing();
+        auto coherentBoundaryAddressing = meshDecomp.blankAddressing( mesh.boundaryMesh().size() );
+
+        // Old format of face addressing requires a plus one.
+        for ( auto& faceId : coherentFaceAddressing ) { ++faceId; }
+
+        // FV fields
+        if
+        (
+            volScalarFields.size()
+         || volVectorFields.size()
+         || volSphericalTensorFields.size()
+         || volSymmTensorFields.size()
+         || volTensorFields.size()
+         || surfaceScalarFields.size()
+         || surfaceVectorFields.size()
+         || surfaceSphericalTensorFields.size()
+         || surfaceSymmTensorFields.size()
+         || surfaceTensorFields.size()
+        )
+        {
+            fvFieldDecomposer fieldDecomposer
+            (
+                mesh,
+                coherentMesh,
+                coherentFaceAddressing,
+                coherentCellAddressing,
+                coherentBoundaryAddressing
+            );
+
+            fieldDecomposer.decomposeFields(volScalarFields);
+            fieldDecomposer.decomposeFields(volVectorFields);
+            fieldDecomposer.decomposeFields(volSphericalTensorFields);
+            fieldDecomposer.decomposeFields(volSymmTensorFields);
+            fieldDecomposer.decomposeFields(volTensorFields);
+
+            fieldDecomposer.decomposeFields(surfaceScalarFields);
+            fieldDecomposer.decomposeFields(surfaceVectorFields);
+            fieldDecomposer.decomposeFields(surfaceSphericalTensorFields);
+            fieldDecomposer.decomposeFields(surfaceSymmTensorFields);
+            fieldDecomposer.decomposeFields(surfaceTensorFields);
+        }
+    }
+    else
+    {
     // Split the fields over processors
     for (label procI = 0; procI < meshDecomp.nProcs(); procI++)
     {
@@ -516,7 +584,8 @@ int main(int argc, char *argv[])
             Foam::system(executeString);
         }
     }
-    }
+    } // for-loop on procI
+    } // if ( IOstream::PARALLEL )
 
     Info<< "\nEnd.\n" << endl;
 

@@ -45,6 +45,8 @@ SourceFiles
 #include "globalProcFaceIndex.H"
 #include "globalProcPointIndex.H"
 
+#include "sliceMeshHelper.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -112,6 +114,12 @@ class domainDecomposition
 
         //- Original patch index for every processor patch
         labelListList procBoundaryAddressing_;
+
+        //- Labels of cells for coherent mesh format
+        labelList coherentCellAddressing_;
+
+        //- Labels of faces for coherent mesh format
+        labelList coherentFaceAddressing_;
 
         //- Sizes for processor mesh patches
         // Excludes inter-processor boundaries
@@ -217,12 +225,11 @@ public:
 
         // Decomposed mesh and addressing
 
-            //autoPtr<fvMesh> 
-            void parallelMesh
+            autoPtr<fvMesh> parallelMesh
             (
                 const Time& procDb,
                 const word& regionName
-            ) const;
+            );
 
             //- Create a decomposed mesh for a given processor index
             //  Note: at the point of construction, the boundary is marked
@@ -264,6 +271,26 @@ public:
                 return procBoundaryAddressing_;
             }
 
+            //- Return coherent cell addressing
+            const labelList& coherentCellAddressing() const
+            {
+                return coherentCellAddressing_;
+            }
+
+            //- Return coherent cell addressing
+            const labelList& coherentFaceAddressing() const
+            {
+                return coherentFaceAddressing_;
+            }
+
+
+            //- Return coherent boundary addressing
+            labelList blankAddressing( label size ) const
+            {
+                Foam::labelList iota{};
+                indexIota( iota, size, 0 );
+                return iota;
+            }
 
         //- Write decomposition
         bool writeDecomposition();

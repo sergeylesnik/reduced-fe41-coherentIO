@@ -37,6 +37,7 @@ License
 #include "globalMeshData.H"
 
 #include "sliceMeshHelper.H"
+#include "slicePermutation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -90,15 +91,14 @@ Foam::domainDecomposition::~domainDecomposition()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-//Foam::autoPtr<Foam::fvMesh>
-void Foam::domainDecomposition::parallelMesh
+Foam::autoPtr<Foam::fvMesh> Foam::domainDecomposition::parallelMesh
 (
     const Time& processorDb,
     const word& regionName
-) const
+)
 {
     // Create cell lookup
-    labelList cellLookup(mesh_.nCells(), -1);
+    labelList coherentCellAddressing(mesh_.nCells(), -1);
 
     label start = 0;
     label gCellI = 0;
@@ -111,7 +111,7 @@ void Foam::domainDecomposition::parallelMesh
         partitionStarts[ procI+1 ] = start;
         // Fill the permutation from new to old cell numbering
         forAll (curCellLabels, cellI) {
-            cellLookup[curCellLabels[cellI]] = gCellI;
+            coherentCellAddressing[curCellLabels[cellI]] = gCellI;
             ++gCellI;
         }
     }
@@ -124,18 +124,19 @@ void Foam::domainDecomposition::parallelMesh
     labelList procOwner( own.size(), -1 );
     forAll ( own, faceI ) {
         auto cellId = own[faceI];
-        procOwner[faceI] = cellLookup[cellId];
+        procOwner[faceI] = coherentCellAddressing[cellId];
     }
 
     labelList procNeighbour( nei.size(), -1 );
     forAll ( nei, faceI ) {
         auto cellId = nei[faceI];
-        procNeighbour[faceI] = cellLookup[cellId];
+        procNeighbour[faceI] = coherentCellAddressing[cellId];
     }
 
     faceList procFaces = mesh_.allFaces();
     pointField procPoints = mesh_.allPoints();
 
+    // Transfer ownership if cell id in neighbour list is smaller than in owner list
     label counter;
     counter = 0;
     while ( counter < procNeighbour.size() ) {
@@ -146,12 +147,19 @@ void Foam::domainDecomposition::parallelMesh
         ++counter;
     }
 
-    std::vector<Foam::label> indices{};
+    
+    Foam::labelList coherentFaceAddressing{};
+    Foam::labelList indices{};
+    indexIota( coherentFaceAddressing, procFaces.size(), 0 );
     indexIota( indices, procNeighbour.size(), 0 );
     indexSort( indices, procNeighbour );
     applyPermutation( procNeighbour, indices );
     applyPermutation( procOwner, indices );
     applyPermutation( procFaces, indices );
+    applyPermutation( coherentFaceAddressing, indices );
+
+    coherentCellAddressing_ = coherentCellAddressing;
+    coherentFaceAddressing_ = coherentFaceAddressing;
 
     // Create processor mesh without a boundary
     autoPtr<fvMesh> procMeshPtr
@@ -184,6 +192,8 @@ void Foam::domainDecomposition::parallelMesh
     procMesh.checkMesh( true );
     // REMOVED: "Create processor boundary patches"
     // Because will be identified through extended neighbour list while reading.
+
+    return procMeshPtr;
 }
 
 Foam::autoPtr<Foam::fvMesh> Foam::domainDecomposition::processorMesh

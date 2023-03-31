@@ -29,15 +29,6 @@ Foam::adiosInputFeatures::createEngine( adios2::IO* const ioPtr, const Foam::fil
     repo->pull( enginePtr, "read"+path( size ) );
     if ( !enginePtr ) {
         enginePtr = std::make_shared<adios2::Engine>( ioPtr->Open( path, adios2::Mode::ReadRandomAccess ) );
-        //auto num_steps = enginePtr->Steps();
-        //enginePtr->BeginStep();
-        //std::cout << "MY TOTAL NUMBER OF STEPS IS " << enginePtr->Steps() << "\n";
-        //while (enginePtr->CurrentStep() != enginePtr->Steps())
-        //{
-            //enginePtr->EndStep();
-            //enginePtr->BeginStep();
-        //std::cout << "MY TOTAL NUMBER OF STEPS IS " << enginePtr->Steps() << "\n";
-        //}
         repo->push( enginePtr, "read"+path( size ) );
     }
     return enginePtr;
