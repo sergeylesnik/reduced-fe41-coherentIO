@@ -91,6 +91,7 @@ void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
 
     // processorFaces
     const labelList& pf = sliceableMesh_.internalFaceIDsFromBoundaries();
+
     // processorFacesPatchIds
     const labelList& pfpi = sliceableMesh_.boundryIDsFromInternalFaces();
 
@@ -133,6 +134,12 @@ void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
         word ppName = sliceableMesh_.procPatches()[i].name();
         bfDict.remove(ppName);
     }
+}
+
+template<>
+label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>()
+{
+    return sliceableMesh_.internalSurfaceFieldOffsets().size();
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -42,7 +42,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "calculatedFvPatchFields.H"
 #include "fvMatrices.H"
-#include "OFCstream.H"
+#include "IFCstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,6 +64,17 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
     const direction,
     const GeometricField<scalar, fvPatchField, volMesh>& sf
 );
+
+template<>
+void IFCstream::addProcessorPatchField<fvPatchField, volMesh>
+(
+    dictionary& bfDict,
+    const word& patchName,
+    const word& fieldTypeName
+);
+
+template<>
+label IFCstream::coherentFieldSize<fvPatchField, volMesh>();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

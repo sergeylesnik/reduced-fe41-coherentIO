@@ -324,7 +324,6 @@ inline bool Foam::token::isLongDoubleScalar() const
     return (type_ == LONG_DOUBLE_SCALAR);
 }
 
-
 inline Foam::longDoubleScalar Foam::token::longDoubleScalarToken() const
 {
     if (type_ == LONG_DOUBLE_SCALAR)
@@ -337,7 +336,6 @@ inline Foam::longDoubleScalar Foam::token::longDoubleScalarToken() const
         return 0.0;
     }
 }
-
 
 inline bool Foam::token::isScalar() const
 {
@@ -405,6 +403,18 @@ inline const Foam::token::compound& Foam::token::compoundToken() const
     }
 }
 
+inline Foam::token::compound& Foam::token::compoundToken()
+{
+    if (type_ == COMPOUND)
+    {
+        return *compoundTokenPtr_;
+    }
+    else
+    {
+        parseError("compound");
+        return *compoundTokenPtr_;
+    }
+}
 
 inline Foam::label Foam::token::lineNumber() const
 {

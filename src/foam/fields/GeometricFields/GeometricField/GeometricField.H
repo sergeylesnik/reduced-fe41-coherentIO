@@ -505,6 +505,9 @@ public:
         //- WriteData member function required by regIOobject
         bool writeData(Ostream&) const;
 
+        //- Construct an IFCsteam
+        virtual Istream* objectStreamPar(const fileName&);
+
         //- Return transpose (only if it is a tensor field)
         tmp<GeometricField<Type, PatchField, GeoMesh> > T() const;
 

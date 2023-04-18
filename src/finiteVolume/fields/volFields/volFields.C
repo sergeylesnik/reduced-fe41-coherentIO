@@ -71,6 +71,25 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
     *this == gsf;
 }
 
+template<>
+void IFCstream::addProcessorPatchField<fvPatchField, volMesh>
+(
+    dictionary& bfDict,
+    const word& patchName,
+    const word& fieldTypeName
+)
+{
+    dictionary dict;
+    dict.add("type", "processor");
+    bfDict.add(patchName, dict);
+}
+
+template<>
+label IFCstream::coherentFieldSize<fvPatchField, volMesh>()
+{
+    return sliceableMesh_.mesh().nCells();
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

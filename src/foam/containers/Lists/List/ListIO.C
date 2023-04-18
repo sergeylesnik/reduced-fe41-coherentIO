@@ -102,8 +102,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
             Pout<< "ListIO: operator>>, reading a list of size " << len << endl;
         }
 
-        // Resize to length read
-        list.resize(len);
+        if (is.format() != IOstream::PARALLEL)
+        {
+            // Resize to length read
+            list.resize(len);
+        }
 
         // Read list contents depending on data format
 
@@ -206,11 +209,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 id.replace("\"","")
             );
             */
-            Foam::string type = "fields";
-            if ( is.name().find("polyMesh") != std::string::npos ) {
-                type = "mesh";
-            }
-            adiosReadPrimitives( type, id, list.data() );
+            // Foam::string type = "fields";
+            // if ( is.name().find("polyMesh") != std::string::npos ) {
+            //     type = "mesh";
+            // }
+            // adiosReadPrimitives( type, id, list.data() );
 
             if (UList<T>::debug > 1)
             {

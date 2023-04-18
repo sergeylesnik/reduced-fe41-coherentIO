@@ -112,7 +112,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
         if (dictionary::debug)
         {
             Pout<< "primitiveEntry::read(const dictionary&, Istream&),"
-                << nl << "    1st append, token = '" << currToken
+                << nl << "    1st append, token = '" << currToken << "'"
                 << nl
                 << "    to a primitiveEntry of dictionary " << dict.name()
                 << endl;

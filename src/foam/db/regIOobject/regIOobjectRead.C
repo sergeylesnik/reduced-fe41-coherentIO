@@ -154,7 +154,7 @@ Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
 
     bool isMeshFile = objPath.find("polyMesh") != std::string::npos;
 
-    // Fall back to the standarad readStream if the ADIOS data directory is not
+    // Fall back to the standard readStream if the ADIOS data directory is not
     // present
     adiosPaths paths;
     fileName adiosDir = paths.dataPathname();

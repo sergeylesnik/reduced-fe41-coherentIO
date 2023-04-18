@@ -83,11 +83,9 @@ void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalGeometricField()
 
     const label nFields = fieldDataEntries.size();
     List<fieldTag> globalUniform(nFields);
-    label nAllCmpts = 0;
 
     forAll(fieldDataEntries, i)
     {
-        nAllCmpts += fieldDataEntries[i]->nCmpts();
         globalUniform[i].firstElement() = fieldDataEntries[i]->firstElement();
         globalUniform[i].getUniformity() = fieldDataEntries[i]->getUniformity();
     }
@@ -107,25 +105,25 @@ void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalGeometricField()
         // processorXX.
         if (!fde.uniform())
         {
-            const label nElements = fde.nElements();
+            const label nElems = fde.nElems();
             const label nCmpts = fde.nCmpts();
 
-            const globalIndex bgi(nElements);
-            const label nGlobalElements = bgi.size();
-            const label elementOffset = bgi.offset(Pstream::myProcNo());
+            const globalIndex bgi(nElems);
+            const label nGlobalElems = bgi.size();
+            const label elemOffset = bgi.offset(Pstream::myProcNo());
 
             writeGlobalField
             (
-                nCmpts*nGlobalElements,
-                nCmpts*elementOffset,
-                nCmpts*nElements,
+                nCmpts*nGlobalElems,
+                nCmpts*elemOffset,
+                nCmpts*nElems,
                 fde.data(),
                 fde.id()
             );
 
             if(Pstream::master())
             {
-                fde.setNGlobalElements(nGlobalElements);
+                fde.nGlobalElems(nGlobalElems);
             }
         }
     }
@@ -134,7 +132,8 @@ void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalGeometricField()
     {
         OFstream of
         (
-            "fields/" + name().name(),
+            // "fields/" + name().name(),
+            name(),
             ios_base::out|ios_base::trunc,
             streamFormat::ASCII
         );
@@ -293,7 +292,7 @@ Foam::Ostream& Foam::OFCstream<PatchField, GeoMesh>::parwrite
 (
     const char* data,
     std::streamsize byteSize,
-    label nElements
+    label nElems
 )
 {
     currentSubDictPtr_->add
@@ -304,7 +303,7 @@ Foam::Ostream& Foam::OFCstream<PatchField, GeoMesh>::parwrite
             currentCompoundToken_,
             reinterpret_cast<const scalar*>(data),
             byteSize,
-            nElements
+            nElems
         )
     );
 

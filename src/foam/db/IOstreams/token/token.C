@@ -32,6 +32,7 @@ Foam::token Foam::token::undefinedToken;
 
 defineTypeNameAndDebug(Foam::token::compound, 0);
 defineRunTimeSelectionTable(Foam::token::compound, Istream);
+defineRunTimeSelectionTable(Foam::token::compound, label);
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -71,6 +72,32 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
     }
 
     return autoPtr<Foam::token::compound>(cstrIter()(is));
+}
+
+
+Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
+(
+    const word& compoundType,
+    Istream& is,
+    label size
+)
+{
+    labelConstructorTable::iterator cstrIter =
+        labelConstructorTablePtr_->find(compoundType);
+
+    if (cstrIter == labelConstructorTablePtr_->end())
+    {
+        FatalIOErrorInFunction(is)
+            << "Unknown compound type " << compoundType << nl << nl
+            << "Valid compound types:" << endl
+            << IstreamConstructorTablePtr_->sortedToc()
+            << abort(FatalIOError);
+    }
+
+    autoPtr<Foam::token::compound> ptr =
+        autoPtr<Foam::token::compound>(cstrIter()(size));
+
+    return ptr;
 }
 
 

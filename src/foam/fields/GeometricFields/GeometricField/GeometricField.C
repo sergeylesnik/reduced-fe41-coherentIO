@@ -28,6 +28,7 @@ License
 #include "demandDrivenData.H"
 #include "dictionary.H"
 #include "OFCstream.H"
+#include "IFCstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -120,7 +121,21 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::readField(Istream& is)
             << exit(FatalIOError);
     }
 
-    return readField(dictionary(is));
+    if (is.format() == IOstream::PARALLEL)
+    {
+        IFCstream& ifc = dynamic_cast<IFCstream&>(is);
+        return readField
+        (
+            ifc.readToDict<PatchField, GeoMesh>
+            (
+                pTraits<PrimitiveType>::typeName
+            )
+        );
+    }
+    else
+    {
+        return readField(dictionary(is));
+    }
 }
 
 
@@ -1051,6 +1066,35 @@ writeData(Ostream& os) const
 {
     os << *this;
     return os.good();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::Istream*
+Foam::GeometricField<Type, PatchField, GeoMesh>::objectStreamPar
+(
+    const fileName& fName
+)
+{
+    if (fName.size())
+    {
+        IFCstream* isPtr =
+            new IFCstream(fName, this->mesh().thisDb(), IOstream::PARALLEL);
+
+        if (isPtr->good())
+        {
+            return isPtr;
+        }
+        else
+        {
+            delete isPtr;
+            return nullptr;
+        }
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 

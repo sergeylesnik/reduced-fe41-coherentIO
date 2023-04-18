@@ -30,12 +30,12 @@ License
 Foam::fieldTag::uniformity
 Foam::fieldDataEntry::determineUniformity() const
 {
-    if (nElements_ != 0)
+    if (nElems_ != 0)
     {
         fieldTag::uniformity u = fieldTag::UNIFORM;
 
         // Skip comparison of the first element with itself
-        for (label i = 1; i < nElements_; i++)
+        for (label i = 1; i < nElems_; i++)
         {
             const label offset = i*nCmpts_;
 
@@ -66,7 +66,7 @@ Foam::fieldDataEntry::fieldDataEntry
     const token& compoundToken,
     const scalar* data,
     std::streamsize byteSize,
-    label nElements
+    label nElems
 )
 :
     entry(keyword),
@@ -74,10 +74,10 @@ Foam::fieldDataEntry::fieldDataEntry
     compoundToken_(compoundToken),
     data_(data),
     byteSize_(byteSize),
-    nElements_(nElements),
-    nCmpts_(nElements ? (byteSize/nElements/sizeof(scalar)) : 0),
+    nElems_(nElems),
+    nCmpts_(nElems ? (byteSize/nElems/sizeof(scalar)) : 0),
     uniformity_(determineUniformity()),
-    nGlobalElements_(0)
+    nGlobalElems_(0)
 {}
 
 
@@ -163,7 +163,7 @@ void Foam::fieldDataEntry::write(Ostream& os) const
     else
     {
         os  << "nonuniform" << token::SPACE << compoundToken_ << token::SPACE
-            << nGlobalElements_ << fn;
+            << nGlobalElems_ << fn;
     }
 
     os << token::END_STATEMENT << endl;

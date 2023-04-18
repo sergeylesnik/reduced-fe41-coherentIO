@@ -180,6 +180,7 @@ $(A2streams)/buffer/variableBuffer.C
 $(A2streams)/fieldDataEntry.C
 $(A2streams)/formattingEntry.C
 $(A2streams)/fieldTag.C
+$(A2streams)/IFCstream.C
 
 
 dictionary = db/dictionary

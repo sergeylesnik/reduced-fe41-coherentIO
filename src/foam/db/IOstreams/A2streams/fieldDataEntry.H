@@ -67,7 +67,7 @@ class fieldDataEntry
         const label byteSize_;
 
         //- Number of elements in the data list
-        const label nElements_;
+        const label nElems_;
 
         //- Number of components in each element
         const label nCmpts_;
@@ -76,7 +76,7 @@ class fieldDataEntry
         fieldTag::uniformity uniformity_;
 
         //- Number of elements summed over all ranks
-        label nGlobalElements_;
+        label nGlobalElems_;
 
     // Private member functions
 
@@ -93,7 +93,7 @@ public:
             const token& compoundToken,
             const scalar* data,
             std::streamsize byteSize,
-            label nElements
+            label nElems
         );
 
         //- Construct on freestore as copy with reference to the
@@ -164,9 +164,9 @@ public:
             }
 
             //- Return number of the elements
-            inline label nElements() const
+            inline label nElems() const
             {
-                return nElements_;
+                return nElems_;
             }
 
             //- Return number of the field components
@@ -214,9 +214,9 @@ public:
         }
 
         //- Set number of elements summed over all ranks
-        inline void setNGlobalElements(const label nElem)
+        inline void nGlobalElems(const label nElem)
         {
-            nGlobalElements_ = nElem;
+            nGlobalElems_ = nElem;
         }
 };
 

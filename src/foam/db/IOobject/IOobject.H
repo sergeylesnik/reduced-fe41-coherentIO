@@ -175,7 +175,7 @@ protected:
 
         //- Construct and return an IFsteam with initialized ADIOS instance
         //  and the underlying stream being std::istringstream
-        Istream* objectStreamPar(const fileName&);
+        virtual Istream* objectStreamPar(const fileName&);
 
         //- Set the object state to bad
         void setBad(const string&);

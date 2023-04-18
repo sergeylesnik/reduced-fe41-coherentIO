@@ -53,6 +53,9 @@ namespace Foam
 template<>
 void OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict();
 
+template<>
+label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>();
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

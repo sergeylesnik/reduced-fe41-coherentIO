@@ -61,14 +61,9 @@ class ISstream
         istream& is_;
 
 
-    // Private member functions
-
-        char nextValid();
-
-        void readWordToken(token&);
-
     // Private Member Functions
 
+        char nextValid();
 
         //- Read a verbatim string (excluding block delimiters).
         Istream& readVerbatim(string&);
@@ -78,6 +73,14 @@ class ISstream
 
         //- Disallow default bitwise assignment
         void operator=(const ISstream&);
+
+
+protected:
+
+    // Protected Member Functions
+
+        virtual void readWordToken(token&);
+
 
 
 public:

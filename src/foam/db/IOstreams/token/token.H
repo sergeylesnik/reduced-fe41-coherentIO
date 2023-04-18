@@ -49,6 +49,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 
 #include <iostream>
+#include "primitives_traits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -155,6 +156,16 @@ public:
             (is)
         );
 
+        //- Declare run-time constructor selection table for a sized T
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            compound,
+            label,
+            (label size),
+            (size)
+        );
+
 
         // Constructors
 
@@ -169,6 +180,9 @@ public:
 
             //- Select null constructed
             static autoPtr<compound> New(const word& type, Istream&);
+
+            //- Select constructed with size
+            static autoPtr<compound> New(const word& type, Istream&, label);
 
 
         //- Destructor
@@ -195,10 +209,19 @@ public:
 
                 virtual label size() const = 0;
 
+                virtual label nComponents() const = 0;
+
 
             // Check
 
             // Edit
+
+                virtual void read(Istream&) = 0;
+
+                virtual void resize(const label newSize) = 0;
+
+                virtual char* data() = 0;
+
 
             // Write
 
@@ -229,14 +252,47 @@ public:
             T(is)
         {}
 
+        Compound(label size)
+        :
+            T(size)
+        {}
+
         label size() const
         {
             return T::size();
         }
 
+        label nComponents() const
+        {
+            if constexpr (is_vectorspace<typename T::value_type>::value)
+            {
+                return T::value_type::nComponents;
+            }
+            else
+            {
+                return 1;
+            }
+
+        }
+
+        void resize(const label newSize)
+        {
+            return T::resize(newSize);
+        }
+
+        char* data()
+        {
+            return reinterpret_cast<char*>(T::data());
+        }
+
         void write(Ostream& os) const
         {
             operator<<(os, static_cast<const T&>(*this));
+        }
+
+        void read(Istream& is)
+        {
+            operator>>(is, static_cast<T&>(*this));
         }
     };
 
@@ -365,6 +421,7 @@ public:
 
             inline bool isCompound() const;
             inline const compound& compoundToken() const;
+            inline compound& compoundToken();
             compound& transferCompoundToken(const Istream& is);
 
             inline label lineNumber() const;
@@ -460,7 +517,9 @@ Ostream& operator<<(Ostream& os, const InfoProxy<token>& ip);
 
 #define addCompoundToRunTimeSelectionTable(Type, Name)                        \
     token::compound::addIstreamConstructorToTable<token::Compound<Type > >    \
-        add##Name##IstreamConstructorToTable_;
+        add##Name##IstreamConstructorToTable_; \
+    token::compound::addlabelConstructorToTable<token::Compound<Type > >    \
+        add##Name##labelConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

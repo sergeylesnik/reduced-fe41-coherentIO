@@ -43,7 +43,7 @@ void transferToSpan( adios2::Engine* const engine,
                      DataType* data ) {
     auto span = engine->Put( variable );
     for ( Foam::label i = 0; i < count[0]; ++i ) {
-        span[i] = data[i]; 
+        span[i] = data[i];
     }
 }
 
@@ -114,6 +114,11 @@ Foam::variableBuffer<DataType>::variableBuffer( adios2::IO* io,
         start_ = variable_.Start();
         count_ = variable_.Count();
     }
+    else
+    {
+        WarningInFunction
+            << "Variable not found: " << blockId << endl;
+    }
 }
 
 template<typename DataType>
@@ -132,6 +137,11 @@ Foam::variableBuffer<DataType>::variableBuffer( adios2::IO* io,
         variable_.SetSelection( { start_, count_ } ) ;
         shape_ = variable_.Shape();
     }
+    else
+    {
+        WarningInFunction
+            << "Variable not found: " << blockId << endl;
+    }
 }
 
 template<typename DataType>
@@ -142,7 +152,7 @@ Foam::variableBuffer<DataType>::variableBuffer( adios2::IO* io,
                                                 const Foam::labelList& start,
                                                 const Foam::labelList& count )
     : shape_{ toDims( shape ) }
-    , start_{ toDims( start ) } 
+    , start_{ toDims( start ) }
     , count_{ toDims( count ) } {
     variable_ = io->InquireVariable<DataType>( blockId );
     if ( variable_ ) {
