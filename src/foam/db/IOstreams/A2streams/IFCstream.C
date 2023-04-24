@@ -75,7 +75,11 @@ Foam::IFCstreamAllocator::IFCstreamAllocator
     // The metadata is read only on master and then broadcasted to slaves.
     if (Pstream::master())
     {
-        Pout << "Reading ASCII file " << pathname << endl;
+        if (IFCstream::debug)
+        {
+            InfoInFunction
+                << "Reading ASCII file " << pathname << endl;
+        }
 
         std::istream* iPtr = new std::ifstream(pathname.c_str());
 

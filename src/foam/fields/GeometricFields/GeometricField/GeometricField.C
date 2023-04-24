@@ -1076,6 +1076,13 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::objectStreamPar
     const fileName& fName
 )
 {
+    if (debug)
+    {
+        Info<< "GeometricField<Type, PatchField, GeoMesh>::objectStreamPar : "
+               "Constructing object stream IFCstream"
+            << endl << this->info() << endl;
+    }
+
     if (fName.size())
     {
         IFCstream* isPtr =

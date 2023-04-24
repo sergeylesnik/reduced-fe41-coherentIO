@@ -81,7 +81,7 @@ void IFCstream::addProcessorPatchField<fvPatchField, volMesh>
 {
     dictionary dict;
     dict.add("type", "processor");
-    bfDict.add(patchName, dict);
+    bfDict.add(patchName, dict.xfer());
 }
 
 template<>
