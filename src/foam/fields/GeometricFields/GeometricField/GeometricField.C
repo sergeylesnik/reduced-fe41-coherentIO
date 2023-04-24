@@ -1083,7 +1083,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::objectStreamPar
             << endl << this->info() << endl;
     }
 
-    if (fName.size())
+    // Forbid format mixing, i.e. no reading with PARALLEL when the write
+    // format is different
+    if (fName.size() && this->mesh().time().writeFormat() == IOstream::PARALLEL)
     {
         IFCstream* isPtr =
             new IFCstream(fName, this->mesh().thisDb(), IOstream::PARALLEL);
