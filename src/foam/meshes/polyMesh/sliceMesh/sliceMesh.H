@@ -163,7 +163,7 @@ public:
     pointField polyPoints();
     std::vector<label> polyPatches();
     std::vector<sliceProcPatch> procPatches();
-    void polyPatches( polyBoundaryMesh& );
+    List<polyPatch*> polyPatches( polyBoundaryMesh& );
 
 
         // Compulsory overloads resulting from the inheritance from MeshObject

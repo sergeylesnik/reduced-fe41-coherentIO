@@ -232,9 +232,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
             time().findInstance(meshDir(), "points"),
             meshSubDir,
             *this,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        pointField(0)
     ),
     // To be re-sliced later.  HJ, 19/oct/2008
     points_(allPoints_, allPoints_.size()),
@@ -246,9 +247,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
             time().findInstance(meshDir(), "faces"),
             meshSubDir,
             *this,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        faceList(0)
     ),
     // To be re-sliced later.  HJ, 19/oct/2008
     faces_(allFaces_, allFaces_.size()),
@@ -260,9 +262,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
             time().findInstance(meshDir(), "faces"),
             meshSubDir,
             *this,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        labelList(0)
     ),
     neighbour_
     (
@@ -272,9 +275,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
             time().findInstance(meshDir(), "faces"),
             meshSubDir,
             *this,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        labelList(0)
     ),
     syncPar_(true),  // Reading mesh from IOobject: must be valid
     clearedPrimitives_(false),
@@ -287,9 +291,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
             meshSubDir,
             *this,
             IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
-        *this
+        *this,
+        0
     ),
     bounds_(allPoints_),  // Reading mesh from IOobject: syncPar
     geometricD_(Vector<label>::zero),
@@ -377,12 +382,85 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         owner_ = sliceableMesh.polyOwner();
         allFaces_ = sliceableMesh.polyFaces();
         allPoints_ = sliceableMesh.polyPoints();
-        sliceableMesh.polyPatches( boundary_ );
-
         faces_.reset( allFaces_, allFaces_.size() );
         points_.reset( allPoints_, allPoints_.size() );
 
+        Foam::List<Foam::polyPatch*> procPatches = sliceableMesh.polyPatches( boundary_ );
+        addPatches(procPatches, false);
+
         bounds_ = boundBox( allPoints_ );
+    }
+    else
+    {
+        allPoints_ = pointIOField
+                     (
+                         IOobject
+                         (
+                             "points",
+                             time().findInstance(meshDir(), "points"),
+                             meshSubDir,
+                             *this,
+                             IOobject::MUST_READ,
+                             IOobject::NO_WRITE
+                         )
+                     );
+        allFaces_ = faceIOList
+                    (
+                        IOobject
+                        (
+                            "faces",
+                            time().findInstance(meshDir(), "faces"),
+                            meshSubDir,
+                            *this,
+                            IOobject::MUST_READ,
+                            IOobject::NO_WRITE
+                        )
+                    );
+        owner_ = labelIOList
+                 (
+                     IOobject
+                     (
+                         "owner",
+                         time().findInstance(meshDir(), "owner"),
+                         meshSubDir,
+                         *this,
+                         IOobject::MUST_READ,
+                         IOobject::NO_WRITE
+                     )
+                 );
+        neighbour_ = labelIOList
+                     (
+                         IOobject
+                         (
+                             "neighbour",
+                             time().findInstance(meshDir(), "neighbour"),
+                             meshSubDir,
+                             *this,
+                             IOobject::MUST_READ,
+                             IOobject::NO_WRITE
+                         )
+                     );
+        faces_.reset( allFaces_, allFaces_.size() );
+        points_.reset( allPoints_, allPoints_.size() );
+        bounds_ = boundBox( allPoints_ );
+
+        Istream& is = boundary_.readStream("polyBoundaryMesh");
+        PtrList<entry> patchEntries(is);
+        boundary_.setSize(patchEntries.size());
+        forAll(patchEntries, patchI)
+        {
+            boundary_.set
+            (
+                patchI,
+                polyPatch::New
+                (
+                    patchEntries[patchI].keyword(),
+                    patchEntries[patchI].dict(),
+                    patchI,
+                    boundary_
+                )
+            );
+        }
     }
 
     // if (exists(owner_.objectPath()))
