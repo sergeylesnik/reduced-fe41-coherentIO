@@ -43,10 +43,15 @@ Foam::zip( const Container1& container1, const Container2& container2 ) {
 
 template<typename IndexContainer, typename DataContainer>
 void Foam::indexSort( IndexContainer& indices, const DataContainer& data ) {
-    std::stable_sort( indices.begin(),
-                      indices.end(),
-                      [ data ]( const auto& i, const auto& j )
-                      { return data[i] < data[j]; } );
+    std::stable_sort
+    (
+        indices.begin(),
+        indices.end(),
+        [&data](const auto& i, const auto& j)
+        {
+            return data[i] < data[j];
+        }
+    );
 }
 
 
