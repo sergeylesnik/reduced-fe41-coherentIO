@@ -1542,10 +1542,12 @@ bool Foam::polyMesh::write() const
                                   linearizedAdiosFaces.cdata() );
 
         // Generate ownerStarts
+        // - BUG: Taking care of "corner-cases" if cell is not owning any faces.
         labelList ownerStarts( cells().size() + 1, 0 );
         label ownerStart = 0;
         forAll( adiosOwner, i ) {
-            if( adiosOwner[i] == (ownerStart + 1) ) {
+            while (ownerStart != adiosOwner[i])
+            {
                 ++ownerStart;
                 ownerStarts[ownerStart] = i;
             }
