@@ -48,42 +48,50 @@ SourceFiles
 namespace Foam
 {
 
-struct InitStrategy {
-
+struct InitStrategy
+{
     virtual ~InitStrategy() = default;
 
     using index_container = DataComponent::index_container;
     using labelPair = std::pair<Foam::label, Foam::label>;
 
     template<typename Container>
-    void operator()( Container& data, labelPair& start_count ) {
-        execute( data, start_count );
+    void operator()(Container& data, labelPair& start_count)
+    {
+        execute(data, start_count);
     }
 
     virtual Foam::Offsets offsets() { return {}; }
 
-  private:
+private:
 
-    virtual void execute( index_container& data,
-                          labelPair& start_count ) {}
-    virtual void execute( Foam::scalarField& data,
-                          labelPair& start_count ) {}
-    virtual void execute( Foam::vectorField& data,
-                          labelPair& start_count ) {}
+    virtual void execute(index_container& data, labelPair& start_count) {}
+
+    virtual void execute(Foam::scalarField& data, labelPair& start_count) {}
+
+    virtual void execute(Foam::vectorField& data, labelPair& start_count) {}
 
 };
 
-template<typename FieldType = InitStrategy::index_container>
-struct InitFromADIOS : public InitStrategy {
 
+template<typename FieldType = InitStrategy::index_container>
+struct InitFromADIOS
+:
+    public InitStrategy
+{
     InitFromADIOS() = default;
 
-    explicit InitFromADIOS( const Foam::string& type,
-                            const Foam::string& name )
-        : type_{ type }
-        , name_{ name } {}
+    explicit InitFromADIOS
+    (
+        const Foam::string& type,
+        const Foam::string& name
+    )
+    :
+        type_{type},
+        name_{name}
+    {}
 
-  private:
+private:
 
     void execute
     (
@@ -91,12 +99,12 @@ struct InitFromADIOS : public InitStrategy {
         Foam::InitStrategy::labelPair& start_count
     ) final
     {
-        labelList start = ( start_count.first != -1 ) ?
-                          labelList( { start_count.first } ) 
-                          : labelList( {} );
-        labelList count = ( start_count.second != -1 ) ?
-                          labelList( { start_count.second } )
-                          : labelList( {} );
+        auto start = (start_count.first != -1) ?
+                     labelList({start_count.first}) :
+                     labelList({});
+        auto count = (start_count.second != -1) ?
+                     labelList({start_count.second}) :
+                     labelList({});
         Foam::adiosReadToContainer
         (
             type_,
@@ -108,24 +116,28 @@ struct InitFromADIOS : public InitStrategy {
     }
 
     Foam::string type_{};
+
     Foam::string name_{};
 
 };
 
-struct InitOffsets : public InitStrategy {
 
+struct InitOffsets
+:
+    public InitStrategy
+{
     InitOffsets() = default;
 
-    explicit InitOffsets( const bool accumulate )
-        : accumulate_{ accumulate } {}
+    explicit InitOffsets(const bool accumulate) : accumulate_{accumulate} {}
 
     Foam::Offsets offsets() { return offsets_; }
 
-  private:
+private:
 
-    void execute( index_container&, labelPair& ) final;
+    void execute(index_container&, labelPair&) final;
 
     Foam::Offsets offsets_{};
+
     bool accumulate_{};
 
 };

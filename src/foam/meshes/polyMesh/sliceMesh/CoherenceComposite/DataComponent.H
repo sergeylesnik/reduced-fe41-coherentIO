@@ -48,18 +48,19 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 struct DataComponent;
 class IndexComponent;
 
 using DataComponentPtr = std::shared_ptr<DataComponent>;
 // used as strategy in construction of components and decorators
-using OffsetStrategy = std::function<Foam::label( const DataComponent& )>;
+using OffsetStrategy = std::function<Foam::label(const DataComponent&)>;
 
 struct DataComponent
 {
     // used as data container for IndexComponent
     using index_container = labelList;
-    using index_iterator  = index_container::iterator;
+    using index_iterator = index_container::iterator;
     using index_citerator = index_container::const_iterator;
 
     using base_raw_ptr = DataComponent*;
@@ -67,14 +68,20 @@ struct DataComponent
 
     DataComponent() = default;
 
-    DataComponent( const Foam::string type,
-                   const Foam::string name,
-                   base_raw_ptr const parent_component = nullptr );
+    DataComponent
+    (
+        const Foam::string type,
+        const Foam::string name,
+        base_raw_ptr const parent_component = nullptr
+    );
 
-    DataComponent( const DataComponent& other) = default;
-    DataComponent( DataComponent&& other) = default;
-    DataComponent& operator=( const DataComponent& other) = default;
-    DataComponent& operator=( DataComponent&& other) = default;
+    DataComponent(const DataComponent& other) = default;
+
+    DataComponent(DataComponent&& other) = default;
+
+    DataComponent& operator=(const DataComponent& other) = default;
+
+    DataComponent& operator=(DataComponent&& other) = default;
 
     virtual ~DataComponent() = default;
 
@@ -84,59 +91,74 @@ struct DataComponent
 
     Foam::string type() const;
 
-    base_ptr add( const base_ptr& component );
+    base_ptr add(const base_ptr& component);
 
     void initialize();
 
-    base_ptr node( const Foam::string& by_name );
+    base_ptr node(const Foam::string& by_name);
 
-    void pull_node( const Foam::string& by_name, base_ptr& output );
+    void pull_node(const Foam::string& by_name, base_ptr& output);
 
     template<typename ComponentType = IndexComponent>
-    base_ptr add( const Foam::string type,
-                  const Foam::string name,
-                  OffsetStrategy calc_start = nullptr,
-                  OffsetStrategy calc_count = nullptr );
+    base_ptr add
+    (
+        const Foam::string type,
+        const Foam::string name,
+        OffsetStrategy calc_start = nullptr,
+        OffsetStrategy calc_count = nullptr
+    );
 
     template<typename DecoratorType, typename... Args>
-    base_ptr decorate( const Foam::string name, Args... args );
+    base_ptr decorate(const Foam::string name, Args... args);
 
-    template< class DataType >
-    void extract( DataType& output );
+    template<class DataType>
+    void extract(DataType& output);
 
-    virtual label accept( const OffsetStrategy& offset_strategy ) const {
-        return !offset_strategy ? -1 : offset_strategy( *this );
+    virtual label accept(const OffsetStrategy& offset_strategy) const
+    {
+        return !offset_strategy ? -1 : offset_strategy(*this);
     }
 
     virtual index_citerator begin() const { return index_container{}.begin(); }
+
     virtual index_citerator end() const { return index_container{}.end(); }
+
     virtual label front() const { return {}; }
+
     virtual label back() const { return {}; }
+
     virtual label size() const { return {}; }
 
-  private:
+private:
 
     Foam::string type_{};
+
     Foam::string name_{};
 
-    virtual void _v_add_( base_ptr ) = 0;
+    virtual void _v_add_(base_ptr) = 0;
 
     virtual void _v_initialize_() = 0;
 
-    virtual void _v_pull_node_( const Foam::string& by_name, base_ptr& output ) = 0;
+    virtual void
+    _v_pull_node_(const Foam::string& by_name, base_ptr& output) = 0;
 
-    virtual void _v_extract_( index_container& output ) {}
-    virtual void _v_extract_( std::vector<label>& output ) {}
-    virtual void _v_extract_( Foam::scalarField& output ) {}
-    virtual void _v_extract_( Foam::vectorField& output ) {}
-    virtual void _v_extract_( Foam::Offsets& output ) {}
-    virtual void _v_extract_( Foam::Slice& output ) {}
+    virtual void _v_extract_(index_container& output) {}
 
-  protected:
+    virtual void _v_extract_(std::vector<label>& output) {}
 
-    DataComponent* parent_component_{ nullptr };
+    virtual void _v_extract_(Foam::scalarField& output) {}
 
-    base_raw_ptr parent_component_of( const base_ptr& component );
+    virtual void _v_extract_(Foam::vectorField& output) {}
+
+    virtual void _v_extract_(Foam::Offsets& output) {}
+
+    virtual void _v_extract_(Foam::Slice& output) {}
+
+protected:
+
+    DataComponent* parent_component_{nullptr};
+
+    base_raw_ptr parent_component_of(const base_ptr& component);
 
 };
 

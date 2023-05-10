@@ -40,31 +40,45 @@ SourceFiles
 namespace Foam
 {
 
-struct ComponentDecorator : public DataComponent {
+struct ComponentDecorator
+:
+    public DataComponent
+{
+    ComponentDecorator
+    (
+        DataComponentPtr&& component,
+        base_raw_ptr const parent_component
+    )
+    :
+        DataComponent{component->type(), component->name(), parent_component},
+        component_{std::move(component)}
+    {}
 
-    ComponentDecorator( DataComponentPtr&& component,
-                        base_raw_ptr const parent_component )
-        : DataComponent{ component->type(), component->name(), parent_component }
-        , component_{ std::move( component ) } {}
+protected:
 
-  protected:
-    DataComponentPtr component_{ nullptr };
+    DataComponentPtr component_{nullptr};
 
-  private:
+private:
 
-    void _v_add_( base_ptr input ) final {
-        component_->add( input );
+    void _v_add_(base_ptr input) final
+    {
+        component_->add(input);
     }
 
-    virtual void _v_pull_node_( const Foam::string& by_name,
-                               base_ptr& output ) {
-        output = component_->node( by_name );
+    virtual void _v_pull_node_
+    (
+        const Foam::string& by_name,
+        base_ptr& output
+    )
+    {
+        output = component_->node(by_name);
     }
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+}// End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

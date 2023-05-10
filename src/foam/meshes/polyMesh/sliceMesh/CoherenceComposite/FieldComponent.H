@@ -22,13 +22,14 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::DataComponent
+    Foam::FieldComponent
 
 Description
-    Foam::DataComponent
+    Foam::FieldComponent
 
 SourceFiles
-    DataComponent.C
+    FieldComponent.C
+    FieldComponentI.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,13 +43,18 @@ SourceFiles
 namespace Foam
 {
 
-template< typename FieldType >
-class FieldComponent : public DataComponent {
-
+template<typename FieldType>
+class FieldComponent
+:
+    public DataComponent
+{
     FieldType data_;
-    OffsetStrategy calc_start_{ nullptr };
-    OffsetStrategy calc_count_{ nullptr };
-    bool initialized_{ false };
+
+    OffsetStrategy calc_start_{nullptr};
+
+    OffsetStrategy calc_count_{nullptr};
+
+    bool initialized_{false};
 
     // Core initialization for field component
     void init();
@@ -57,8 +63,9 @@ class FieldComponent : public DataComponent {
     // because a field component acts as leaf component.
     // Hence, they are only dummy functions of the pure
     // virtual functions from base.
-    void _v_add_( base_ptr input ) final {}
-    void _v_pull_node_( const Foam::string& by_name, base_ptr& output ) final {}
+    void _v_add_(base_ptr input) final {}
+
+    void _v_pull_node_(const Foam::string& by_name, base_ptr& output) final {}
 
     // Initialize this field component
     void _v_initialize_() final;
@@ -66,15 +73,18 @@ class FieldComponent : public DataComponent {
     // Method to retrieve field data_
     // TODO: could/should be replaced by iterator pattern and
     //       corresponding free functions with std::copy
-    void _v_extract_( FieldType& output ) final;
+    void _v_extract_(FieldType& output) final;
 
-  public:
+public:
 
-    FieldComponent( const Foam::string type,
-                    const Foam::string name,
-                    OffsetStrategy calc_start = nullptr,
-                    OffsetStrategy calc_count = nullptr,
-                    base_raw_ptr const parent_component = nullptr );
+    FieldComponent
+    (
+        const Foam::string type,
+        const Foam::string name,
+        OffsetStrategy calc_start = nullptr,
+        OffsetStrategy calc_count = nullptr,
+        base_raw_ptr const parent_component = nullptr
+    );
 
 };
 

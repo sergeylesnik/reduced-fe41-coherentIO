@@ -25,7 +25,7 @@ Class
     Foam::slicePermutation
 
 Description
-    Foam::slicePermutation
+    Permuting fragmented data structure to coherent and sliceable data layout
 
 SourceFiles
     slicePermutation.C
@@ -49,54 +49,82 @@ namespace Foam
 // Forward declaration
 class pointMesh;
 
-label encodeSlicePatchId( const label& );
-label decodeSlicePatchId( const label& );
-label sliceNeighbourId( const label&, const polyMesh&);
-std::vector<label> createSortedPermutation( const labelList& input );
+// Encoding a patch Id to differentiate from internal face IDs
+label encodeSlicePatchId(const label&);
+
+// Decoding an encoded patch Id to receive an indexing Id for face-ordered lists
+label decodeSlicePatchId(const label&);
 
 /*---------------------------------------------------------------------------*\
                        Class slicePermutation Declaration
 \*---------------------------------------------------------------------------*/
 
-
 class slicePermutation
 {
-    std::vector<std::pair<label, label> > polyNeighboursPermutation_{};
+    pairVector<label, label> polyNeighboursPermutation_{};
+
     std::vector<label> polyNeighboursAndPatches_{};
 
+    // Permutation from sliceable layout to
+    // fragmented layout for face-ordered lists
     std::vector<label> permutationToPoly_{};
+
+    // Permutation from fragmented layout to
+    // sliceable layout for face-ordered lists
     std::vector<label> permutationToSlice_{};
 
+    // Permutation from fragmented layout
+    // to sliceable layout for point-ordered lists
     std::vector<label> permutationToSlicePoint_{};
+
+    // Permutation from sliceable layout
+    // sliceable layout for point-ordered lists
     std::vector<label> permutationToPolyPoint_{};
 
-    std::vector<std::pair<label, label> >
-    createPolyNeighbourPermutation( const labelList& );
+    //
+    pairVector<label, label>
+    createPolyNeighbourPermutation(const labelList&);
 
-    std::vector<label> createSlicePermutation( const labelList& );
+    // Create the point permutation from fragmented to sliceable data layout
+    void createPointPermutation(faceList&, const label&);
 
-    void createPointPermutation( faceList&, const label& );
+    void renumberToSlice(faceList&);
 
-    void renumberToSlice( faceList& );
-
-    template< typename IterType >
-    void resetNextPatch( IterType& patchBegin,
-                         IterType& patchEnd,
-                         polyPatch& patch,
-                         const label& patchId ) {
-        findValueExtend( patchBegin,
-                         patchEnd,
-                         polyNeighboursAndPatches_.end(),
-                         encodeSlicePatchId( patchId ) );
-        patch.resetPatch( std::distance( patchBegin, patchEnd ),
-                          std::distance( polyNeighboursAndPatches_.begin(), patchBegin ) );
+    template<typename IterType>
+    void resetNextPatch
+    (
+        IterType& patchBegin,
+        IterType& patchEnd,
+        polyPatch& patch,
+        const label& patchId
+    )
+    {
+        findValueExtend
+        (
+            patchBegin,
+            patchEnd,
+            polyNeighboursAndPatches_.end(),
+            encodeSlicePatchId(patchId)
+        );
+        patch.resetPatch
+        (
+            std::distance(patchBegin, patchEnd),
+            std::distance(polyNeighboursAndPatches_.begin(), patchBegin)
+        );
     }
 
-    auto findPatchBegin() {
-        return std::find_if( polyNeighboursAndPatches_.begin(),
-                             polyNeighboursAndPatches_.end(),
-                             []( const auto& id )  
-                             { return id < 0; } ); //== encodeSlicePatchId( 0 ); } );
+
+    auto findPatchBegin()
+    {
+        return std::find_if
+               (
+                   polyNeighboursAndPatches_.begin(),
+                   polyNeighboursAndPatches_.end(),
+                   [](const auto &id)
+                   {
+                       return id < 0;
+                   }
+               ); //== encodeSlicePatchId( 0 ); } );
     }
 
 
@@ -106,88 +134,50 @@ public:
     slicePermutation() = default;
 
     //- Construct from slicePermutation neighbour and patch list
-    explicit slicePermutation( const labelList& );
+    explicit slicePermutation(const labelList&);
 
     //- Construct from polyMesh
-    explicit slicePermutation( const polyMesh& );
+    explicit slicePermutation(const polyMesh&);
 
     //- Construct from faces, owners and number of points
-    slicePermutation( const labelList&, const faceList&, const label& );
+    slicePermutation(const labelList&, const faceList&, const label&);
 
     // Member Functions
     //
 
     // Transformations to slicePermutation
-    
+
     template<typename Container>
-    void mapToSlice( Container& );
+    void mapToSlice(Container&);
 
-    void mapToSlice( pointField& );
+    void mapToSlice(pointField&);
 
-    label mapToSlice( const label& );
+    label mapToSlice(const label&);
 
     template<typename MeshElement>
-    MeshElement generateSlice( MeshElement& );
+    MeshElement generateSlice(MeshElement&);
 
-    faceList generateSlice( faceList& );
+    faceList generateSlice(faceList&);
 
     // Generate 'sliced' neighbours
-    labelList generateSlice( labelList&, const polyMesh& );
+    labelList generateSlice(labelList&, const polyMesh&);
 
     // Transformations to polyMesh
-    
-    template<typename Container>
-    void mapToPoly( Container& );
-    
-    label mapToPoly( const label& );
-
-    void resetPolyPatches( polyBoundaryMesh& );
 
     template<typename Container>
-    void copyPolyNeighbours( Container& );
+    void mapToPoly(Container&);
+
+    label mapToPoly(const label&);
 
     template<typename Container>
-    void copyPolyPatches( Container& );
+    void copyPolyNeighbours(Container&);
+
+    template<typename Container>
+    void copyPolyPatches(Container&);
+
 };
 
-// Transformations to slicePermutation
-
-template<typename Container>
-void Foam::slicePermutation::mapToSlice( Container& input ) {
-    applyPermutation( input, permutationToSlice_ );
-}
-
-
-template<typename MeshElement>
-MeshElement Foam::slicePermutation::generateSlice( MeshElement& input ) {
-    mapToSlice( input );
-    return input;
-}
-
-
-// Transformations to polyMesh
-
-template<typename Container>
-void Foam::slicePermutation::mapToPoly( Container& input ) {
-    applyPermutation( input, permutationToPoly_ );
-}
-
-
-template<typename Container>
-void Foam::slicePermutation::copyPolyNeighbours( Container& neighbours ) {
-     const auto polyNeighboursBegin = polyNeighboursAndPatches_.begin();
-     const auto polyPatchBegin = findPatchBegin();
-     neighbours.resize( std::distance( polyNeighboursBegin, polyPatchBegin ) );
-     std::copy( polyNeighboursBegin, polyPatchBegin, neighbours.begin() );
-}
-
-template<typename Container>
-void Foam::slicePermutation::copyPolyPatches( Container& patches ) {
-     const auto polyPatchBegin = findPatchBegin();
-     const auto polyPatchEnd = polyNeighboursAndPatches_.end();
-     patches.resize( std::distance( polyPatchBegin, polyPatchEnd ) );
-     std::copy( polyPatchBegin, polyPatchEnd, patches.begin() );
-}
+#include "slicePermutationI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

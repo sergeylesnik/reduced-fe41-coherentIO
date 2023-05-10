@@ -43,14 +43,21 @@ namespace Foam
 // Forward declaration
 class InitStrategy;
 
-class IndexComponent : public DataComponent {
-
+class IndexComponent
+:
+    public DataComponent
+{
     std::map<std::string, base_ptr> components_map_{};
+
     index_container data_{};
-    OffsetStrategy calc_start_{ nullptr };
-    OffsetStrategy calc_count_{ nullptr };
-    std::unique_ptr<InitStrategy> init_strategy_{ nullptr };
-    bool initialized_{ false };
+
+    OffsetStrategy calc_start_{nullptr};
+
+    OffsetStrategy calc_count_{nullptr};
+
+    std::unique_ptr<InitStrategy> init_strategy_{nullptr};
+
+    bool initialized_{false};
 
     // Core initialization for this index component
     // with given initialization strategy:
@@ -62,31 +69,36 @@ class IndexComponent : public DataComponent {
     void init_children();
 
     // Adds a component into component_map_
-    void _v_add_( base_ptr input ) final;
+    void _v_add_(base_ptr input) final;
 
     // Initialize this index component and
     // its children in components_map_
     void _v_initialize_() final;
 
     // Search for node by name and copy it to the output pointer
-    void _v_pull_node_( const Foam::string& by_name, base_ptr& output ) final;
+    void _v_pull_node_(const Foam::string& by_name, base_ptr& output) final;
 
     // Different methods to retrieve data_
     // TODO: could/should be replaced by iterator pattern and
     //       corresponding free functions with std::copy
-    void _v_extract_( index_container& output ) final;
-    void _v_extract_( std::vector<label>& output ) final;
-    void _v_extract_( Foam::Offsets& output ) final;
+    void _v_extract_(index_container& output) final;
 
-  public:
+    void _v_extract_(std::vector<label>& output) final;
+
+    void _v_extract_(Foam::Offsets& output) final;
+
+public:
 
     IndexComponent() = default;
 
-    IndexComponent( const Foam::string type,
-                    const Foam::string name,
-                    OffsetStrategy calc_start = nullptr,
-                    OffsetStrategy calc_count = nullptr,
-                    base_raw_ptr const parent_component = nullptr );
+    IndexComponent
+    (
+        const Foam::string type,
+        const Foam::string name,
+        OffsetStrategy calc_start = nullptr,
+        OffsetStrategy calc_count = nullptr,
+        base_raw_ptr const parent_component = nullptr
+    );
 
     // Key feature to determine coherents between a
     // component and its parent:
@@ -94,10 +106,12 @@ class IndexComponent : public DataComponent {
     // Takes a function to calculate an offset integer.
     // This is used by an index component to determine
     // its offsets by the data of its parent component.
-    label accept( const OffsetStrategy& offset_strategy ) const final;
+    label accept(const OffsetStrategy& offset_strategy) const final;
 
-    // Returning iterators to internal data_
+    // Returning begin iterator to internal data_
     index_citerator begin() const final;
+
+    // Returning end iterator to internal data_
     index_citerator end() const final;
 
     // Returns the first value
@@ -110,6 +124,7 @@ class IndexComponent : public DataComponent {
 
     // Returns the size of data_
     label size() const final;
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

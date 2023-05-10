@@ -30,60 +30,83 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * //
 
-void Foam::SliceDecorator::_v_initialize_() {
+void Foam::SliceDecorator::_v_initialize_()
+{
     component_->initialize();
-    if ( !initialized_ ) {
+    if (!initialized_)
+    {
         Foam::Offsets offsets{};
-        component_->extract( offsets );
-        slice_ = Foam::Slice{ Pstream::myProcNo(), offsets };
+        component_->extract(offsets);
+        slice_ = Foam::Slice{Pstream::myProcNo(), offsets};
         initialized_ = true;
     }
 }
 
-void Foam::SliceDecorator::_v_extract_( Foam::Slice& output ) {
+
+void Foam::SliceDecorator::_v_extract_(Foam::Slice& output)
+{
     output = slice_;
 }
 
-void Foam::SliceDecorator::_v_extract_( Foam::Offsets& output ) {
-    component_->extract( output );
+
+void Foam::SliceDecorator::_v_extract_(Foam::Offsets& output)
+{
+    component_->extract(output);
 }
 
-void Foam::SliceDecorator::_v_extract_( Foam::DataComponent::index_container& output ) {
-    component_->extract( output );
+
+void
+Foam::SliceDecorator::_v_extract_(Foam::DataComponent::index_container& output)
+{
+    component_->extract(output);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SliceDecorator::SliceDecorator( Foam::DataComponentPtr&& component,
-                                      Foam::DataComponent* const parent_component )
-    : ComponentDecorator{ std::move( component ), parent_component }
-    , slice_{}
-    , initialized_{ false } {}
+Foam::SliceDecorator::SliceDecorator
+(
+    Foam::DataComponentPtr&& component,
+    Foam::DataComponent* const parent_component
+)
+:
+    ComponentDecorator{std::move(component), parent_component},
+    slice_{},
+    initialized_{false}
+{}
 
 // * * * * * * * * * * * * * Public Member Functions  * * * * * * * * * * * //
 
 Foam::DataComponent::index_citerator
-Foam::SliceDecorator::begin() const {
+Foam::SliceDecorator::begin() const
+{
     return component_->begin();
 }
 
+
 Foam::DataComponent::index_citerator
-Foam::SliceDecorator::end() const {
+Foam::SliceDecorator::end() const
+{
     return component_->end();
 }
 
+
 Foam::label
-Foam::SliceDecorator::front() const {
+Foam::SliceDecorator::front() const
+{
     return component_->front();
 }
 
+
 Foam::label
-Foam::SliceDecorator::back() const {
+Foam::SliceDecorator::back() const
+{
     return component_->back();
 }
 
+
 Foam::label
-Foam::SliceDecorator::size() const {
+Foam::SliceDecorator::size() const
+{
     return component_->size();
 }
 

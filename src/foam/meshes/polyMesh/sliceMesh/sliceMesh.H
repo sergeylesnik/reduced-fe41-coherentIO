@@ -55,26 +55,32 @@ namespace Foam
                        Class sliceMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-void sendSliceFaces( std::pair<label, label> sendPair,
-                     Offsets& cellOffsets,
-                     Offsets& pointOffsets,
-                     labelList& globalNeighbours,
-                     faceList& globalFaces,
-                     pointField& allPoints_,
-                     std::vector<sliceProcPatch>& sliceProcPatches,
-                     label numBoundaries );
+void sendSliceFaces
+(
+    std::pair<label, label> sendPair,
+    Offsets& cellOffsets,
+    Offsets& pointOffsets,
+    labelList& globalNeighbours,
+    faceList& globalFaces,
+    pointField& allPoints_,
+    std::vector<sliceProcPatch>& sliceProcPatches,
+    label numBoundaries
+);
 
-void recvSliceFaces( std::pair<label, label> recvPair,
-                     faceList& globalFaces,
-                     labelList& localOwner,
-                     Offsets& cellOffsets,
-                     Offsets& pointOffsets,
-                     Slice& cellSlice,
-                     Slice& pointSlice,
-                     pointField& allPoints_,
-                     std::vector<sliceProcPatch>& sliceProcPatches,
-                     labelList& globalNeighbours,
-                     label numBoundaries );
+void recvSliceFaces
+(
+    std::pair<label, label> recvPair,
+    faceList& globalFaces,
+    labelList& localOwner,
+    Offsets& cellOffsets,
+    Offsets& pointOffsets,
+    Slice& cellSlice,
+    Slice& pointSlice,
+    pointField& allPoints_,
+    std::vector<sliceProcPatch>& sliceProcPatches,
+    labelList& globalNeighbours,
+    label numBoundaries
+);
 
 
 class sliceMesh
@@ -82,24 +88,39 @@ class sliceMesh
     public MeshObject<polyMesh, sliceMesh>
 {
     label numBoundaries_{};
+
     labelList globalNeighbours_{};
+
     labelList localOwner_{};
+
     faceList globalFaces_{};
+
     pointField allPoints_{};
+
     Offsets cellOffsets_{};
+
     Offsets faceOffsets_{};
+
     Offsets internalSurfaceFieldOffsets_{};
+
     std::vector<Offsets> boundarySurfacePatchOffsets_{};
+
     Offsets pointOffsets_{};
+
     Slice cellSlice_{};
+
     Slice pointSlice_{};
+
     std::vector<sliceProcPatch> slicePatches_{};
+
     slicePermutation sliceablePermutation_{};
-    PtrList<globalIndex> boundaryGlobalIndex_;
+
+    PtrList<globalIndex> boundaryGlobalIndex_{};
 
     // Internal face indices
     // in processor boundaries
     Foam::labelList internalFaceIDs_;
+
     // Processor boundary indices of internal faces
     // participating in a processor boundary
     Foam::labelList procBoundaryIDs_;
@@ -108,15 +129,18 @@ class sliceMesh
     void readMesh();
 
     // De-serialize faces
-    faceList deserializeFaces( const std::vector<label>&, const std::vector<label>& );
+    faceList
+    deserializeFaces(const std::vector<label>&, const std::vector<label>&);
 
     // Serialize owner list
-    labelList serializeOwner( const std::vector<label>& );
+    labelList serializeOwner(const std::vector<label>&);
 
     // TODO: lengthy functions that must be refactored
     //       (structure and design still pending)
     void initializeSurfaceFieldMappings();
+
     void commSlicePatches();
+
     void commSharedPoints();
 
     void renumberFaces();
@@ -127,71 +151,78 @@ public:
 
     // Constructors
     sliceMesh() = default;
-    sliceMesh( const polyMesh& );
+
+    sliceMesh(const polyMesh&);
 
     // Destructor
     ~sliceMesh() = default;
 
     // Member Functions
 
-        // Access
+    // Access
 
-            inline const Offsets& cellOffsets() const
-            {
-                return cellOffsets_;
-            }
+    inline const Offsets& cellOffsets() const
+    {
+        return cellOffsets_;
+    }
 
-            inline const Offsets& internalSurfaceFieldOffsets() const
-            {
-                return internalSurfaceFieldOffsets_;
-            }
+    inline const Offsets& internalSurfaceFieldOffsets() const
+    {
+        return internalSurfaceFieldOffsets_;
+    }
 
-            inline const labelList& internalFaceIDsFromBoundaries() const
-            {
-                return internalFaceIDs_;
-            }
+    inline const labelList& internalFaceIDsFromBoundaries() const
+    {
+        return internalFaceIDs_;
+    }
 
-            inline const labelList& boundryIDsFromInternalFaces() const
-            {
-                return procBoundaryIDs_;
-            }
-
+    inline const labelList& boundryIDsFromInternalFaces() const
+    {
+        return procBoundaryIDs_;
+    }
 
     labelList polyNeighbours();
+
     labelList polyOwner();
+
     faceList polyFaces();
+
     pointField polyPoints();
+
     std::vector<label> polyPatches();
+
     std::vector<sliceProcPatch> procPatches();
-    List<polyPatch*> polyPatches( polyBoundaryMesh& );
+
+    List<polyPatch*> polyPatches(polyBoundaryMesh&);
+
+    // Compulsory overloads resulting from the inheritance from MeshObject
+
+    virtual bool movePoints() const
+    {
+        // ToDoIO
+        FatalErrorInFunction
+        << "not implemented"
+        << abort(FatalError);
+
+        return true;
+    }
 
 
-        // Compulsory overloads resulting from the inheritance from MeshObject
+    virtual bool updateMesh(const mapPolyMesh&) const
+    {
+        // ToDoIO
+        FatalErrorInFunction
+        << "not implemented"
+        << abort(FatalError);
 
-            virtual bool movePoints() const
-            {
-                // ToDoIO
-                FatalErrorInFunction
-                    << "not implemented"
-                    << abort(FatalError);
-
-                return true;
-            }
-
-            virtual bool updateMesh(const mapPolyMesh&) const
-            {
-                // ToDoIO
-                FatalErrorInFunction
-                    << "not implemented"
-                    << abort(FatalError);
-
-                return true;
-            }
+        return true;
+    }
 
 
-        // Field infrastructure
+    // Field infrastructure
 
-            const globalIndex& boundaryGlobalIndex(label patchId);
+    const globalIndex& boundaryGlobalIndex(label patchId);
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

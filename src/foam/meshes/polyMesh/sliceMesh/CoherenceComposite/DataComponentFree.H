@@ -46,13 +46,16 @@ namespace Foam
 class DataComponent;
 class InitStrategy;
 
-bool head_of_composition( const DataComponent& component );
+bool head_of_composition(const DataComponent& component);
 
 template<typename FieldType = DataComponent::index_container>
 std::unique_ptr<InitStrategy>
-create_component_initializer( const string& type,
-                              const string& name,
-                              const bool accumulate );
+create_component_initializer
+(
+    const string& type,
+    const string& name,
+    const bool accumulate
+);
 
 } // End namespace Foam
 

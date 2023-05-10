@@ -26,35 +26,48 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<typename ComponentType = Foam::IndexComponent>
-Foam::DataComponentPtr
-Foam::DataComponent::add( const Foam::string type,
-                          const Foam::string name,
-                          Foam::OffsetStrategy calc_start,
-                          Foam::OffsetStrategy calc_count ) {
-    auto component = std::make_shared<ComponentType>( type,
-                                                      name,
-                                                      calc_start,
-                                                      calc_count,
-                                                      this );
-    _v_add_( component );
+Foam::DataComponentPtr Foam::DataComponent::add
+(
+    const Foam::string type,
+    const Foam::string name,
+    Foam::OffsetStrategy calc_start,
+    Foam::OffsetStrategy calc_count
+)
+{
+    auto component = std::make_shared<ComponentType>
+                     (
+                         type,
+                         name,
+                         calc_start,
+                         calc_count,
+                         this
+                     );
+    _v_add_(component);
     return component;
 }
+
 
 template<typename DecoratorType, typename... Args>
 Foam::DataComponentPtr
-Foam::DataComponent::decorate( const Foam::string name, Args... args ) {
-    DataComponentPtr component = node( name );
-    auto parent_component = parent_component_of( component );
-    component = std::make_shared<DecoratorType>( std::move( component ),
-                                                 parent_component,
-                                                 args... );
-    parent_component->add( component );
+Foam::DataComponent::decorate(const Foam::string name, Args... args)
+{
+    DataComponentPtr component = node(name);
+    auto parent_component = parent_component_of(component);
+    component = std::make_shared<DecoratorType>
+                (
+                    std::move(component),
+                    parent_component,
+                    args...
+                );
+    parent_component->add(component);
     return component;
 }
 
-template< class DataType >
-void Foam::DataComponent::extract( DataType& output ) {
-    _v_extract_( output );
+
+template<class DataType>
+void Foam::DataComponent::extract(DataType& output)
+{
+    _v_extract_(output);
 };
 
 // ************************************************************************* //

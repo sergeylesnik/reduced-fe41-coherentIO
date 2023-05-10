@@ -41,29 +41,40 @@ namespace Foam
 {
 
 // Only for IndexComponents decorated by OffsetDecorator
-class SliceDecorator : public ComponentDecorator {
-
+class SliceDecorator
+:
+    public ComponentDecorator
+{
     Foam::Slice slice_{};
-    bool initialized_{ false };
+
+    bool initialized_{false};
 
     void _v_initialize_() final;
 
-    void _v_extract_( Foam::Slice& output ) final;
+    void _v_extract_(Foam::Slice& output) final;
 
-    void _v_extract_( Foam::Offsets& output ) final;
+    void _v_extract_(Foam::Offsets& output) final;
 
-    void _v_extract_( index_container& output ) final;
+    void _v_extract_(index_container& output) final;
 
-  public:
+public:
 
-    SliceDecorator( DataComponentPtr&& component,
-                    base_raw_ptr const parent_component );
+    SliceDecorator
+    (
+        DataComponentPtr&& component,
+        base_raw_ptr const parent_component
+    );
 
     index_citerator begin() const final;
+
     index_citerator end() const final;
+
     label front() const final;
+
     label back() const final;
+
     label size() const final;
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

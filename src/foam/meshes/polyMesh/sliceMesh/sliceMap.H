@@ -1,3 +1,37 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | foam-extend: Open Source CFD
+   \\    /   O peration     | Version:     4.1
+    \\  /    A nd           | Web:         http://www.foam-extend.org
+     \\/     M anipulation  | For copyright notice see file Copyright
+-------------------------------------------------------------------------------
+License
+    This file is part of foam-extend.
+
+    foam-extend is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation, either version 3 of the License, or (at your
+    option) any later version.
+
+    foam-extend is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::sliceMap
+
+Description
+    Defining a mesh slice of a cell/face/point list.
+
+SourceFiles
+    sliceMap.C
+    sliceMapI.C
+
+\*---------------------------------------------------------------------------*/
 
 #ifndef sliceMap_H
 #define sliceMap_H
@@ -5,13 +39,12 @@
 #include "label.H"
 
 #include <map>
-#include <algorithm>
 
 namespace Foam
 {
 
-class sliceMap {
-
+class sliceMap
+{
     std::map<label, label> mapping_{};
 
     const label numNativeEntities_{};
@@ -20,29 +53,24 @@ public:
 
     // Constructor
     sliceMap() = default;
-    sliceMap( const label& );
 
-    template< typename Container >
-    void append( const Container& );
+    // Construct with an offset in mapped IDs
+    sliceMap(const label&);
 
-    label operator[]( const label& );
+    // Append a list of IDs to the map
+    template<typename Container>
+    void append(const Container&);
 
-    bool exist( const label& id ) { return mapping_.count( id ) == 1; };
+    // Return mapped Id
+    label operator[](const label&);
+
+    // Check if input Id is mapped
+    bool exist(const label&);
 
 };
 
 }
 
-template< typename Container >
-void Foam::sliceMap::append( const Container& list ) {
-    Foam::label currId = numNativeEntities_ + mapping_.size();
-    std::transform( std::begin( list ), std::end( list ),
-                    std::inserter( mapping_, std::end( mapping_ ) ),
-                    [ &currId ] ( const auto& id ) mutable {
-                        auto ret = std::pair<label, label>( { id, currId } );
-                        ++currId;
-                        return ret;
-                    } );
-}
+#include "sliceMapI.H"
 
 #endif

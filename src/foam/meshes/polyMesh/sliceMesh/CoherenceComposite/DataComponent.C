@@ -27,51 +27,75 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::DataComponent::DataComponent( const Foam::string type,
-                                    const Foam::string name,
-                                    Foam::DataComponent* const parent_component )
-    : type_{ type }
-    , name_{ name }
-    , parent_component_{ parent_component } {}
+Foam::DataComponent::DataComponent
+(
+    const Foam::string type,
+    const Foam::string name,
+    Foam::DataComponent* const parent_component
+)
+:
+    type_{type},
+    name_{name},
+    parent_component_{parent_component}
+{}
 
 // * * * * * * * * * * * * * Public Member Functions  * * * * * * * * * * * //
 
 Foam::string
-Foam::DataComponent::parent_name() const {
+Foam::DataComponent::parent_name() const
+{
     return parent_component_ ? parent_component_->name() : Foam::string{};
 }
 
+
 Foam::string
-Foam::DataComponent::name() const {
+Foam::DataComponent::name() const
+{
     return name_;
 }
 
+
 Foam::string
-Foam::DataComponent::type() const {
+Foam::DataComponent::type() const
+{
     return type_;
 }
 
+
 Foam::DataComponentPtr
-Foam::DataComponent::add( const Foam::DataComponentPtr& component ) {
-    _v_add_( component );
+Foam::DataComponent::add(const Foam::DataComponentPtr& component)
+{
+    _v_add_(component);
     return component;
 }
 
-void Foam::DataComponent::initialize() {
+
+void Foam::DataComponent::initialize()
+{
     _v_initialize_();
 }
 
+
 Foam::DataComponentPtr
-Foam::DataComponent::node( const Foam::string& by_name ) {
-    Foam::DataComponentPtr ret{ nullptr };
-    if ( by_name.compare( "" ) == 0 ) { return ret; }
-    pull_node( by_name, ret );
+Foam::DataComponent::node(const Foam::string& by_name)
+{
+    Foam::DataComponentPtr ret{nullptr};
+    if (by_name.compare("") == 0)
+    {
+        return ret;
+    }
+    pull_node(by_name, ret);
     return ret;
 }
 
-void Foam::DataComponent::pull_node( const Foam::string& by_name,
-                                     Foam::DataComponentPtr& output ) {
-    _v_pull_node_( by_name, output );
+
+void Foam::DataComponent::pull_node
+(
+    const Foam::string& by_name,
+    Foam::DataComponentPtr& output
+)
+{
+    _v_pull_node_(by_name, output);
 }
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -79,8 +103,15 @@ void Foam::DataComponent::pull_node( const Foam::string& by_name,
 // if parent is the head node,
 // parent_component will be set to this
 Foam::DataComponent*
-Foam::DataComponent::parent_component_of( const Foam::DataComponentPtr& component ) {
-    Foam::DataComponent* parent_component = node( component->parent_name() ).get();
+Foam::DataComponent::parent_component_of
+(
+    const Foam::DataComponentPtr& component
+)
+{
+    Foam::DataComponent* parent_component = node
+                                            (
+                                                component->parent_name()
+                                            ).get();
     return !parent_component ? this : parent_component;
 }
 

@@ -26,15 +26,21 @@ License
 #include "InitStrategies.H"
 #include <memory>
 
+
 template<typename FieldType>
 std::unique_ptr<Foam::InitStrategy>
-Foam::create_component_initializer( const Foam::string& type,
-                                    const Foam::string& name,
-                                    const bool accumulate ) {
-    if ( type == "offsets" ) {
-        return std::make_unique<Foam::InitOffsets>( accumulate );
+Foam::create_component_initializer
+(
+    const Foam::string& type,
+    const Foam::string& name,
+    const bool accumulate
+)
+{
+    if (type == "offsets")
+    {
+        return std::make_unique<Foam::InitOffsets>(accumulate);
     }
-    return std::make_unique<Foam::InitFromADIOS<FieldType> >( type, name );
+    return std::make_unique<Foam::InitFromADIOS<FieldType> >(type, name);
 }
 
 // ************************************************************************* //

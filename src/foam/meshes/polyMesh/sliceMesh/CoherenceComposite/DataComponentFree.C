@@ -27,7 +27,9 @@ License
 
 #include "DataComponent.H"
 
-bool Foam::head_of_composition( const Foam::DataComponent& component ) {
+
+bool Foam::head_of_composition(const Foam::DataComponent& component)
+{
     return component.type().empty() || component.name().empty();
 }
 

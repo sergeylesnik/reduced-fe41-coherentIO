@@ -27,6 +27,7 @@ License
 
 #include "adiosStream.H"
 
+
 void Foam::InitOffsets::execute
 (
     Foam::InitStrategy::index_container& data,
@@ -36,7 +37,8 @@ void Foam::InitOffsets::execute
     auto value = !accumulate_ ?
                  start_count.first :
                  start_count.second;
-    offsets_.set( value, accumulate_ );
-    data = Foam::labelList( { offsets_.front(), offsets_.back() } );
+    offsets_.set(value, accumulate_);
+    data = Foam::labelList({offsets_.front(), offsets_.back()});
 }
 
+// ************************************************************************* //

@@ -41,49 +41,80 @@ namespace Foam
 {
 
 // Only for IndexComponents
-class OffsetDecorator : public ComponentDecorator {
-
+class OffsetDecorator
+:
+    public ComponentDecorator
+{
     Foam::Offsets offsets_{};
-    OffsetStrategy offset_strategy_{ nullptr };
-    bool accumulate_{ false };
-    bool initialized_{ false };
 
-    void _v_extract_( Foam::Offsets& output ) final {
+    OffsetStrategy offset_strategy_{nullptr};
+
+    bool accumulate_{false};
+
+    bool initialized_{false};
+
+    void _v_extract_(Foam::Offsets& output) final
+    {
         output = offsets_;
     }
 
-    void _v_extract_( index_container& output ) final {
-        component_->extract( output );
+    void _v_extract_(index_container& output) final
+    {
+        component_->extract(output);
     }
 
-    void _v_initialize_() final {
+    void _v_initialize_() final
+    {
         component_->initialize();
-        if ( !initialized_ ) {
-            offsets_.set( offset_strategy_( *component_.get() ), accumulate_ );
+        if (!initialized_)
+        {
+            offsets_.set(offset_strategy_(*component_.get()), accumulate_);
             initialized_ = true;
         }
     }
 
-  public:
+public:
 
-    OffsetDecorator( DataComponentPtr&& component,
-                     base_raw_ptr const parent_component,
-                     OffsetStrategy offset_strategy,
-                     bool accumulate = false )
-        : ComponentDecorator{ std::move( component ), parent_component }
-        , offsets_{}
-        , offset_strategy_{ offset_strategy }
-        , accumulate_{ accumulate }
-        , initialized_{ false } {}
+    OffsetDecorator
+    (
+        DataComponentPtr&& component,
+        base_raw_ptr const parent_component,
+        OffsetStrategy offset_strategy,
+        bool accumulate = false
+    )
+    :
+        ComponentDecorator{std::move(component), parent_component},
+        offsets_{},
+        offset_strategy_{offset_strategy},
+        accumulate_{accumulate},
+        initialized_{false}
+    {}
 
-    label accept( const OffsetStrategy& determine_offset ) const final {
-        if ( !determine_offset ) return {};
-        return determine_offset( *this );
+
+    label accept(const OffsetStrategy& determine_offset) const final
+    {
+        if (!determine_offset)
+        {
+            return {};
+        }
+        return determine_offset(*this);
     }
 
-    label front() const final { return offsets_.front(); }
-    label back() const final { return offsets_.back(); }
-    label size() const final { return offsets_.size(); }
+    label front() const final
+    {
+        return offsets_.front();
+    }
+
+    label back() const final
+    {
+        return offsets_.back();
+    }
+
+    label size() const final
+    {
+        return offsets_.size();
+    }
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

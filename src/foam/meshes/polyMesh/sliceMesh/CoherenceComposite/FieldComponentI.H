@@ -28,42 +28,58 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<typename FieldType>
-Foam::FieldComponent<FieldType>::FieldComponent( const Foam::string type,
-                                      const Foam::string name,
-                                      Foam::OffsetStrategy calc_start,
-                                      Foam::OffsetStrategy calc_count,
-                                      Foam::DataComponent* const parent_component )
-        : Foam::DataComponent( type, name, parent_component )
-        , data_{}
-        , calc_start_{ calc_start }
-        , calc_count_{ calc_count }
-        , initialized_{ false } {}
+Foam::FieldComponent<FieldType>::FieldComponent
+(
+    const Foam::string type,
+    const Foam::string name,
+    Foam::OffsetStrategy calc_start,
+    Foam::OffsetStrategy calc_count,
+    Foam::DataComponent* const parent_component
+)
+:
+    Foam::DataComponent(type, name, parent_component),
+    data_{},
+    calc_start_{calc_start},
+    calc_count_{calc_count},
+    initialized_{false}
+{}
 
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * //
 
 template<typename FieldType>
-void Foam::FieldComponent<FieldType>::init() {
+void Foam::FieldComponent<FieldType>::init()
+{
     // FieldComponent (as leaf) must be attached to a IndexComponent (as node)
     auto parent = parent_component_;
-    if ( calc_start_ && calc_count_ ) {
-        auto start = parent->accept( calc_start_ );
-        auto count = parent->accept( calc_count_ );
-        data_.resize( count );
-        Foam::adiosReadPrimitives( type(), name(), data_.data(), start, count );
-    } else {
+    if (calc_start_ && calc_count_)
+    {
+        auto start = parent->accept(calc_start_);
+        auto count = parent->accept(calc_count_);
+        data_.resize(count);
+        Foam::adiosReadPrimitives(type(), name(), data_.data(), start, count);
+    }
+    else
+    {
         // TODO: resizing
-        Foam::adiosReadPrimitives( type(), name(), data_.data() );
+        Foam::adiosReadPrimitives(type(), name(), data_.data());
     }
     initialized_ = true;
 }
 
-template<typename FieldType>
-void Foam::FieldComponent<FieldType>::_v_initialize_() {
-    if ( !initialized_ ) { init(); }
-}
 
 template<typename FieldType>
-void Foam::FieldComponent<FieldType>::_v_extract_( FieldType& output ) {
+void Foam::FieldComponent<FieldType>::_v_initialize_()
+{
+    if (!initialized_)
+    {
+        init();
+    }
+}
+
+
+template<typename FieldType>
+void Foam::FieldComponent<FieldType>::_v_extract_(FieldType& output)
+{
     output = data_;
 }
 

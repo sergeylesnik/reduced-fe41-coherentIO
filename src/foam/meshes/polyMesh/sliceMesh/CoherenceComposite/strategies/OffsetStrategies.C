@@ -28,72 +28,107 @@ License
 #include "DataComponent.H"
 
 
-Foam::label Foam::count_geq::operator()( const Foam::DataComponent& input ){
+Foam::label Foam::count_geq::operator()(const Foam::DataComponent& input)
+{
     using std::begin;
     using std::end;
-    return std::count_if( begin( input ), end( input ),
-                          [ this ] ( const auto& val )
-                          { return val >= value_; } );
+    return std::count_if
+    (
+        begin(input),
+        end(input),
+        [this](const auto& val)
+        {
+            return val>=value_;
+        }
+    );
 }
 
-Foam::label Foam::count_eq::operator()( const Foam::DataComponent& input ){
+
+Foam::label Foam::count_eq::operator()(const Foam::DataComponent& input)
+{
     using std::begin;
     using std::end;
-    return std::count_if( begin( input ), end( input ),
-                          [ this ] ( const auto& val )
-                          { return val == value_; } );
+    return std::count_if
+           (
+               begin(input),
+               end(input),
+               [this](const auto& val)
+               {
+                   return val == value_;
+               }
+           );
 }
 
-Foam::label
-Foam::offset_by_max_plus_one( const Foam::DataComponent& input ) {
-    return *std::max_element( input.begin(), input.end() ) + 1;
-}
 
 Foam::label
-Foam::offset_by_size_minus_one( const Foam::DataComponent& input ) {
+Foam::offset_by_max_plus_one(const Foam::DataComponent& input)
+{
+    return *std::max_element(input.begin(), input.end()) + 1;
+}
+
+
+Foam::label
+Foam::offset_by_size_minus_one(const Foam::DataComponent& input)
+{
     return input.size() - 1;
 }
 
+
 Foam::label
-Foam::start_from_myProcNo( const Foam::DataComponent& dummy ) {
+Foam::start_from_myProcNo(const Foam::DataComponent& dummy)
+{
     return Pstream::myProcNo();
 }
 
+
 Foam::label
-Foam::count_two( const Foam::DataComponent& dummy ) {
+Foam::count_two(const Foam::DataComponent& dummy)
+{
     return 2;
 }
 
+
 Foam::label
-Foam::start_from_front( const Foam::DataComponent& input ) {
+Foam::start_from_front(const Foam::DataComponent& input)
+{
     return input.front();
 }
 
+
 Foam::label
-Foam::count_from_front( const Foam::DataComponent& input ) {
+Foam::count_from_front(const Foam::DataComponent& input)
+{
     return input.back() - input.front();
 }
 
+
 Foam::label
-Foam::count_from_size( const Foam::DataComponent& input ) {
+Foam::count_from_size(const Foam::DataComponent& input)
+{
     return input.size();
 }
 
-Foam::label
-Foam::count_from_front_plus_one( const Foam::DataComponent& input ) {
-    return count_from_front( input ) + 1;
-}
 
 Foam::label
-Foam::start_from_max( const Foam::DataComponent& input ) {
-    Foam::Offsets offsets( *std::max_element( input.begin(), input.end() ) + 1 );
-    return offsets.lowerBound( Pstream::myProcNo() );
+Foam::count_from_front_plus_one(const Foam::DataComponent& input)
+{
+    return count_from_front(input) + 1;
 }
 
+
 Foam::label
-Foam::count_from_max( const Foam::DataComponent& input ) {
-    Foam::Offsets offsets( *std::max_element( input.begin(), input.end() ) + 1 );
-    return offsets.count( Pstream::myProcNo() );
+Foam::start_from_max(const Foam::DataComponent& input)
+{
+    Foam::Offsets offsets(*std::max_element(input.begin(), input.end()) + 1);
+    return offsets.lowerBound(Pstream::myProcNo());
+}
+
+
+Foam::label
+Foam::count_from_max(const Foam::DataComponent& input)
+{
+    Foam::Offsets offsets(*std::max_element(input.begin(), input.end()) + 1);
+    return offsets.count(Pstream::myProcNo());
 }
 
 

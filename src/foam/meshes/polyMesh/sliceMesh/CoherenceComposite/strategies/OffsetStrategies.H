@@ -42,47 +42,47 @@ SourceFiles
 namespace Foam
 {
 
-struct count_geq {
+struct count_geq
+{
+    explicit count_geq(const label value) : value_{value} {}
 
-    explicit count_geq( const label value )
-        : value_{ value } {}
+    label operator()(const DataComponent&);
 
-    label operator()( const DataComponent& );
-
-  private:
+private:
     label value_{};
 };
 
-struct count_eq {
 
-    explicit count_eq( const label value )
-        : value_{ value } {}
+struct count_eq
+{
+    explicit count_eq(const label value) : value_{value} {}
 
-    label operator()( const DataComponent& );
+    label operator()(const DataComponent&);
 
-  private:
+private:
     label value_{};
 };
 
-label offset_by_max_plus_one( const DataComponent& );
 
-label offset_by_size_minus_one( const DataComponent& );
+label offset_by_max_plus_one(const DataComponent&);
 
-label start_from_myProcNo( const DataComponent& );
+label offset_by_size_minus_one(const DataComponent&);
 
-label count_two( const DataComponent& );
+label start_from_myProcNo(const DataComponent&);
 
-label start_from_front( const DataComponent& );
+label count_two(const DataComponent&);
 
-label count_from_front( const DataComponent& );
+label start_from_front(const DataComponent&);
 
-label count_from_size( const DataComponent& );
+label count_from_front(const DataComponent&);
 
-label count_from_front_plus_one( const DataComponent& );
+label count_from_size(const DataComponent&);
 
-label start_from_max( const DataComponent& );
+label count_from_front_plus_one(const DataComponent&);
 
-label count_from_max( const DataComponent& );
+label start_from_max(const DataComponent&);
+
+label count_from_max(const DataComponent&);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
