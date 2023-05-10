@@ -21,7 +21,18 @@ Foam::sliceProcPatch::sliceProcPatch
 :
     numNonProcPatches_{numBoundaries},
     slice_{slice},
-    localFaceIDs_{labelList(countNeighOfSlice(neighbours, slice_))},
+    localFaceIDs_
+    {
+        labelList
+        (
+            std::count_if
+            (
+                neighbours.begin(),
+                neighbours.end(),
+                slice
+            )
+        )
+    },
     procBoundaryName_
     {
         word("procBoundary") +

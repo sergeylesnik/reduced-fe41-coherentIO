@@ -19,17 +19,6 @@ SomeList Foam::extractor(const SomeList& input, const IndexList& extractorList)
     return output;
 }
 
-
-template<typename Container>
-Foam::label Foam::countNeighOfSlice
-(
-    const Container& neighbours,
-    const Foam::Slice& slice
-)
-{
-    return std::count_if(neighbours.begin(), neighbours.end(), slice);
-}
-
 // * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * //
 
 template<typename FaceList>

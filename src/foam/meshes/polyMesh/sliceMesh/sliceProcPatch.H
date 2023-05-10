@@ -52,9 +52,6 @@ namespace Foam
 template<typename SomeList, typename IndexList>
 SomeList extractor(const SomeList& input, const IndexList& extractorList);
 
-template<typename Container>
-label countNeighOfSlice(const Container& neighbours, const Slice& slice);
-
 // Forward declaration
 class Offsets;
 
