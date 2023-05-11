@@ -643,7 +643,7 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
             }
         }
 
-        Foam::List<Foam::polyPatch*> procPatches
+        Foam::List<Foam::polyPatch*> boundaryPatches
                                      (
                                          patchSet.size(),
                                          reinterpret_cast<Foam::polyPatch*>(0)
@@ -673,14 +673,15 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
                                              patches.begin(),
                                              patchStartIt
                                          );
-                procPatches[nLocalPatches] = new Foam::polyPatch
+                patchEntries[nthPatch].dict().set("startFace", patchStart);
+                patchEntries[nthPatch].dict().set("nFaces", patchSize);
+                boundaryPatches[nLocalPatches] = Foam::polyPatch::New
                                                  (
                                                      patchEntries[nthPatch].keyword(),
-                                                     patchSize,
-                                                     patchStart,
+                                                     patchEntries[nthPatch].dict(),
                                                      nLocalPatches,
                                                      boundary
-                                                 );
+                                                 ).ptr();
                 ++nLocalPatches;
             }
             ++nthPatch;
@@ -710,7 +711,7 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
                                          patches.begin(),
                                          patchStartIt
                                      );
-            procPatches[nLocalPatches] = new Foam::processorPolyPatch
+            boundaryPatches[nLocalPatches] = new Foam::processorPolyPatch
                                              (
                                                  sliceProcPatches[patchi].name(),
                                                  patchSize,
@@ -725,7 +726,7 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
         }
     }
 
-    return procPatches;
+    return boundaryPatches;
 }
 
 
