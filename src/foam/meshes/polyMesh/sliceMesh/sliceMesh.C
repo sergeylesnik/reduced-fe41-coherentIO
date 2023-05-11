@@ -611,81 +611,81 @@ std::vector<Foam::sliceProcPatch> Foam::sliceMesh::procPatches()
 Foam::List<Foam::polyPatch*>
 Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
 {
-        label myProcNo = Pstream::myProcNo();
-        label numInternalFaces = std::count_if
-        (
-            std::begin(globalNeighbours_),
-            std::end(globalNeighbours_),
-            [](const auto& id)
-            {
-                return id>=0;
-            }
-        );
-        // Set correct boundary patches and add processor boundary patches
-        std::vector<label> patches = polyPatches();
-        std::set<label> patchSet(patches.begin(), patches.end());
+    label myProcNo = Pstream::myProcNo();
+    label numInternalFaces = std::count_if
+                             (
+                                 std::begin(globalNeighbours_),
+                                 std::end(globalNeighbours_),
+                                 [](const auto& id)
+                                 {
+                                     return id>=0;
+                                 }
+                             );
+    // Set correct boundary patches and add processor boundary patches
+    std::vector<label> patches = polyPatches();
+    std::set<label> patchSet(patches.begin(), patches.end());
 
-        PtrList<entry> patchEntries{};
-        if (Pstream::master())
+    PtrList<entry> patchEntries{};
+    if (Pstream::master())
+    {
+        Istream& is = boundary.readStream("polyBoundaryMesh");
+        patchEntries = PtrList<entry>(is);
+    }
+    Pstream::scatter(patchEntries);
+
+    Foam::label numLocalPatches = 0;
+    forAll(patchEntries, patchI)
+    {
+        auto slicePatchId = Foam::encodeSlicePatchId(patchI);
+        if (patchSet.count(slicePatchId))
         {
-            Istream& is = boundary.readStream("polyBoundaryMesh");
-            patchEntries = PtrList<entry>(is);
+            ++numLocalPatches;
         }
-        Pstream::scatter(patchEntries);
+    }
 
-        Foam::label numLocalPatches = 0;
-        forAll(patchEntries, patchI)
+    Foam::List<Foam::polyPatch*> boundaryPatches
+                                 (
+                                     patchSet.size(),
+                                     reinterpret_cast<Foam::polyPatch*>(0)
+                                 );
+    Foam::label nthPatch = 0;
+    Foam::label nLocalPatches = 0;
+    for (label patchi = 0; patchi<patchEntries.size(); ++patchi)
+    {
+        auto slicePatchId = Foam::encodeSlicePatchId(patchi);
+        if (patchSet.count(slicePatchId))
         {
-            auto slicePatchId = Foam::encodeSlicePatchId(patchI);
-            if (patchSet.count(slicePatchId))
-            {
-                ++numLocalPatches;
-            }
-        }
-
-        Foam::List<Foam::polyPatch*> boundaryPatches
-                                     (
-                                         patchSet.size(),
-                                         reinterpret_cast<Foam::polyPatch*>(0)
-                                     );
-        Foam::label nthPatch = 0;
-        Foam::label nLocalPatches = 0;
-        for (label patchi = 0; patchi<patchEntries.size(); ++patchi)
-        {
-            auto slicePatchId = Foam::encodeSlicePatchId(patchi);
-            if (patchSet.count(slicePatchId))
-            {
-                Foam::label patchSize = std::count
-                                        (
-                                            patches.begin(),
-                                            patches.end(),
-                                            slicePatchId
-                                        );
-                auto patchStartIt = std::find
+            Foam::label patchSize = std::count
                                     (
                                         patches.begin(),
                                         patches.end(),
                                         slicePatchId
                                     );
-                Foam::label patchStart = numInternalFaces +
-                                         std::distance
-                                         (
-                                             patches.begin(),
-                                             patchStartIt
-                                         );
-                patchEntries[nthPatch].dict().set("startFace", patchStart);
-                patchEntries[nthPatch].dict().set("nFaces", patchSize);
-                boundaryPatches[nLocalPatches] = Foam::polyPatch::New
-                                                 (
-                                                     patchEntries[nthPatch].keyword(),
-                                                     patchEntries[nthPatch].dict(),
-                                                     nLocalPatches,
-                                                     boundary
-                                                 ).ptr();
-                ++nLocalPatches;
-            }
-            ++nthPatch;
+            auto patchStartIt = std::find
+                                (
+                                    patches.begin(),
+                                    patches.end(),
+                                    slicePatchId
+                                );
+            Foam::label patchStart = numInternalFaces +
+                                     std::distance
+                                     (
+                                         patches.begin(),
+                                         patchStartIt
+                                     );
+            patchEntries[nthPatch].dict().set("startFace", patchStart);
+            patchEntries[nthPatch].dict().set("nFaces", patchSize);
+            boundaryPatches[nLocalPatches] = Foam::polyPatch::New
+                                             (
+                                                 patchEntries[nthPatch].keyword(),
+                                                 patchEntries[nthPatch].dict(),
+                                                 nLocalPatches,
+                                                 boundary
+                                             ).ptr();
+            ++nLocalPatches;
         }
+        ++nthPatch;
+    }
 
     if (Pstream::parRun())
     {
