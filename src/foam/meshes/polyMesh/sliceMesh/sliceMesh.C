@@ -621,9 +621,7 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
                                      return id>=0;
                                  }
                              );
-    // Set correct boundary patches and add processor boundary patches
     std::vector<label> patches = polyPatches();
-    std::set<label> patchSet(patches.begin(), patches.end());
 
     PtrList<entry> patchEntries{};
     if (Pstream::master())
@@ -633,27 +631,19 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
     }
     Pstream::scatter(patchEntries);
 
-    Foam::label numLocalPatches = 0;
-    forAll(patchEntries, patchI)
-    {
-        auto slicePatchId = Foam::encodeSlicePatchId(patchI);
-        if (patchSet.count(slicePatchId))
-        {
-            ++numLocalPatches;
-        }
-    }
-
+    auto sliceProcPatches = this->procPatches();
     Foam::List<Foam::polyPatch*> boundaryPatches
                                  (
-                                     patchSet.size(),
+                                     patchEntries.size() +
+                                     sliceProcPatches.size(),
                                      reinterpret_cast<Foam::polyPatch*>(0)
                                  );
     Foam::label nthPatch = 0;
     Foam::label nLocalPatches = 0;
+    Foam::label nextPatchStart = numInternalFaces;
     for (label patchi = 0; patchi<patchEntries.size(); ++patchi)
     {
         auto slicePatchId = Foam::encodeSlicePatchId(patchi);
-        if (patchSet.count(slicePatchId))
         {
             Foam::label patchSize = std::count
                                     (
@@ -673,6 +663,7 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
                                          patches.begin(),
                                          patchStartIt
                                      );
+            patchStart = (patchSize == 0) ? nextPatchStart : patchStart;
             patchEntries[nthPatch].dict().set("startFace", patchStart);
             patchEntries[nthPatch].dict().set("nFaces", patchSize);
             boundaryPatches[nLocalPatches] = Foam::polyPatch::New
@@ -682,6 +673,7 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
                                                  nLocalPatches,
                                                  boundary
                                              ).ptr();
+            nextPatchStart = patchStart + patchSize;
             ++nLocalPatches;
         }
         ++nthPatch;
@@ -689,7 +681,6 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
 
     if (Pstream::parRun())
     {
-        auto sliceProcPatches = this->procPatches();
         for (label patchi = 0; patchi<sliceProcPatches.size(); ++patchi)
         {
             auto sliceProcPatchId = sliceProcPatches[patchi].id();
