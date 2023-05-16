@@ -611,19 +611,11 @@ std::vector<Foam::sliceProcPatch> Foam::sliceMesh::procPatches()
 Foam::List<Foam::polyPatch*>
 Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
 {
-    label myProcNo = Pstream::myProcNo();
-    label numInternalFaces =
-        std::count_if
-        (
-            std::begin(globalNeighbours_),
-            std::end(globalNeighbours_),
-            [](const auto& id)
-            {
-                return id>=0;
-            }
-        );
+    // Retrieve list of patch IDs for boundary patch faces
     std::vector<label> patches = polyPatches();
+    Foam::label numInternalFaces = globalNeighbours_.size() - patches.size();
 
+    // Read (on master) and distribute ASCII entries for boundaries
     PtrList<entry> patchEntries{};
     if (Pstream::master())
     {
@@ -632,25 +624,31 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
     }
     Pstream::scatter(patchEntries);
 
-    auto sliceProcPatches = this->procPatches();
+    // Start filling modelled/physical boundary patches
     Foam::List<Foam::polyPatch*> boundaryPatches
     (
         patchEntries.size() +
-        sliceProcPatches.size(),
+        slicePatches_.size(),
         reinterpret_cast<Foam::polyPatch*>(0)
     );
     Foam::label nthPatch = 0;
     Foam::label nextPatchStart = numInternalFaces;
     for (label patchi = 0; patchi<patchEntries.size(); ++patchi)
     {
-        auto slicePatchId = Foam::encodeSlicePatchId(patchi);
-        Foam::label patchSize =
-            std::count(patches.begin(), patches.end(), slicePatchId);
+        // Determine local start and size of boundary patches
+        Foam::label patchStart{nextPatchStart};
+        Foam::label patchSize{0};
+        Foam::label slicePatchId = Foam::encodeSlicePatchId(patchi);
         auto patchStartIt =
             std::find(patches.begin(), patches.end(), slicePatchId);
-        Foam::label patchStart =
-            numInternalFaces + std::distance(patches.begin(), patchStartIt);
-        patchStart = (patchSize == 0) ? nextPatchStart : patchStart;
+        if (patchStartIt != patches.end())
+        {
+            patchStart =
+                numInternalFaces + std::distance(patches.begin(), patchStartIt);
+            patchSize = std::count(patchStartIt, patches.end(), slicePatchId);
+        }
+
+        // Replace new values into patch entries and create the polyPatch.
         patchEntries[nthPatch].dict().set("startFace", patchStart);
         patchEntries[nthPatch].dict().set("nFaces", patchSize);
         boundaryPatches[nthPatch] =
@@ -661,32 +659,38 @@ Foam::sliceMesh::polyPatches(polyBoundaryMesh& boundary)
                 nthPatch,
                 boundary
             ).ptr();
+
         nextPatchStart = patchStart + patchSize;
         ++nthPatch;
     }
 
     if (Pstream::parRun())
     {
-        for (label patchi = 0; patchi<sliceProcPatches.size(); ++patchi)
+        // Fill processor boundary patches
+        for (label patchi = 0; patchi<slicePatches_.size(); ++patchi)
         {
-            auto sliceProcPatchId = sliceProcPatches[patchi].id();
-            Foam::label patchSize =
-                std::count(patches.begin(), patches.end(), sliceProcPatchId);
+            // Determine start and size of processor boundary patch
+            Foam::label sliceProcPatchId = slicePatches_[patchi].id();
             auto patchStartIt =
                 std::find(patches.begin(), patches.end(), sliceProcPatchId);
             Foam::label patchStart =
                 numInternalFaces + std::distance(patches.begin(), patchStartIt);
+            Foam::label patchSize =
+                std::count(patchStartIt, patches.end(), sliceProcPatchId);
+
+            // Create and store the processorPolyPatch
             boundaryPatches[nthPatch] =
                 new Foam::processorPolyPatch
                 (
-                    sliceProcPatches[patchi].name(),
+                    slicePatches_[patchi].name(),
                     patchSize,
                     patchStart,
                     nthPatch,
                     boundary,
-                    myProcNo,
-                    sliceProcPatches[patchi].partner()
+                    Pstream::myProcNo(),
+                    slicePatches_[patchi].partner()
                 );
+
             ++nthPatch;
         }
     }
