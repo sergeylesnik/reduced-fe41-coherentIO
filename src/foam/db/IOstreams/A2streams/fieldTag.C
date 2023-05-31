@@ -28,7 +28,11 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::List<Foam::fieldTag>
-Foam::fieldTag::globalUniform(const List<fieldTag>& x, const List<fieldTag>& y)
+Foam::fieldTag::uniformityCompareOp
+(
+    const List<fieldTag>& x,
+    const List<fieldTag>& y
+)
 {
     List<fieldTag> res(x);
 
@@ -78,6 +82,20 @@ Foam::fieldTag::fieldTag()
 {}
 
 
+Foam::fieldTag::fieldTag(uniformity u, const scalarList& l)
+:
+    uniformity_(u),
+    firstElement_(l)
+{}
+
+
+Foam::fieldTag::fieldTag(const fieldTag& t)
+:
+    uniformity_(t.uniformity_),
+    firstElement_(t.firstElement_)
+{}
+
+
 // * * * * * * * * * * * * * Public Member Functions  * * * * * * * * * * * //
 
 bool Foam::fieldTag::operator==(const fieldTag& d) const
@@ -101,13 +119,20 @@ bool Foam::fieldTag::operator!=(const fieldTag& d) const
 }
 
 
+void Foam::fieldTag::operator=(const fieldTag& t)
+{
+    this->uniformity_ = t.uniformity_;
+    this->firstElement_ = t.firstElement_;
+}
+
+
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const fieldTag& d
 )
 {
-    os << d.firstElement() << d.getUniformity();
+    os << d.firstElement() << d.uniformityState();
     return os;
 }
 
@@ -120,6 +145,6 @@ Foam::Istream& Foam::operator>>
     is >> d.firstElement();
     label lfu;
     is >> lfu;
-    d.getUniformity() = static_cast<fieldTag::uniformity>(lfu);
+    d.uniformityState() = static_cast<fieldTag::uniformity>(lfu);
     return is;
 }

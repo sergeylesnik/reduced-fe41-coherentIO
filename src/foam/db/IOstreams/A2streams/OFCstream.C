@@ -82,24 +82,25 @@ void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalGeometricField()
     gatherFieldDataEntries(dict_, fieldDataEntries);
 
     const label nFields = fieldDataEntries.size();
-    List<fieldTag> globalUniform(nFields);
+    List<fieldTag> globalUniformity(nFields);
 
+    // Prepare list with field tags for global reduce
     forAll(fieldDataEntries, i)
     {
-        globalUniform[i].firstElement() = fieldDataEntries[i]->firstElement();
-        globalUniform[i].getUniformity() = fieldDataEntries[i]->getUniformity();
+        globalUniformity[i] = fieldDataEntries[i]->tag();
     }
 
-    globalUniform = returnReduce(globalUniform, fieldTag::globalUniform);
+    globalUniformity =
+        returnReduce(globalUniformity, fieldTag::uniformityCompareOp);
 
     forAll(fieldDataEntries, i)
     {
         fieldDataEntry& fde = *(fieldDataEntries[i]);
-        fde.getUniformity() = globalUniform[i].getUniformity();
+        fde.tag() = globalUniformity[i];
 
         // ToDoIO Check whether the fde field size equals the size of the
         // corresponding mesh entity on each rank. Allreduce this info using
-        // the globalUniform infrastructure because the field size may
+        // the uniformityCompareOp infrastructure because the field size may
         // accidentally equal the size of the mesh entity. If it's not equal on
         // all ranks, do not agglomerate and write to ADIOS with prefixed
         // processorXX.
@@ -121,10 +122,7 @@ void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalGeometricField()
                 fde.id()
             );
 
-            if(Pstream::master())
-            {
-                fde.nGlobalElems(nGlobalElems);
-            }
+            fde.nGlobalElems() = nGlobalElems;
         }
     }
 
@@ -132,7 +130,6 @@ void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalGeometricField()
     {
         OFstream of
         (
-            // "fields/" + name().name(),
             name(),
             ios_base::out|ios_base::trunc,
             streamFormat::ASCII
@@ -253,7 +250,7 @@ Foam::OFCstream<PatchField, GeoMesh>::write(const word& str)
 {
     if (token::compound::isCompound(str))
     {
-        currentCompoundToken_ = str;
+        currentCompoundTokenName_ = str;
 
         return *this;
     }
@@ -300,7 +297,7 @@ Foam::Ostream& Foam::OFCstream<PatchField, GeoMesh>::parwrite
         new fieldDataEntry
         (
             currentKeyword_,
-            currentCompoundToken_,
+            currentCompoundTokenName_,
             reinterpret_cast<const scalar*>(data),
             byteSize,
             nElems

@@ -72,8 +72,8 @@ class OFCstream
         //- Entry counter used for the formatting entries
         label currentEntryI_;
 
-        //- The last compound token senn on the stream
-        token currentCompoundToken_;
+        //- The last compound token seen on the stream
+        word currentCompoundTokenName_;
 
         // Pointers to data chunks contributing to a single array staged until
         // all data is gathered and the consolidated data array is filled

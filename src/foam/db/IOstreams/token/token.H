@@ -182,7 +182,7 @@ public:
             static autoPtr<compound> New(const word& type, Istream&);
 
             //- Select constructed with size
-            static autoPtr<compound> New(const word& type, Istream&, label);
+            static autoPtr<compound> New(const word& type, label);
 
 
         //- Destructor

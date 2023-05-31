@@ -30,7 +30,7 @@ License
 Foam::fieldTag::uniformity
 Foam::fieldDataEntry::determineUniformity() const
 {
-    if (nElems_ != 0)
+    if (nElems_ > 0)
     {
         fieldTag::uniformity u = fieldTag::UNIFORM;
 
@@ -58,12 +58,30 @@ Foam::fieldDataEntry::determineUniformity() const
 }
 
 
+Foam::scalarList Foam::fieldDataEntry::firstElement() const
+{
+    if (nElems_)
+    {
+        scalarList L(nCmpts_);
+
+        for(label i = 0; i < nCmpts_; i++)
+        {
+            L[i] = data_[i];
+        }
+
+        return L;
+    }
+
+    return scalarList(0);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fieldDataEntry::fieldDataEntry
 (
     const keyType& keyword,
-    const token& compoundToken,
+    const word& compoundTokenName,
     const scalar* data,
     std::streamsize byteSize,
     label nElems
@@ -71,13 +89,16 @@ Foam::fieldDataEntry::fieldDataEntry
 :
     entry(keyword),
     name_(),
-    compoundToken_(compoundToken),
+    compoundTokenName_(compoundTokenName),
     data_(data),
     byteSize_(byteSize),
     nElems_(nElems),
-    nCmpts_(nElems ? (byteSize/nElems/sizeof(scalar)) : 0),
-    uniformity_(determineUniformity()),
-    nGlobalElems_(0)
+    // ToDoIO Improve this. A workaround to get nComponents from the word
+    // containing the type of data, e.g. List<vector>. By now, create a
+    // temporary zero-sized compound token and call nComponents on it.
+    nCmpts_(token::compound::New(compoundTokenName, 0)().nComponents()),
+    nGlobalElems_(0),
+    tag_(determineUniformity(), firstElement())
 {}
 
 
@@ -104,9 +125,6 @@ Foam::ITstream& Foam::fieldDataEntry::stream() const
         << "Attempt to return field data entry " << keyword()
         << " as a primitive"
         << abort(FatalError);
-
-    ITstream dummyStream("", UList<token>());
-    return dummyStream;
 }
 
 
@@ -139,9 +157,13 @@ void Foam::fieldDataEntry::write(Ostream& os) const
     fn.replaceAll("::", "/");
     os.writeKeyword(fn.name());
 
-    if (uniformity_ == fieldTag::UNIFORM)
+    if (tag_.uniformityState() == fieldTag::UNIFORM)
     {
         os  << "uniform" << token::SPACE;
+
+        // If EMPTY, data_ is nullptr. Thus, use the field tag to provide the
+        // first element.
+        const scalarList& fe = tag_.firstElement();
 
         if (nCmpts_ > 1)
         {
@@ -150,35 +172,23 @@ void Foam::fieldDataEntry::write(Ostream& os) const
 
             for (label i = 0; i < (nCmpts_ - 1); i++)
             {
-                os << data_[i] << token::SPACE;
+                os << fe[i] << token::SPACE;
             }
 
-            os << data_[nCmpts_ - 1] << token::END_LIST;
+            os << fe[nCmpts_ - 1] << token::END_LIST;
         }
         else // single scalar
         {
-            os  << data_[0];
+            os  << fe[0];
         }
     }
     else
     {
-        os  << "nonuniform" << token::SPACE << compoundToken_ << token::SPACE
-            << nGlobalElems_ << fn;
+        os  << "nonuniform" << token::SPACE << compoundTokenName_
+            << token::SPACE << nGlobalElems_ << fn;
     }
 
     os << token::END_STATEMENT << endl;
-}
-
-
-Foam::scalarList Foam::fieldDataEntry::firstElement() const
-{
-    scalarList L(nCmpts_);
-    for(label i = 0; i < nCmpts_; i++)
-    {
-        L[i] = data_[i];
-    }
-
-    return L;
 }
 
 

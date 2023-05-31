@@ -34,7 +34,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::IFCstream, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(IFCstream, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,6 +53,18 @@ Foam::IFCstreamAllocator::IFCstreamAllocator
     adiosStreamPtr_(nullptr),
     compression_(IOstream::UNCOMPRESSED)
 {
+    // ToDoIO Get rid of "processorXX" in path
+    fileName& globalId = const_cast<fileName&>(pathname);
+    const wordList cmpts = globalId.components();
+    globalId = "";
+    forAll(cmpts, i)
+    {
+        if (cmpts[i].find("processor") == std::string::npos)
+        {
+            globalId = globalId/cmpts[i];
+        }
+    }
+
     if (pathname.empty())
     {
         if (IFCstream::debug)
@@ -142,14 +157,17 @@ void Foam::IFCstream::readCompoundTokenData(dictionary& dict, const label size)
     {
         entry& pEntry = pIter();
 
-        // ToDoIO Add recursion for nested dictionaries
-        if (!pEntry.isStream())
+        if (pEntry.isDict())
         {
             readCompoundTokenData(pEntry.dict(), size);
         }
 
-        ITstream& is = pEntry.stream();
+        if (debug)
+        {
+            Pout<< "Reading primitive entry " << nl << tab << pEntry << endl;
+        }
 
+        ITstream& is = pEntry.stream();
         readCompoundTokenData(is, size);
     }
 }
@@ -176,8 +194,12 @@ void Foam::IFCstream::readCompoundTokenData
 
             // Current token index points to the token after the compound
             // ToDoIO Get rid of globalSize?
-            const label globalSize = is[is.tokenIndex()++].labelToken();
-            const string id = is[is.tokenIndex()++].stringToken();
+            const label coherentStartI = is.tokenIndex();
+            const label globalSize = is[coherentStartI].labelToken();
+            const string id = is[coherentStartI + 1].stringToken();
+
+            // Delete the coherent format tokens by resizing the tokenList
+            is.resize(coherentStartI);
 
             // ToDoIO Get proper offsets directly from sliceableMesh_
             // elemOffset has to be int64
@@ -203,8 +225,11 @@ void Foam::IFCstream::readCompoundTokenData
             if (debug)
             {
                 Pout
-                    << "Foam::IFCstream::readToDict(const word& fieldTypeName)"
-                    << nl
+                    << "void Foam::IFCstream::readCompoundTokenData" << nl
+                    << "(" << nl
+                    << "    ITstream& is," << nl
+                    << "    const label localSize" << nl
+                    << ")" << nl
                     << "Reading compoundToken" << nl
                     << "    ITstream name = " << is.name() << nl
                     << "    ITstream globalSize = " << globalSize << nl
@@ -249,14 +274,15 @@ void Foam::IFCstream::readWordToken(token& t)
     {
         if (debug)
         {
-            Pout<< "Start constructing coherent compound token" << endl;
+            Pout<< "Start constructing coherent compound token " << *wPtr
+                << endl;
         }
 
-        t = token::compound::New(*wPtr, *this, 0).ptr();
+        t = token::compound::New(*wPtr, 0).ptr();
 
         if (debug)
         {
-            Pout<< "End constructing coherent compound token" << endl;
+            Pout<< "End constructing coherent compound token " << *wPtr << endl;
         }
 
         delete wPtr;
@@ -297,6 +323,17 @@ Foam::IFCstream::IFCstream
     ),
     tmpIssPtr_(nullptr)
 {
+    // ToDoIO Get rid of "processorXX" in path
+    const wordList cmpts = pathname_.components();
+    pathname_ = "";
+    forAll(cmpts, i)
+    {
+        if (cmpts[i].find("processor") == std::string::npos)
+        {
+            pathname_ = pathname_/cmpts[i];
+        }
+    }
+
     setClosed();
 
     setState(ifPtr_->rdstate());

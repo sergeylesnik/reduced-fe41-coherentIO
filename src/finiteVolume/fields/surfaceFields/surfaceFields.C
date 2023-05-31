@@ -143,7 +143,7 @@ void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
     new fieldDataEntry
     (
         "internalField",
-        procPatchFDEPtrs[0]->compoundToken(),
+        procPatchFDEPtrs[0]->compoundTokenName(),
         consolidatedData_.data(),
         localTotalSize*sizeof(scalar),
         localTotalSize/procPatchFDEPtrs[0]->nCmpts()
@@ -177,7 +177,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
 
     // Field data in the coherent format holding internal and processor patch
     // fields
-    scalarList coherentFieldData;
+    scalarList coherentData;
 
     // Fill the dictionary with the stream
     dict_.read(*this);
@@ -195,9 +195,10 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
         {
             // Resize the compoundToken according to the mesh of the proc and
             // read the corresponding slice of the data.
-
             token::compound& compToken = currToken.compoundToken();
+            compToken.resize(mesh.nInternalFaces());
 
+            // Store the data pointer in a UList for convenience
             internalData = UList<scalar>
             (
                 reinterpret_cast<scalar*>(compToken.data()),
@@ -216,13 +217,13 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             const label nElems = gi.localSize();
             const label nCmpts = compToken.nComponents();
 
-            coherentFieldData.resize(localSize);
+            coherentData.resize(localSize);
 
             adiosReadPrimitives
             (
                 "fields",
                 id,
-                reinterpret_cast<scalar*>(coherentFieldData.data()),
+                reinterpret_cast<scalar*>(coherentData.data()),
                 nCmpts*elemOffset,
                 nCmpts*nElems
             );
@@ -249,7 +250,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
                         dictionary dict;
                         dict.add("type", "processor");
                         dict.add("value", is.xfer());
-                        bfDict.add(patchName, dict.xfer());
+                        bfDict.add(patchName, dict);
                     }
                 }
 
@@ -259,39 +260,50 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     }
 
 
-    // Create dictionary entries with the correctly sized compound tokens
+    // Create dictionary entries for the processor patch fields with the
+    // correctly sized compound tokens
 
     const label nAllPatches = mesh.boundaryMesh().size();
-    const label nProcPatches = sliceableMesh_.procPatches().size();
-    const label nNonProcPatches = nAllPatches - nProcPatches;
 
-    List<UList<scalar> > patchData(nProcPatches);
+    List<UList<scalar> > procPatchData(nAllPatches);
+    const polyBoundaryMesh& bm = sliceableMesh_.mesh().boundaryMesh();
+    label nProcPatches = 0;
 
-    forAll(sliceableMesh_.procPatches(), i)
+    forAll(bm, patchI)
     {
-        const word& patchName = sliceableMesh_.procPatches()[i].name();
-        const label patchSize = sliceableMesh_.procPatches()[i].size();
+        const polyPatch& patch = bm[patchI];
 
-        tokenList entryTokens(3);
-        entryTokens[0] = word("nonuniform");
-        entryTokens[1] = patchSize;
+        if (isA<processorPolyPatch>(patch))
+        {
+            const label patchSize = patch.size();
 
-        // Create a compound token for the patch, resize and store in a list
-        autoPtr<token::compound> ctPtr =
-            token::compound::New(fieldTypeName, *this, patchSize);
+            tokenList entryTokens(2);
+            entryTokens[0] = word("nonuniform");
 
-        // Store the data pointer for the later mapping
-        patchData[i] =
-            UList<scalar>(reinterpret_cast<scalar*>(ctPtr().data()), patchSize);
+            // Create a compound token for the patch, resize and store in a list
+            autoPtr<token::compound> ctPtr =
+                token::compound::New("List<" + fieldTypeName + ">", patchSize);
 
-        // autoPtr is invalid after calling ptr()
-        entryTokens[2] = ctPtr.ptr();
+            // Store the data pointer for the later mapping
+            procPatchData[nProcPatches++] =
+                UList<scalar>(reinterpret_cast<scalar*>(ctPtr().data()), patchSize);
 
-        dictionary dict;
-        dict.add("type", "processor");
-        dict.add("value", entryTokens.xfer());
-        bfDict.add(patchName, dict.xfer());
+            // autoPtr is invalid after calling ptr()
+            entryTokens[1] = ctPtr.ptr();
+            dictionary dict;
+            dict.add("type", "processor");
+            // Xfer needed here, calls the corresponding primitiveEntry
+            // constructor
+            dict.add("value", entryTokens.xfer());
+            // No Xfer implemented for adding dictionary but copying is
+            // accomplished by cloning the pointers of the hash table and
+            // IDLList
+            bfDict.add(patch.name(), dict);
+        }
     }
+
+    procPatchData.resize(nProcPatches);
+    const label nNonProcPatches = nAllPatches - nProcPatches;
 
 
     // Map from the coherent format to the internal and processor patch fields
@@ -308,20 +320,20 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
 
     if (pf.empty())
     {
-        internalData = coherentFieldData;
+        internalData = coherentData;
     }
     else
     {
-        forAll(coherentFieldData, i)
+        forAll(coherentData, i)
         {
             if (i == pf[pfI])  // Processor field
             {
-                label patchI = pfpi[pfI++] - nNonProcPatches - 1;
-                coherentFieldData[i] = patchData[patchI][patchFaceI[patchI]++];
+                const label patchI = pfpi[pfI++] - nNonProcPatches;
+                procPatchData[patchI][patchFaceI[patchI]++] = coherentData[i];
             }
             else  // Internal field
             {
-                coherentFieldData[i] = internalData[internalFaceI++];
+                internalData[internalFaceI++] = coherentData[i];
             }
         }
     }

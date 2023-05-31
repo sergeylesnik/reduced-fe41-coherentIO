@@ -77,6 +77,9 @@ public:
 
         fieldTag();
 
+        fieldTag(uniformity, const scalarList&);
+
+        fieldTag(const fieldTag&);
 
     // Member functions
 
@@ -85,7 +88,11 @@ public:
             //- Binary operator to be used by reduce function for detecting
             //  global uniformity
             static List<fieldTag>
-            globalUniform(const List<fieldTag>& x, const List<fieldTag>& y);
+            uniformityCompareOp
+            (
+                const List<fieldTag>& x,
+                const List<fieldTag>& y
+            );
 
         // Access
 
@@ -99,12 +106,12 @@ public:
                 return firstElement_;
             }
 
-            inline uniformity getUniformity() const
+            inline uniformity uniformityState() const
             {
                 return uniformity_;
             }
 
-            inline uniformity& getUniformity()
+            inline uniformity& uniformityState()
             {
                 return uniformity_;
             }
@@ -113,6 +120,7 @@ public:
 
             bool operator==(const fieldTag&) const;
             bool operator!=(const fieldTag&) const;
+            void operator=(const fieldTag&);
 };
 
 

@@ -57,8 +57,8 @@ class fieldDataEntry
         //- Entry name
         fileName name_;
 
-        //- Compound token associated with the data, i.e. List<...>
-        const token compoundToken_;
+        //- Name of the compound token associated with the data, i.e. List<...>
+        const word compoundTokenName_;
 
         //- Pointer to the data
         const scalar* data_;
@@ -69,19 +69,24 @@ class fieldDataEntry
         //- Number of elements in the data list
         const label nElems_;
 
-        //- Number of components in each element
-        const label nCmpts_;
-
-        //- Uniformity property
-        fieldTag::uniformity uniformity_;
+        //- Number of components in each element. It is defined even if the
+        //  number of elements is zero.
+        label nCmpts_;
 
         //- Number of elements summed over all ranks
         label nGlobalElems_;
+
+        //- Field tag needed for global communication
+        fieldTag tag_;
 
     // Private member functions
 
         //- Determine uniformity of the data
         fieldTag::uniformity determineUniformity() const;
+
+        //- Return first element of the data list. If size 0, return empty
+        //  element.
+        scalarList firstElement() const;
 
 public:
 
@@ -90,7 +95,7 @@ public:
         fieldDataEntry
         (
             const keyType& keyword,
-            const token& compoundToken,
+            const word& compoundTokenName,
             const scalar* data,
             std::streamsize byteSize,
             label nElems
@@ -152,9 +157,9 @@ public:
         // Access
 
             //- Return number of bytes
-            inline token compoundToken() const
+            inline const word& compoundTokenName() const
             {
-                return compoundToken_;
+                return compoundTokenName_;
             }
 
             //- Return number of bytes
@@ -190,7 +195,7 @@ public:
 
             inline bool uniform() const
             {
-                if (uniformity_ == fieldTag::UNIFORM)
+                if (tag_.uniformityState() == fieldTag::UNIFORM)
                 {
                     return true;
                 }
@@ -198,25 +203,32 @@ public:
                 return false;
             }
 
-        //- Return first element of the data list
-        scalarList firstElement() const;
+            //- Set number of elements summed over all ranks
+            inline label& nGlobalElems()
+            {
+                return nGlobalElems_;
+            }
+
+            inline const fieldTag& tag() const
+            {
+                return tag_;
+            }
+
+            inline fieldTag& tag()
+            {
+                return tag_;
+            }
 
         //- Return uniformity of the data list
-        inline fieldTag::uniformity getUniformity() const
+        inline fieldTag::uniformity uniformityState() const
         {
-            return uniformity_;
+            return tag_.uniformityState();
         }
 
         //- Return access to the uniformity of the data list
-        inline fieldTag::uniformity& getUniformity()
+        inline fieldTag::uniformity& uniformityState()
         {
-            return uniformity_;
-        }
-
-        //- Set number of elements summed over all ranks
-        inline void nGlobalElems(const label nElem)
-        {
-            nGlobalElems_ = nElem;
+            return tag_.uniformityState();
         }
 };
 

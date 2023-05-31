@@ -78,7 +78,6 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
 Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
 (
     const word& compoundType,
-    Istream& is,
     label size
 )
 {
@@ -87,7 +86,7 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
 
     if (cstrIter == labelConstructorTablePtr_->end())
     {
-        FatalIOErrorInFunction(is)
+        FatalErrorInFunction
             << "Unknown compound type " << compoundType << nl << nl
             << "Valid compound types:" << endl
             << IstreamConstructorTablePtr_->sortedToc()

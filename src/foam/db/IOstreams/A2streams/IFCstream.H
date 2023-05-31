@@ -154,8 +154,10 @@ protected:
 
 public:
 
-    // Declare name of the class and its debug switch
-    ClassName("IFCstream");
+    // Static data members
+
+        //- Runtime type information
+        TypeName("IFCstream");
 
 
     // Constructors
