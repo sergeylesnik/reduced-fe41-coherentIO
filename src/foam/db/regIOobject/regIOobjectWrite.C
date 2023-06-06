@@ -73,30 +73,19 @@ bool Foam::regIOobject::writeObject
         const_cast<regIOobject&>(*this).instance() = time().timeName();
     }
 
-    Foam::fileName local_path;
-    Foam::fileName local_objectPath;
-    if (fmt != IOstream::PARALLEL)
-    {
-        local_path = path();
-        mkDir(path());
-    }
-    else if (fmt == IOstream::PARALLEL)
-    {
-        local_path = rootPath()/time().globalCaseName()/instance()/db().dbDir()/local();
-    }
-    local_objectPath = local_path/name();
+    mkDir(path());
 
     if (OFstream::debug)
     {
         Info<< "regIOobject::write() : "
-            << "writing file " << local_objectPath << " ..." << nl;
+            << "writing file " << objectPath() << " ..." << nl;
     }
 
     // Try opening an OFstream for object.
     // May open different streams in the derived classes.
     bool osGood = writeToStream
     (
-        local_objectPath,
+        objectPath(),
         ios_base::out|ios_base::trunc,
         fmt,
         ver,

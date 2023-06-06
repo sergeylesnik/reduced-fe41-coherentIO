@@ -41,13 +41,22 @@ void Foam::adiosStream::open( const Foam::string& type, const Foam::string& path
     v_open();
 }
 
-void Foam::adiosStream::close() {
-    if (enginePtr_->OpenMode() == adios2::Mode::Read
-        ||
-        enginePtr_->OpenMode() == adios2::Mode::ReadRandomAccess) {
-        enginePtr_->PerformGets();
-    } else {
-        enginePtr_->PerformPuts();
+void Foam::adiosStream::close()
+{
+    if (enginePtr_)
+    {
+        if
+        (
+            enginePtr_->OpenMode() == adios2::Mode::Read
+         || enginePtr_->OpenMode() == adios2::Mode::ReadRandomAccess
+        )
+        {
+            enginePtr_->PerformGets();
+        }
+        else
+        {
+            enginePtr_->PerformPuts();
+        }
     }
 }
 

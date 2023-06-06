@@ -73,9 +73,6 @@ class IFCstreamAllocator
         //  master
         string bufStr_;
 
-        //- Pointer to the class holding IO engine
-        std::unique_ptr<adiosStream> adiosStreamPtr_;
-
         //- Compression, e.g. ".gz"
         IOstream::compressionType compression_;
 
@@ -118,6 +115,9 @@ class IFCstream
 
         //- Field dictionary populated by stream
         dictionary dict_;
+
+        //- Pointer to the IO engine
+        std::unique_ptr<adiosStream> adiosStreamPtr_;
 
     // Private Member Functions
 

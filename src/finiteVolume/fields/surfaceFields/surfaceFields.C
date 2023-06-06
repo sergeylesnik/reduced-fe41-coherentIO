@@ -95,9 +95,20 @@ void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
     // processorFacesPatchIds
     const labelList& pfpi = sliceableMesh_.boundryIDsFromInternalFaces();
 
-    // List<UList<scalar> > patchData(nProcPatches);
+
+
+    // const fieldDataEntry* internalFieldDataEntryPtr =
+    //     dynamic_cast<const fieldDataEntry*>
+    //     (
+    //         dict_.lookupEntryPtr("internalField", false, false)
+    //     );
+    // const UList<scalar> internalData
+    // (
+    //     internalFieldDataEntryPtr->data(),
+    //     sliceableMesh_.mesh().nInternalFaces()
+    // );
+    // List<const UList<scalar> > patchData(nProcPatches);
     // labelList patchFaceI(nProcPatches, 0);
-    // UList<scalar> internalData(SIZE);
     // label internalFaceI = 0;
     // if (pf.empty())
     // {
@@ -109,8 +120,8 @@ void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
     //     {
     //         if (i == pf[j])  // Processor field
     //         {
-    //             label id = pfpi[j] - nNonProcPatches;
-    //             consolidatedData_[i] = patchData[patchFaceI[id]++];
+    //             const label patchI = pfpi[j] - nNonProcPatches;
+    //             consolidatedData_[i] = patchData[patchFaceI[patchI]++];
     //         }
     //         else  // Internal field
     //         {
@@ -139,18 +150,18 @@ void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
     }
 
     // Create new entry for the consolidated internalField
-    fieldDataEntry* newInternal =
+    fieldDataEntry* coherentInternal =
     new fieldDataEntry
     (
         "internalField",
         procPatchFDEPtrs[0]->compoundTokenName(),
         consolidatedData_.data(),
         localTotalSize*sizeof(scalar),
-        localTotalSize/procPatchFDEPtrs[0]->nCmpts()
+        localTotalSize/procPatchFDEPtrs[0]->nComponents()
     );
 
     // Set the new internalField in the dictionary replacing the old one
-    dict_.set(newInternal);
+    dict_.set(coherentInternal);
 
     // Remove processor patches from the dictionary
     forAll(sliceableMesh_.procPatches(), i)
@@ -337,6 +348,9 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             }
         }
     }
+
+    // Closing the IO engine ensures that the data is read from disk
+    adiosStreamPtr_->close();
 
     return dict_;
 }

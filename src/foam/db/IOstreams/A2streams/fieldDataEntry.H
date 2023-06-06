@@ -175,7 +175,7 @@ public:
             }
 
             //- Return number of the field components
-            inline label nCmpts() const
+            inline label nComponents() const
             {
                 return nCmpts_;
             }

@@ -50,21 +50,8 @@ Foam::IFCstreamAllocator::IFCstreamAllocator
 :
     ifPtr_(nullptr),
     bufStr_(),
-    adiosStreamPtr_(nullptr),
     compression_(IOstream::UNCOMPRESSED)
 {
-    // ToDoIO Get rid of "processorXX" in path
-    fileName& globalId = const_cast<fileName&>(pathname);
-    const wordList cmpts = globalId.components();
-    globalId = "";
-    forAll(cmpts, i)
-    {
-        if (cmpts[i].find("processor") == std::string::npos)
-        {
-            globalId = globalId/cmpts[i];
-        }
-    }
-
     if (pathname.empty())
     {
         if (IFCstream::debug)
@@ -81,11 +68,6 @@ Foam::IFCstreamAllocator::IFCstreamAllocator
     }
 
     ifPtr_ = new std::istringstream();
-
-    if ( !adiosStreamPtr_ )
-    {
-        allocateAdios();
-    }
 
     // The metadata is read only on master and then broadcasted to slaves.
     if (Pstream::master())
@@ -132,20 +114,12 @@ Foam::IFCstreamAllocator::IFCstreamAllocator
 
     // Assign the buffer of string bufStr_ to the buffer of the stream
     ifPtr_->rdbuf()->pubsetbuf(&bufStr_[0], bufStr_.size());
-
-
 }
 
 
 Foam::IFCstreamAllocator::~IFCstreamAllocator()
 {
     delete ifPtr_;
-}
-
-
-void Foam::IFCstreamAllocator::allocateAdios()
-{
-    adiosStreamPtr_ = adiosReading{}.createStream();
 }
 
 
@@ -246,13 +220,15 @@ void Foam::IFCstream::readCompoundTokenData
                 }
             }
 
-            adiosReadPrimitives
+            // ToDoIO Provide a better interface from adiosStream for reading
+            // of fields.
+            adiosStreamPtr_->open("fields", pathname_.path());
+            adiosStreamPtr_->transfer
             (
-                "fields",
                 id,
                 reinterpret_cast<scalar*>(compToken.data()),
-                nCmpts*elemOffset,
-                nCmpts*nElems
+                List<label>({nCmpts*elemOffset}),
+                List<label>({nCmpts*nElems})
             );
         }
     }
@@ -321,7 +297,8 @@ Foam::IFCstream::IFCstream
             registry.lookupObject<sliceMesh>(sliceMesh::typeName)
         )
     ),
-    tmpIssPtr_(nullptr)
+    tmpIssPtr_(nullptr),
+    adiosStreamPtr_(adiosReading{}.createStream())
 {
     // ToDoIO Get rid of "processorXX" in path
     const wordList cmpts = pathname_.components();

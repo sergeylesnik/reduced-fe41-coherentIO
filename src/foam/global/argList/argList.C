@@ -597,6 +597,8 @@ void Foam::argList::parse
     // If this actually is a parallel run
     if (parRunControl_.parRun())
     {
+        bool isCoherentFormat = false;
+
         // For the master
         if (Pstream::master())
         {
@@ -679,6 +681,23 @@ void Foam::argList::parse
             }
 
 
+            // Check the IO write format
+            source = rootPath_/globalCase_/"system/controlDict";
+            IFstream controlDictStream(source);
+
+            if (!controlDictStream.good())
+            {
+                FatalError
+                    << "Cannot read "
+                    << controlDictStream.name()
+                    << exit(FatalError);
+            }
+
+            const dictionary controlDict(controlDictStream);
+            const word writeFormat(controlDict.lookup("writeFormat"));
+            isCoherentFormat =
+                (IOstream::formatEnum(writeFormat) == IOstream::PARALLEL);
+
             // Distributed data
             if (roots.size())
             {
@@ -709,7 +728,7 @@ void Foam::argList::parse
                     options_.set("case", roots[slave-1]/globalCase_);
 
                     OPstream toSlave(Pstream::scheduled, slave);
-                    toSlave << args_ << options_;
+                    toSlave << args_ << options_ << isCoherentFormat;
                 }
                 options_.erase("case");
 
@@ -756,7 +775,7 @@ void Foam::argList::parse
                 )
                 {
                     OPstream toSlave(Pstream::scheduled, slave);
-                    toSlave << args_ << options_;
+                    toSlave << args_ << options_ << isCoherentFormat;
                 }
             }
         }
@@ -764,14 +783,32 @@ void Foam::argList::parse
         {
             // Collect the master's argument list
             IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
-            fromMaster >> args_ >> options_;
+            fromMaster >> args_ >> options_ >> isCoherentFormat;
 
             // Establish rootPath_/globalCase_/case_ for slave
             getRootCase();
         }
 
         nProcs = Pstream::nProcs();
-        case_ = globalCase_/(word("processor") + name(Pstream::myProcNo()));
+
+        if (isCoherentFormat)
+        {
+            case_ = globalCase_;
+            if (Pstream::master() && isDir(rootPath_/globalCase_/"processor0"))
+            {
+                WarningInFunction
+                    << "The I/O is set to the coherent format (writeFormat in"
+                    << " controlDict) but 'processor0' directory is present"
+                    << " indicating usage of a conventional I/O format."
+                    << " Note that the coherent format does not use"
+                    << " 'processor' directories."
+                    << nl << endl;
+            }
+        }
+        else
+        {
+            case_ = globalCase_/(word("processor") + name(Pstream::myProcNo()));
+        }
     }
     else
     {

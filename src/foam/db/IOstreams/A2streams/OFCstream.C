@@ -107,7 +107,7 @@ void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalGeometricField()
         if (!fde.uniform())
         {
             const label nElems = fde.nElems();
-            const label nCmpts = fde.nCmpts();
+            const label nCmpts = fde.nComponents();
 
             const globalIndex bgi(nElems);
             const label nGlobalElems = bgi.size();
