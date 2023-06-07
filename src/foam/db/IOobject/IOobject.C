@@ -26,6 +26,7 @@ License
 #include "IOobject.H"
 #include "foamTime.H"
 #include "IFstream.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -511,48 +512,26 @@ bool Foam::IOobject::headerOk()
 
 bool Foam::IOobject::headerOkPar()
 {
-    bool ok = true;
+    const word writeFormat(time().controlDict().lookup("writeFormat"));
+    const bool isCoherentFormat =
+        (IOstream::formatEnum(writeFormat) == IOstream::PARALLEL);
 
-    // Get the file name relative to the root directory
-    fileName objPath = objectPath().caseName("");
-
-    Istream* isPtr = objectStreamPar(objPath);
-
-    // If the stream has failed fall back to standard IO
-    if (!isPtr)
+    if (isCoherentFormat)
     {
-        if (objectRegistry::debug)
+        bool ok;
+        if (Pstream::master())
         {
-            Info
-                << "IOobject::headerOkPar() : "
-                << "data " << objectPath() << " could not be found via ADIOS;"
-                << " Trying via standard input"
-                << endl;
+            ok = headerOk();
         }
+        Pstream::scatter(ok);
 
-        ok = headerOk();
+        return ok;
     }
     else
     {
-        // Try reading header
-        if (!readHeader(*isPtr))
-        {
-            if (objectRegistry::debug)
-            {
-                IOWarningIn("IOobject::headerOkPar()", (*isPtr))
-                    << "failed to read header of file " << objectPath()
-                    << endl;
-            }
-
-            ok = false;
-        }
+        return headerOk();
     }
-
-    delete isPtr;
-
-    return ok;
 }
-
 
 
 void Foam::IOobject::setBad(const string& s)
