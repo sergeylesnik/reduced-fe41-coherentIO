@@ -510,7 +510,11 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         WarningIn("polyMesh(const IOobject&)")
             << "no cells in mesh" << endl;
     }
-    checkMesh( true );
+
+    if (debug)
+    {
+        checkMesh( true );
+    }
 }
 
 
@@ -1620,18 +1624,16 @@ bool Foam::polyMesh::write() const
                                   linearizedAdiosFaces.cdata() );
 
         // Generate ownerStarts
-        // - BUG: Taking care of "corner-cases" if cell is not owning any faces.
+        // - Takes into account if cell is not owning any faces.
         labelList ownerStarts( cells().size() + 1, 0 );
-        label ownerStart = 0;
-        forAll( adiosOwner, i ) {
-            while (ownerStart != adiosOwner[i])
-            {
-                ++ownerStart;
-                ownerStarts[ownerStart] = i;
-            }
+        for (auto ownerId : adiosOwner )
+        {
+            ownerStarts[ownerId+1] += 1;
         }
-        ++ownerStart;
-        ownerStarts[ownerStart] = adiosOwner.size();
+        for ( label ownerId = 1; ownerId < ownerStarts.size(); ++ownerId )
+        {
+            ownerStarts[ownerId] += ownerStarts[ownerId-1];
+        }
         adiosStreamPtr->transfer( "ownerStarts",
                                   { ownerStarts.size() },
                                   { 0 },
