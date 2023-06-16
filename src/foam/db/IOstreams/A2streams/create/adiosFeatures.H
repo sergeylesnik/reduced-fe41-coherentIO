@@ -4,10 +4,11 @@
 
 #include <memory>
 
-namespace adios2 {
-    class ADIOS;
-    class IO;
-    class Engine;
+namespace adios2
+{
+class ADIOS;
+class IO;
+class Engine;
 }
 
 namespace Foam
@@ -16,14 +17,15 @@ namespace Foam
 // Forward declaration
 class fileName;
 
-struct adiosFeatures {
-
+struct adiosFeatures
+{
     virtual ~adiosFeatures() = default;
 
-    virtual std::shared_ptr<adios2::IO> createIO( adios2::ADIOS* const ) = 0;
+    virtual std::shared_ptr<adios2::IO>
+    createIO(adios2::ADIOS* const) = 0;
 
-    virtual std::shared_ptr<adios2::Engine> createEngine( adios2::IO* const, const fileName& ) = 0;
-
+    virtual std::shared_ptr<adios2::Engine>
+    createEngine(adios2::IO* const, const fileName&) = 0;
 };
 
 }

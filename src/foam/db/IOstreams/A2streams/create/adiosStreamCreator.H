@@ -6,14 +6,14 @@
 namespace Foam
 {
 
+// Forward declaration
 class adiosStream;
 
-struct adiosStreamCreator {
-
+struct adiosStreamCreator
+{
     virtual ~adiosStreamCreator() = default;
 
     virtual std::unique_ptr<adiosStream> createStream() = 0;
-
 };
 
 }

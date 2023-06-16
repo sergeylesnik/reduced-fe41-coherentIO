@@ -41,6 +41,7 @@ namespace Foam
 
 class string;
 
+
 void adiosReadPrimitives
 (
     const string type,
@@ -67,72 +68,110 @@ void adiosReadPrimitives
     const List<label>& start = {},
     const List<label>& count = {}
 );
-
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template< typename T, std::enable_if_t< !Foam::is_vectorspace<T>::value, void >* = nullptr >
-void Foam::adiosReadPrimitives( const Foam::string type, 
-                               const Foam::string name,
-                               T* buf, 
-                               const Foam::List<Foam::label>& start = {},
-                               const Foam::List<Foam::label>& count = {} ) {
+template
+<
+    typename T,
+    std::enable_if_t<!Foam::is_vectorspace<T>::value, void>* = nullptr
+>
+void Foam::adiosReadPrimitives
+(
+    const Foam::string type,
+    const Foam::string name,
+    T* buf,
+    const Foam::List<Foam::label>& start = {},
+    const Foam::List<Foam::label>& count = {}
+)
+{
     std::cout << "adiosReadPrimitives not implemented for this type.\n";
-    std::cout << typeid( buf ).name() << "\n";
+    std::cout << typeid(buf).name() << "\n";
     std::cout << name << "\n";
 }
 
 
-template< typename T, std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr >
-void Foam::adiosReadPrimitives( const Foam::string type,
-                                const Foam::string name,
-                                T* buf,
-                                const Foam::List<Foam::label>& start = {},
-                                const Foam::List<Foam::label>& count = {} ) {
+template
+<
+    typename T,
+    std::enable_if_t<Foam::is_vectorspace<T>::value, void>* = nullptr
+>
+void Foam::adiosReadPrimitives
+(
+    const Foam::string type,
+    const Foam::string name,
+    T* buf,
+    const Foam::List<Foam::label>& start = {},
+    const Foam::List<Foam::label>& count = {}
+)
+{
     auto startList = start;
     auto countList = count;
-    if ( start.size() > 0 && count.size() > 0 ) {
-        startList = Foam::List<Foam::label>( { start[0], 0 } );
-        countList = Foam::List<Foam::label>( { count[0], buf[0].size() } );
+    if (start.size()>0 && count.size()>0)
+    {
+        startList = Foam::List<Foam::label>({start[0], 0});
+        countList = Foam::List<Foam::label>({count[0], buf[0].size()});
     }
-    Foam::adiosReadPrimitives( type, name, reinterpret_cast<scalar*>( buf ), startList, countList );
+    Foam::adiosReadPrimitives
+    (
+        type,
+        name,
+        reinterpret_cast<scalar*>( buf ),
+        startList,
+        countList
+    );
 }
 
 
 // if T is arithmetic
-template< typename T,
-          typename Integral,
-          std::enable_if_t< std::is_arithmetic<T>::value, void >* = nullptr,
-          std::enable_if_t< std::is_integral<Integral>::value, void >* = nullptr >
-void Foam::adiosReadPrimitives( const Foam::string type,
-                                const Foam::string name,
-                                T* buf,
-                                Integral start = -1,
-                                Integral count = -1 ) {
+template
+<
+    typename T,
+    typename Integral,
+    std::enable_if_t<std::is_arithmetic<T>::value, void>* = nullptr,
+    std::enable_if_t<std::is_integral<Integral>::value, void>* = nullptr
+>
+void Foam::adiosReadPrimitives
+(
+    const Foam::string type,
+    const Foam::string name,
+    T* buf,
+    Integral start = -1,
+    Integral count = -1
+)
+{
     Foam::List<Integral> startList{};
     Foam::List<Integral> countList{};
-    if ( start > -1 && count > -1 ) {
-        startList = Foam::List<Foam::label>( { start } );
-        countList = Foam::List<Foam::label>( { count } );
+    if (start>-1 && count>-1)
+    {
+        startList = Foam::List<Foam::label>({start});
+        countList = Foam::List<Foam::label>({count});
     }
-    Foam::adiosReadPrimitives( type, name, buf, startList, countList );
+    Foam::adiosReadPrimitives(type, name, buf, startList, countList);
 }
 
 
 // if T is vector space
-template< typename T,
-          typename Integral,
-          std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr,
-          std::enable_if_t< std::is_integral<Integral>::value, void >* = nullptr >
-void Foam::adiosReadPrimitives( const Foam::string type,
-                                const Foam::string name,
-                                T* buf,
-                                Integral start = -1,
-                                Integral count = -1 ) {
-    Foam::List<Integral> startList( { start } );
-    Foam::List<Integral> countList( { count } );
-    Foam::adiosReadPrimitives( type, name, buf, startList, countList );
+template
+<
+    typename T,
+    typename Integral,
+    std::enable_if_t<Foam::is_vectorspace<T>::value, void>* = nullptr,
+    std::enable_if_t<std::is_integral<Integral>::value, void>* = nullptr
+>
+void Foam::adiosReadPrimitives
+(
+    const Foam::string type,
+    const Foam::string name,
+    T* buf,
+    Integral start = -1,
+    Integral count = -1
+)
+{
+    Foam::List<Integral> startList({start});
+    Foam::List<Integral> countList({count});
+    Foam::adiosReadPrimitives(type, name, buf, startList, countList);
 }
 
 

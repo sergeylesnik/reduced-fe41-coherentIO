@@ -4,15 +4,17 @@
 
 #include "adiosStreamCreator.H"
 
-namespace Foam 
+namespace Foam
 {
 
+// Forward declaration
 class adiosStream;
 
-struct adiosWriting : public adiosStreamCreator {
-
+struct adiosWriting
+:
+    public adiosStreamCreator
+{
     virtual std::unique_ptr<adiosStream> createStream() override;
-
 };
 
 }

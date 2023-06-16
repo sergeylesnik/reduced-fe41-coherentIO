@@ -7,12 +7,15 @@
 namespace Foam
 {
 
-struct adiosInputFeatures : public adiosFeatures {
+struct adiosInputFeatures
+:
+    public adiosFeatures
+{
+    virtual std::shared_ptr<adios2::IO>
+    createIO( adios2::ADIOS* const ) override;
 
-    virtual std::shared_ptr<adios2::IO> createIO( adios2::ADIOS* const ) override; 
-
-    virtual std::shared_ptr<adios2::Engine> createEngine( adios2::IO* const, const Foam::fileName& ) override;
-
+    virtual std::shared_ptr<adios2::Engine>
+    createEngine( adios2::IO* const, const Foam::fileName& ) override;
 };
 
 }

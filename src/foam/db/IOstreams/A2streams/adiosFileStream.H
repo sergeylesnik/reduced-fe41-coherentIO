@@ -6,19 +6,22 @@
 namespace Foam
 {
 
-// Forward declaration
+// Forward declarations
 class string;
 class adiosFeatures;
 
-class adiosFileStream : public adiosStream {
+class adiosFileStream
+:
+    public adiosStream
+{
 
-    std::unique_ptr<adiosFeatures> adiosFile_{ nullptr };
+    std::unique_ptr<adiosFeatures> adiosFile_{nullptr};
 
     virtual void v_open() final;
 
 public:
 
-    explicit adiosFileStream( std::unique_ptr<adiosFeatures>& );
+    explicit adiosFileStream(std::unique_ptr<adiosFeatures>&);
 
 };
 

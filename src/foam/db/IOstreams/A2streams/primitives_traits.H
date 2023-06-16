@@ -44,21 +44,31 @@ struct is_vectorspace : std::false_type {};
 
 // partial specialization, maybe SFINAE'd away
 template<typename T>
-struct is_vectorspace< T,
-                       std::void_t
-                           < decltype( std::declval<T>().size() )
-                           , decltype( std::declval<T>().component( std::declval<direction>() ) )
-                           , decltype( std::declval<T>().replace( 
-                                         std::declval<direction>(),
-                                         std::declval<T>()[ std::declval<direction>() ]
-                                     )
-                                   )
-                           , decltype( std::declval<T>()[ std::declval<direction>() ] )
-                           , decltype( std::declval<T>().operator+=( std::declval<T>() ) )
-                           , decltype( std::declval<T>().operator-=( std::declval<T>() ) )
-                           , decltype( std::declval<T>().operator*=( std::declval<scalar>() ) )
-                           , decltype( std::declval<T>().operator/=( std::declval<scalar>() ) ) >
-                     > : std::true_type {};
+struct is_vectorspace
+<
+    T,
+    std::void_t
+    <
+        decltype(std::declval<T>().size()),
+        decltype
+        (
+            std::declval<T>().component(std::declval<direction>())
+        ),
+        decltype
+        (
+            std::declval<T>().replace
+            (
+                std::declval<direction>(),
+                std::declval<T>()[std::declval<direction>()]
+            )
+        ),
+        decltype(std::declval<T>()[std::declval<direction>()]),
+        decltype(std::declval<T>().operator+=(std::declval<T>())),
+        decltype(std::declval<T>().operator-=(std::declval<T>())),
+        decltype(std::declval<T>().operator*=(std::declval<scalar>())),
+        decltype(std::declval<T>().operator/=(std::declval<scalar>()))
+    >
+> : std::true_type {};
 
 } // End namespace Foam
 

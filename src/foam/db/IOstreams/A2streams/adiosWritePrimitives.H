@@ -36,6 +36,7 @@ License
 namespace Foam
 {
 
+// Forward declarations
 class string;
 template<typename T> class List;
 
@@ -83,51 +84,84 @@ void adiosWritePrimitives
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template< typename T, std::enable_if_t< !Foam::is_vectorspace<T>::value, void >* = nullptr >
-void Foam::adiosWritePrimitives( const Foam::string type,
-                                 const Foam::string name,
-                                 const Foam::label count,
-                                 const T* buf ) {
+template
+<
+    typename T,
+    std::enable_if_t<!Foam::is_vectorspace<T>::value, void>* = nullptr
+>
+void Foam::adiosWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string name,
+    const Foam::label count,
+    const T* buf
+)
+{
     std::cout << "adiosWritePrimitives not implemented for this type.\n";
-    std::cout << typeid( buf ).name() << "\n";
+    std::cout << typeid(buf).name() << "\n";
     std::cout << name << "\n";
 }
 
+
 //- Write local array
-template< typename T, std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr >
-void Foam::adiosWritePrimitives( const Foam::string type,
-                                 const Foam::string name,
-                                 const Foam::label count,
-                                 const T* buf ) {
-    Foam::List<Foam::label> shapeList( { count, buf[0].size() } );
-    Foam::List<Foam::label> startList( { 0, 0 } );
-    Foam::List<Foam::label> countList{ shapeList };
-    adiosWritePrimitives( type,
-                          name,
-                          shapeList,
-                          startList,
-                          countList,
-                          reinterpret_cast<const Foam::scalar*>( buf ) );
+template
+<
+    typename T,
+    std::enable_if_t<Foam::is_vectorspace<T>::value, void>* = nullptr
+>
+void Foam::adiosWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string name,
+    const Foam::label count,
+    const T* buf
+)
+{
+    Foam::List<Foam::label> shapeList({count, buf[0].size()});
+    Foam::List<Foam::label> startList({0, 0});
+    Foam::List<Foam::label> countList{shapeList};
+    adiosWritePrimitives
+    (
+        type,
+        name,
+        shapeList,
+        startList,
+        countList,
+        reinterpret_cast<const Foam::scalar*>( buf )
+    );
 }
 
+
 //- Write global array
-template< typename T, std::enable_if_t< Foam::is_vectorspace<T>::value, void >* = nullptr >
-void Foam::adiosWritePrimitives( const Foam::string type,
-                                 const Foam::string name,
-                                 const Foam::label shape,
-                                 const Foam::label start,
-                                 const Foam::label count,
-                                 const T* buf ) {
-    Foam::List<Foam::label> shapeList( { shape, buf[0].size() } );
-    Foam::List<Foam::label> startList( { start, 0 } );
-    Foam::List<Foam::label> countList( { count, buf[0].size() } );
-    adiosWritePrimitives( type,
-                          name,
-                          shapeList,
-                          startList,
-                          countList,
-                          reinterpret_cast<const Foam::scalar*>( buf ) );
+template
+<
+    typename T,
+    std::enable_if_t<Foam::is_vectorspace<T>::value, void>* = nullptr
+>
+void Foam::adiosWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string name,
+    const Foam::label shape,
+    const Foam::label start,
+    const Foam::label count,
+    const T* buf
+)
+{
+    Foam::List<Foam::label> shapeList({shape, buf[0].size()});
+    Foam::List<Foam::label> startList({start, 0});
+    Foam::List<Foam::label> countList({count, buf[0].size()});
+    adiosWritePrimitives
+    (
+        type,
+        name,
+        shapeList,
+        startList,
+        countList,
+        reinterpret_cast<const Foam::scalar*>( buf )
+    );
 }
+
 
 #endif
 

@@ -29,24 +29,30 @@ License
 
 #include "foamString.H"
 
-template< typename T >
+
+template<typename T>
 void _implReadPrimitives
 (
     const Foam::string type,
     const Foam::string blockId,
     T* buf,
     const Foam::List<Foam::label>& start,
-    const Foam::List<Foam::label>& count )
+    const Foam::List<Foam::label>& count
+)
 {
     auto adiosStreamPtr = Foam::adiosReading{}.createStream();
-    adiosStreamPtr->open( type );
-    if ( start.size() > 0 && count.size() > 0 ) {
-        adiosStreamPtr->transfer( blockId, buf, start, count );
-    } else {
-        adiosStreamPtr->transfer( blockId, buf );
+    adiosStreamPtr->open(type);
+    if (start.size()>0 && count.size()>0)
+    {
+        adiosStreamPtr->transfer(blockId, buf, start, count);
+    }
+    else
+    {
+        adiosStreamPtr->transfer(blockId, buf);
     }
     adiosStreamPtr->close();
 }
+
 
 void Foam::adiosReadPrimitives
 (
@@ -57,8 +63,9 @@ void Foam::adiosReadPrimitives
     const Foam::List<Foam::label>& count
 )
 {
-    _implReadPrimitives( type, blockId, buf, start, count );
+    _implReadPrimitives(type, blockId, buf, start, count);
 }
+
 
 void Foam::adiosReadPrimitives
 (
@@ -69,8 +76,9 @@ void Foam::adiosReadPrimitives
     const Foam::List<Foam::label>& count
 )
 {
-    _implReadPrimitives( type, blockId, buf, start, count );
+    _implReadPrimitives(type, blockId, buf, start, count);
 }
+
 
 void Foam::adiosReadPrimitives
 (
@@ -81,7 +89,7 @@ void Foam::adiosReadPrimitives
     const Foam::List<Foam::label>& count
 )
 {
-    _implReadPrimitives( type, blockId, buf, start, count );
+    _implReadPrimitives(type, blockId, buf, start, count);
 }
 
 // ************************************************************************* //

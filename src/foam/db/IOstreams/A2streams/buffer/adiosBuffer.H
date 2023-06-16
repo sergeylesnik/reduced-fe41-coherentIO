@@ -14,7 +14,8 @@
 namespace Foam
 {
 
-adios2::Dims toDims( const Foam::labelList& list );
+// Convert Foam::labelList to adios2::Dims
+adios2::Dims toDims(const Foam::labelList& list);
 
 class adiosBuffer
 {
@@ -24,8 +25,7 @@ class adiosBuffer
         const char*,
         const labelList& = {},
         const bool = false
-    )
-    {};
+    );
 
     virtual void v_transfer
     (
@@ -33,8 +33,8 @@ class adiosBuffer
         char*,
         const labelList& = {},
         const bool = false
-    )
-    {};
+    ) {};
+
 
     virtual void v_transfer
     (
@@ -42,8 +42,8 @@ class adiosBuffer
         const label*,
         const labelList& = {},
         const bool = false
-    )
-    {};
+    ) {};
+
 
     virtual void v_transfer
     (
@@ -51,8 +51,8 @@ class adiosBuffer
         label*,
         const labelList& = {},
         const bool = false
-    )
-    {};
+    ) {};
+
 
     virtual void v_transfer
     (
@@ -60,8 +60,8 @@ class adiosBuffer
         const scalar*,
         const labelList& = {},
         const bool = false
-    )
-    {};
+    ) {};
+
 
     virtual void v_transfer
     (
@@ -69,9 +69,7 @@ class adiosBuffer
         scalar*,
         const labelList& = {},
         const bool = false
-    )
-    {};
-
+    ) {};
 
 public:
 
@@ -81,14 +79,15 @@ public:
 
     virtual label size() = 0;
 
+
     // Note: constness is included in with type deduction of DataType
     template<typename DataType>
     void transfer
     (
-        adios2::Engine* engine,
-        DataType* const data,
-        const labelList& mapping = {},
-        const bool masked = false
+    adios2::Engine* engine,
+    DataType* const data,
+    const labelList& mapping = {},
+    const bool masked = false
     )
     {
         if (!engine)
