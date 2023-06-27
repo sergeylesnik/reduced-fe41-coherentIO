@@ -28,15 +28,15 @@ License
 #include "formattingEntry.H"
 
 #include "adiosStream.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// defineTypeNameAndDebug(Foam::OFCstream, 0);
+// defineTypeNameAndDebug(Foam::OFCstreamBase, 0);
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-template<template<class> class PatchField, class GeoMesh>
-void Foam::OFCstream<PatchField, GeoMesh>::gatherFieldDataEntries
+void Foam::OFCstreamBase::gatherFieldDataEntries
 (
     dictionary& dict,
     DynamicList<fieldDataEntry*>& fieldDataEntries
@@ -60,94 +60,26 @@ void Foam::OFCstream<PatchField, GeoMesh>::gatherFieldDataEntries
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
-void Foam::OFCstream<PatchField, GeoMesh>::removeProcPatchesFromDict()
+void Foam::OFCstreamBase::removeProcPatchesFromDict()
 {
+    const polyBoundaryMesh& bm = sliceableMesh_.mesh().boundaryMesh();
     dictionary& bfDict = dict_.subDict("boundaryField");
-    // Temporary fix for the warning "label is not unsigned"
-    // forAll(sliceableMesh_.procPatches(), i)
-    for (auto pp : sliceableMesh_.procPatches())
+
+    forAll(bm, i)
     {
-        // word ppName = sliceableMesh_.procPatches()[i].name();
-        // bfDict.remove(ppName);
-        bfDict.remove(pp.name());
-    }
-}
+        const polyPatch& patch = bm[i];
 
-
-template<template<class> class PatchField, class GeoMesh>
-void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalGeometricField()
-{
-    DynamicList<fieldDataEntry*> fieldDataEntries;
-    gatherFieldDataEntries(dict_, fieldDataEntries);
-
-    const label nFields = fieldDataEntries.size();
-    List<fieldTag> globalUniformity(nFields);
-
-    // Prepare list with field tags for global reduce
-    forAll(fieldDataEntries, i)
-    {
-        globalUniformity[i] = fieldDataEntries[i]->tag();
-    }
-
-    globalUniformity =
-        returnReduce(globalUniformity, fieldTag::uniformityCompareOp);
-
-    forAll(fieldDataEntries, i)
-    {
-        fieldDataEntry& fde = *(fieldDataEntries[i]);
-        fde.tag() = globalUniformity[i];
-
-        // ToDoIO Check whether the fde field size equals the size of the
-        // corresponding mesh entity on each rank. Allreduce this info using
-        // the uniformityCompareOp infrastructure because the field size may
-        // accidentally equal the size of the mesh entity. If it's not equal on
-        // all ranks, do not agglomerate and write to ADIOS with prefixed
-        // processorXX.
-        if (!fde.uniform())
+        if (patch.type() == processorPolyPatch::typeName)
         {
-            const label nElems = fde.nElems();
-            const label nCmpts = fde.nComponents();
-
-            const globalIndex bgi(nElems);
-            const label nGlobalElems = bgi.size();
-            const label elemOffset = bgi.offset(Pstream::myProcNo());
-
-            writeGlobalField
-            (
-                nCmpts*nGlobalElems,
-                nCmpts*elemOffset,
-                nCmpts*nElems,
-                fde.data(),
-                fde.id()
-            );
-
-            fde.nGlobalElems() = nGlobalElems;
+            bfDict.remove(patch.name());
         }
-    }
-
-    if (Pstream::master())
-    {
-        OFstream of
-        (
-            name(),
-            ios_base::out|ios_base::trunc,
-            streamFormat::ASCII
-        );
-
-        moveStreamBufferToDict();
-
-        // ToDoIO keep formattingEntry?
-        // dict_.write(of, false);
-        writeDict(of, dict_, false);
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<template<class> class PatchField, class GeoMesh>
-Foam::OFCstream<PatchField, GeoMesh>::OFCstream
+Foam::OFCstreamBase::OFCstreamBase
 (
     const fileName& pathname,
     const objectRegistry& registry,
@@ -175,27 +107,21 @@ Foam::OFCstream<PatchField, GeoMesh>::OFCstream
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-template<template<class> class PatchField, class GeoMesh>
-Foam::OFCstream<PatchField, GeoMesh>::~OFCstream()
-{
-    removeProcPatchesFromDict();
-    writeGlobalGeometricField();
-}
+Foam::OFCstreamBase::~OFCstreamBase()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<template<class> class PatchField, class GeoMesh>
 Foam::string
-Foam::OFCstream<PatchField, GeoMesh>::getBlockId() const
+Foam::OFCstreamBase::getBlockId() const
 {
     return getGlobalId();
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
 Foam::string
-Foam::OFCstream<PatchField, GeoMesh>::getGlobalId() const
+Foam::OFCstreamBase::getGlobalId() const
 {
     const fileName id = OFstream::getBlockId();
     const wordList cmpts = id.components();
@@ -213,9 +139,8 @@ Foam::OFCstream<PatchField, GeoMesh>::getGlobalId() const
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
 Foam::Ostream&
-Foam::OFCstream<PatchField, GeoMesh>::writeKeyword(const keyType& kw)
+Foam::OFCstreamBase::writeKeyword(const keyType& kw)
 {
     currentKeyword_ = kw;
     moveStreamBufferToDict();
@@ -224,9 +149,8 @@ Foam::OFCstream<PatchField, GeoMesh>::writeKeyword(const keyType& kw)
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
 Foam::Ostream&
-Foam::OFCstream<PatchField, GeoMesh>::write(const token& t)
+Foam::OFCstreamBase::write(const token& t)
 {
     if (t.isPunctuation())
     {
@@ -244,9 +168,8 @@ Foam::OFCstream<PatchField, GeoMesh>::write(const token& t)
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
 Foam::Ostream&
-Foam::OFCstream<PatchField, GeoMesh>::write(const word& str)
+Foam::OFCstreamBase::write(const word& str)
 {
     if (token::compound::isCompound(str))
     {
@@ -259,8 +182,7 @@ Foam::OFCstream<PatchField, GeoMesh>::write(const word& str)
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
-Foam::word Foam::OFCstream<PatchField, GeoMesh>::incrBlock(const word name)
+Foam::word Foam::OFCstreamBase::incrBlock(const word name)
 {
     // Save the data written to stream before
     moveStreamBufferToDict();
@@ -274,8 +196,7 @@ Foam::word Foam::OFCstream<PatchField, GeoMesh>::incrBlock(const word name)
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
-void Foam::OFCstream<PatchField, GeoMesh>::decrBlock()
+void Foam::OFCstreamBase::decrBlock()
 {
     // Save the data written to stream before
     moveStreamBufferToDict();
@@ -284,13 +205,8 @@ void Foam::OFCstream<PatchField, GeoMesh>::decrBlock()
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
-Foam::Ostream& Foam::OFCstream<PatchField, GeoMesh>::parwrite
-(
-    const char* data,
-    std::streamsize byteSize,
-    label nElems
-)
+Foam::Ostream&
+Foam::OFCstreamBase::parwrite(uListProxyBase* uListProxyPtr)
 {
     currentSubDictPtr_->add
     (
@@ -298,9 +214,7 @@ Foam::Ostream& Foam::OFCstream<PatchField, GeoMesh>::parwrite
         (
             currentKeyword_,
             currentCompoundTokenName_,
-            reinterpret_cast<const scalar*>(data),
-            byteSize,
-            nElems
+            uListProxyPtr
         )
     );
 
@@ -308,29 +222,7 @@ Foam::Ostream& Foam::OFCstream<PatchField, GeoMesh>::parwrite
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
-void Foam::OFCstream<PatchField, GeoMesh>::writeGlobalField
-(
-    const label globalSize,
-    const label offset,
-    const label localSize,
-    const scalar* data,
-    const string name
-) const
-{
-    auto adiosStreamPtr = Foam::adiosWriting{}.createStream();
-    adiosStreamPtr->open( "fields", pathname_.path() );
-    adiosStreamPtr->transfer( name,
-                              { globalSize },
-                              { offset },
-                              { localSize },
-                              data );
-    adiosStreamPtr->close();
-}
-
-
-template<template<class> class PatchField, class GeoMesh>
-void Foam::OFCstream<PatchField, GeoMesh>::moveStreamBufferToDict()
+void Foam::OFCstreamBase::moveStreamBufferToDict()
 {
     ostream& buf = getStreamBuffer();
     std::ostringstream& oss = dynamic_cast<std::ostringstream&>(buf);
@@ -347,8 +239,7 @@ void Foam::OFCstream<PatchField, GeoMesh>::moveStreamBufferToDict()
 }
 
 
-template<template<class> class PatchField, class GeoMesh>
-void Foam::OFCstream<PatchField, GeoMesh>::writeDict
+void Foam::OFCstreamBase::writeDict
 (
     Ostream& os,
     const dictionary& dict,
@@ -415,6 +306,78 @@ const
         os.decrIndent();
         os.indent();
         os << token::END_BLOCK << nl;
+    }
+}
+
+
+void Foam::OFCstreamBase::writeGlobalGeometricField()
+{
+    DynamicList<fieldDataEntry*> fieldDataEntries;
+    gatherFieldDataEntries(dict_, fieldDataEntries);
+
+    const label nFields = fieldDataEntries.size();
+    List<fieldTag> globalUniformity(nFields);
+
+    // Prepare list with field tags for global reduce
+    forAll(fieldDataEntries, i)
+    {
+        globalUniformity[i] = fieldDataEntries[i]->tag();
+    }
+
+    globalUniformity =
+        returnReduce(globalUniformity, fieldTag::uniformityCompareOp);
+
+    forAll(fieldDataEntries, i)
+    {
+        fieldDataEntry& fde = *(fieldDataEntries[i]);
+        fde.tag() = globalUniformity[i];
+
+        // ToDoIO Check whether the fde field size equals the size of the
+        // corresponding mesh entity on each rank. Allreduce this info using
+        // the uniformityCompareOp infrastructure because the field size may
+        // accidentally equal the size of the mesh entity. If it's not equal on
+        // all ranks, do not agglomerate and write to ADIOS with prefixed
+        // processorXX.
+        if (!fde.uniform())
+        {
+            const label nElems = fde.uList().size(); //nElems();
+            const label nCmpts = fde.uList().nComponents();
+
+            const globalIndex bgi(nElems);
+            const label nGlobalElems = bgi.size();
+            const label elemOffset = bgi.offset(Pstream::myProcNo());
+
+            // Write to engine
+            auto adiosStreamPtr = Foam::adiosWriting{}.createStream();
+            adiosStreamPtr->open("fields", pathname_.path());
+            adiosStreamPtr->transfer
+            (
+                fde.id(),
+                {nCmpts*nGlobalElems},
+                {nCmpts*elemOffset},
+                {nCmpts*nElems},
+                reinterpret_cast<const scalar*>(fde.uList().cdata())
+            );
+            adiosStreamPtr->close();
+
+            fde.nGlobalElems() = nGlobalElems;
+        }
+    }
+
+    if (Pstream::master())
+    {
+        OFstream of
+        (
+            name(),
+            ios_base::out|ios_base::trunc,
+            streamFormat::ASCII
+        );
+
+        moveStreamBufferToDict();
+
+        // ToDoIO keep formattingEntry?
+        // dict_.write(of, false);
+        writeDict(of, dict_, false);
     }
 }
 

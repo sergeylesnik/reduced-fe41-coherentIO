@@ -340,7 +340,7 @@ Foam::Ostream& Foam::OFstream::write
 }
 
 
-Foam::Ostream& Foam::OFstream::parwrite(const char* data, std::streamsize byteSize, label count)
+Foam::Ostream& Foam::OFstream::parwrite(uListProxyBase* uListProxyPtr)
 {
     if (format() != PARALLEL)
     {
@@ -350,18 +350,6 @@ Foam::Ostream& Foam::OFstream::parwrite(const char* data, std::streamsize byteSi
     }
 
     string blockId = getBlockId();
-
-    std::ostringstream& os = dynamic_cast<std::ostringstream&>(*ofPtr_);
-    os << count << token::BEGIN_STRING << blockId << token::BEGIN_STRING;
-
-    labelList shapeList{1};
-    labelList startList{1};
-    labelList countList{1};
-    shapeList[0] = count;
-    startList[0] = 0;
-    countList[0] = count;
-
-    //adiosStreamPtr_->transfer( blockId, shapeList, startList, countList, data );
 
     return *this;
 }

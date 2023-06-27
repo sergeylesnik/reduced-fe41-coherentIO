@@ -37,6 +37,7 @@ SourceFiles
 
 #include "dictionary.H"
 #include "fieldTag.H"
+#include "uListProxyBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,18 +61,7 @@ class fieldDataEntry
         //- Name of the compound token associated with the data, i.e. List<...>
         const word compoundTokenName_;
 
-        //- Pointer to the data
-        const scalar* data_;
-
-        //- Size of the complete data in bytes
-        const label byteSize_;
-
-        //- Number of elements in the data list
-        const label nElems_;
-
-        //- Number of components in each element. It is defined even if the
-        //  number of elements is zero.
-        label nCmpts_;
+        const autoPtr<uListProxyBase> uListProxyPtr_;
 
         //- Number of elements summed over all ranks
         label nGlobalElems_;
@@ -80,9 +70,6 @@ class fieldDataEntry
         fieldTag tag_;
 
     // Private member functions
-
-        //- Determine uniformity of the data
-        fieldTag::uniformity determineUniformity() const;
 
         //- Return first element of the data list. If size 0, return empty
         //  element.
@@ -96,9 +83,7 @@ public:
         (
             const keyType& keyword,
             const word& compoundTokenName,
-            const scalar* data,
-            std::streamsize byteSize,
-            label nElems
+            uListProxyBase* uListProxyPtr
         );
 
         //- Construct on freestore as copy with reference to the
@@ -162,24 +147,6 @@ public:
                 return compoundTokenName_;
             }
 
-            //- Return number of bytes
-            inline label byteSize() const
-            {
-                return byteSize_;
-            }
-
-            //- Return number of the elements
-            inline label nElems() const
-            {
-                return nElems_;
-            }
-
-            //- Return number of the field components
-            inline label nComponents() const
-            {
-                return nCmpts_;
-            }
-
             inline fileName id() const
             {
                 fileName id = name_;
@@ -188,14 +155,9 @@ public:
                 return id;
             }
 
-            inline const scalar* data() const
-            {
-                return data_;
-            }
-
             inline bool uniform() const
             {
-                if (tag_.uniformityState() == fieldTag::UNIFORM)
+                if (tag_.uniformityState() == uListProxyBase::UNIFORM)
                 {
                     return true;
                 }
@@ -219,14 +181,19 @@ public:
                 return tag_;
             }
 
+            inline const uListProxyBase& uList() const
+            {
+                return uListProxyPtr_();
+            }
+
         //- Return uniformity of the data list
-        inline fieldTag::uniformity uniformityState() const
+        inline uListProxyBase::uniformity uniformityState() const
         {
             return tag_.uniformityState();
         }
 
         //- Return access to the uniformity of the data list
-        inline fieldTag::uniformity& uniformityState()
+        inline uListProxyBase::uniformity& uniformityState()
         {
             return tag_.uniformityState();
         }

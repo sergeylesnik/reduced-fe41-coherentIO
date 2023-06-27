@@ -39,6 +39,8 @@ SourceFiles
 #include "sliceMesh.H"
 #include "dictionary.H"
 #include "fieldDataEntry.H"
+#include "uListProxyBase.H"
+#include "IOstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,15 +48,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class OFCstream Declaration
+                          Class OFCstreamBase Declaration
 \*---------------------------------------------------------------------------*/
 
-template<template<class> class PatchField, class GeoMesh>
-class OFCstream
+class OFCstreamBase
 :
     public OFstream
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         fileName pathname_;
         sliceMesh& sliceableMesh_;
@@ -75,32 +79,29 @@ class OFCstream
         //- The last compound token seen on the stream
         word currentCompoundTokenName_;
 
-        // Pointers to data chunks contributing to a single array staged until
-        // all data is gathered and the consolidated data array is filled
-        scalarList consolidatedData_;
 
+    // Protected member functions
 
-    // Private member functions
-
-        void gatherFieldDataEntries
+        //- Gather all objects of type fieldDataEntry from a dictionary
+        virtual void gatherFieldDataEntries
         (
             dictionary&,
             DynamicList<fieldDataEntry*>&
         );
 
-        void removeProcPatchesFromDict();
-        void writeGlobalGeometricField();
+        //- Remove processor patches from the dictionary
+        virtual void removeProcPatchesFromDict();
 
 public:
 
     // Declare name of the class and its debug switch
-    TypeName("OFCstream");
+    // TypeName("OFCstreamBase");
 
 
     // Constructors
 
         //- Construct from pathname
-        OFCstream
+        OFCstreamBase
         (
             const fileName& pathname,
             const objectRegistry& registry,
@@ -111,9 +112,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~OFCstream();
+    //- Destructor
+    virtual ~OFCstreamBase();
 
 
     // Member functions
@@ -129,33 +129,60 @@ public:
         virtual Ostream& write(const word&);
         virtual word incrBlock(const word);
         virtual void decrBlock();
-        virtual Ostream& parwrite(const char*, std::streamsize, label);
-
-        //- Write global field as a single variable
-        void writeGlobalField
-        (
-            const label globalSize,
-            const label offset,
-            const label localSize,
-            const scalar* data,
-            const string name
-        ) const;
+        virtual Ostream& parwrite(uListProxyBase*);
 
         //- Put current stream buffer to a dictionary as an entry
         void moveStreamBufferToDict();
 
-        //- Write the dictionary manually for correct formatting
+        //- Write the dictionary with correct formatting
         void writeDict(Ostream& os, const dictionary& dict, bool subDict) const;
+
+        //- Write data with the specified engine and dictionary by master
+        void writeGlobalGeometricField();
 };
 
+template<class GeoFieldType, template<class> class PatchField, class GeoMesh>
+class OFCstream
+:
+public OFCstreamBase
+{
+
+public:
+
+    // Constructors
+
+        //- Construct given path and registry
+        OFCstream
+        (
+            const fileName& pathname,
+            const objectRegistry& registry,
+            ios_base::openmode mode = ios_base::out|ios_base::trunc,
+            IOstream::streamFormat format = IOstream::ASCII,
+            IOstream::versionNumber version = IOstream::currentVersion,
+            IOstream::compressionType compression = IOstream::UNCOMPRESSED
+        )
+        :
+            OFCstreamBase
+            (
+                pathname,
+                registry,
+                mode,
+                format,
+                version,
+                compression
+            )
+        {}
+
+
+    //- Destructor
+    virtual ~OFCstream()
+    {
+        this->removeProcPatchesFromDict();
+        this->writeGlobalGeometricField();
+    }
+};
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "OFCstream.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -300,17 +300,6 @@ Foam::IFCstream::IFCstream
     tmpIssPtr_(nullptr),
     adiosStreamPtr_(adiosReading{}.createStream())
 {
-    // ToDoIO Get rid of "processorXX" in path
-    const wordList cmpts = pathname_.components();
-    pathname_ = "";
-    forAll(cmpts, i)
-    {
-        if (cmpts[i].find("processor") == std::string::npos)
-        {
-            pathname_ = pathname_/cmpts[i];
-        }
-    }
-
     setClosed();
 
     setState(ifPtr_->rdstate());

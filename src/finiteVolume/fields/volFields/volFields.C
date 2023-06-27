@@ -48,9 +48,6 @@ defineTemplateTypeNameAndDebug(volSymmTensor4thOrderField, 0);
 defineTemplateTypeNameAndDebug(volDiagTensorField, 0);
 defineTemplateTypeNameAndDebug(volTensorField, 0);
 
-typedef OFCstream<fvPatchField, volMesh> volOFCstream;
-defineTemplateTypeNameAndDebug(volOFCstream, 0);
-
 template<>
 tmp<GeometricField<scalar, fvPatchField, volMesh> >
 GeometricField<scalar, fvPatchField, volMesh>::component

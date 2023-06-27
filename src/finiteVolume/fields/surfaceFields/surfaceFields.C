@@ -48,128 +48,6 @@ defineTemplateTypeNameAndDebug(surfaceSymmTensor4thOrderField, 0);
 defineTemplateTypeNameAndDebug(surfaceDiagTensorField, 0);
 defineTemplateTypeNameAndDebug(surfaceTensorField, 0);
 
-typedef OFCstream<fvsPatchField, surfaceMesh> surfaceOFCstream;
-defineTemplateTypeNameAndDebug(surfaceOFCstream, 0);
-
-
-template<>
-void Foam::OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict()
-{
-    const Offsets& iso = sliceableMesh_.internalSurfaceFieldOffsets();
-    const label localTotalSize = iso.count(Pstream::myProcNo());
-
-    const label nAllPatches = sliceableMesh_.mesh().boundaryMesh().size();
-    const label nProcPatches = sliceableMesh_.procPatches().size();
-    const label nNonProcPatches = nAllPatches - nProcPatches;
-
-    consolidatedData_.resize(localTotalSize);
-
-    // Store internal and processor patch fields pointers in a list
-    List<const fieldDataEntry*> procPatchFDEPtrs(nProcPatches + 1);
-    procPatchFDEPtrs[0] =
-        dynamic_cast<const fieldDataEntry*>
-        (
-            dict_.lookupEntryPtr("internalField", false, false)
-        );
-
-    dictionary& bfDict = dict_.subDict("boundaryField");
-    forAll(sliceableMesh_.procPatches(), i)
-    {
-        const label ppI = i + 1;
-        const dictionary& ppDict =
-            bfDict.subDict(sliceableMesh_.procPatches()[i].name());
-
-        procPatchFDEPtrs[ppI] =
-            dynamic_cast<const fieldDataEntry*>
-            (
-                ppDict.lookupEntryPtr("value", false, false)
-            );
-    }
-
-    // Initialize iterator for each subfield
-    labelList fieldIters(procPatchFDEPtrs.size(), 0);
-
-    // processorFaces
-    const labelList& pf = sliceableMesh_.internalFaceIDsFromBoundaries();
-
-    // processorFacesPatchIds
-    const labelList& pfpi = sliceableMesh_.boundryIDsFromInternalFaces();
-
-
-
-    // const fieldDataEntry* internalFieldDataEntryPtr =
-    //     dynamic_cast<const fieldDataEntry*>
-    //     (
-    //         dict_.lookupEntryPtr("internalField", false, false)
-    //     );
-    // const UList<scalar> internalData
-    // (
-    //     internalFieldDataEntryPtr->data(),
-    //     sliceableMesh_.mesh().nInternalFaces()
-    // );
-    // List<const UList<scalar> > patchData(nProcPatches);
-    // labelList patchFaceI(nProcPatches, 0);
-    // label internalFaceI = 0;
-    // if (pf.empty())
-    // {
-    //     consolidatedData_ = internalData;
-    // }
-    // else
-    // {
-    //     forAll(consolidatedData_, i)
-    //     {
-    //         if (i == pf[j])  // Processor field
-    //         {
-    //             const label patchI = pfpi[j] - nNonProcPatches;
-    //             consolidatedData_[i] = patchData[patchFaceI[patchI]++];
-    //         }
-    //         else  // Internal field
-    //         {
-    //             consolidatedData_[i] = internalData[internalFaceI++];
-    //         }
-    //     }
-    // }
-
-    label j = 0;
-    forAll(consolidatedData_, i)
-    {
-        label id;
-
-        if (!pf.empty() && i == pf[j])  // Processor field
-        {
-            id = pfpi[j] - nNonProcPatches;
-            j++;
-        }
-        else  // Internal field
-        {
-            id = 0;
-        }
-
-        consolidatedData_[i] = *(procPatchFDEPtrs[id]->data() + fieldIters[id]);
-        fieldIters[id]++;
-    }
-
-    // Create new entry for the consolidated internalField
-    fieldDataEntry* coherentInternal =
-    new fieldDataEntry
-    (
-        "internalField",
-        procPatchFDEPtrs[0]->compoundTokenName(),
-        consolidatedData_.data(),
-        localTotalSize*sizeof(scalar),
-        localTotalSize/procPatchFDEPtrs[0]->nComponents()
-    );
-
-    // Set the new internalField in the dictionary replacing the old one
-    dict_.set(coherentInternal);
-
-    // Remove processor patches from the dictionary
-    forAll(sliceableMesh_.procPatches(), i)
-    {
-        word ppName = sliceableMesh_.procPatches()[i].name();
-        bfDict.remove(ppName);
-    }
-}
 
 template<>
 label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>()
@@ -230,13 +108,13 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
 
             coherentData.resize(localSize);
 
-            adiosReadPrimitives
+            adiosStreamPtr_->open("fields", pathname_.path());
+            adiosStreamPtr_->transfer
             (
-                "fields",
                 id,
                 reinterpret_cast<scalar*>(coherentData.data()),
-                nCmpts*elemOffset,
-                nCmpts*nElems
+                List<label>({nCmpts*elemOffset}),
+                List<label>({nCmpts*nElems})
             );
         }
         else if (currToken.isWord())
@@ -329,15 +207,22 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     label internalFaceI = 0;
     label pfI = 0;
 
+    // Closing the IO engine ensures that the data is read from disk
+    adiosStreamPtr_->close();
+
     if (pf.empty())
     {
-        internalData = coherentData;
+        // Use explicit assign(). An assignment operator would trigger a
+        // shallow copy by setting internalData data pointer to that of
+        // coherentData. But the latter is destroyed after returning and the
+        // data pointer would not be valid anymore.
+        internalData.assign(coherentData);
     }
     else
     {
         forAll(coherentData, i)
         {
-            if (i == pf[pfI])  // Processor field
+            if (i < pf.size() && i == pf[pfI])  // Processor field
             {
                 const label patchI = pfpi[pfI++] - nNonProcPatches;
                 procPatchData[patchI][patchFaceI[patchI]++] = coherentData[i];
@@ -348,9 +233,6 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             }
         }
     }
-
-    // Closing the IO engine ensures that the data is read from disk
-    adiosStreamPtr_->close();
 
     return dict_;
 }

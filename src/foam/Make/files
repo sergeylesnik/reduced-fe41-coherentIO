@@ -181,6 +181,7 @@ $(A2streams)/fieldDataEntry.C
 $(A2streams)/formattingEntry.C
 $(A2streams)/fieldTag.C
 $(A2streams)/IFCstream.C
+$(A2streams)/OFCstream.C
 
 
 dictionary = db/dictionary

@@ -38,6 +38,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "uListProxyBase.H"
 #include "scalarList.H"
 
 namespace Foam
@@ -46,26 +47,10 @@ namespace Foam
 class fieldTag
 {
 
-public:
-
-    // Public fieldTag types
-
-        enum uniformity
-        :
-            label
-        {
-            EMPTY,
-            UNIFORM,
-            NONUNIFORM
-        };
-
-
-private:
-
     // Private data
 
         //- Uniformity property of the field
-        uniformity uniformity_;
+        uListProxyBase::uniformity uniformity_;
 
         //- First element of the field
         scalarList firstElement_;
@@ -77,7 +62,7 @@ public:
 
         fieldTag();
 
-        fieldTag(uniformity, const scalarList&);
+        fieldTag(uListProxyBase::uniformity, const scalarList&);
 
         fieldTag(const fieldTag&);
 
@@ -106,12 +91,12 @@ public:
                 return firstElement_;
             }
 
-            inline uniformity uniformityState() const
+            inline uListProxyBase::uniformity uniformityState() const
             {
                 return uniformity_;
             }
 
-            inline uniformity& uniformityState()
+            inline uListProxyBase::uniformity& uniformityState()
             {
                 return uniformity_;
             }

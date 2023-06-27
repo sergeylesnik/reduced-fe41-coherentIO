@@ -27,46 +27,17 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::fieldTag::uniformity
-Foam::fieldDataEntry::determineUniformity() const
-{
-    if (nElems_ > 0)
-    {
-        fieldTag::uniformity u = fieldTag::UNIFORM;
-
-        // Skip comparison of the first element with itself
-        for (label i = 1; i < nElems_; i++)
-        {
-            const label offset = i*nCmpts_;
-
-            for (label cmptI = 0; cmptI < nCmpts_; cmptI++)
-            {
-                if (data_[offset + cmptI] != data_[cmptI])
-                {
-                    u = fieldTag::NONUNIFORM;
-                    break;
-                }
-            }
-        }
-
-        return u;
-    }
-    else
-    {
-        return fieldTag::EMPTY;
-    }
-}
-
-
 Foam::scalarList Foam::fieldDataEntry::firstElement() const
 {
-    if (nElems_)
+    if (uListProxyPtr_->size())
     {
-        scalarList L(nCmpts_);
+        label nCmpts = uListProxyPtr_->nComponents();
 
-        for(label i = 0; i < nCmpts_; i++)
+        scalarList L(uListProxyPtr_->nComponents());
+
+        for(label i = 0; i < nCmpts; i++)
         {
-            L[i] = data_[i];
+            L[i] = uListProxyPtr_->cdata()[i];
         }
 
         return L;
@@ -82,23 +53,15 @@ Foam::fieldDataEntry::fieldDataEntry
 (
     const keyType& keyword,
     const word& compoundTokenName,
-    const scalar* data,
-    std::streamsize byteSize,
-    label nElems
+    uListProxyBase* uListProxyPtr
 )
 :
     entry(keyword),
     name_(),
     compoundTokenName_(compoundTokenName),
-    data_(data),
-    byteSize_(byteSize),
-    nElems_(nElems),
-    // ToDoIO Improve this. A workaround to get nComponents from the word
-    // containing the type of data, e.g. List<vector>. By now, create a
-    // temporary zero-sized compound token and call nComponents on it.
-    nCmpts_(token::compound::New(compoundTokenName, 0)().nComponents()),
+    uListProxyPtr_(uListProxyPtr),
     nGlobalElems_(0),
-    tag_(determineUniformity(), firstElement())
+    tag_(uListProxyPtr->determineUniformity(), firstElement())
 {}
 
 
@@ -157,30 +120,17 @@ void Foam::fieldDataEntry::write(Ostream& os) const
     fn.replaceAll("::", "/");
     os.writeKeyword(fn.name());
 
-    if (tag_.uniformityState() == fieldTag::UNIFORM)
+    if (tag_.uniformityState() == uListProxyBase::UNIFORM)
     {
         os  << "uniform" << token::SPACE;
 
-        // If EMPTY, data_ is nullptr. Thus, use the field tag to provide the
+        // If EMPTY, data is nullptr. Thus, use the field tag to provide the
         // first element.
-        const scalarList& fe = tag_.firstElement();
-
-        if (nCmpts_ > 1)
-        {
-            // Mimic VectorSpace write
-            os  << token::BEGIN_LIST;
-
-            for (label i = 0; i < (nCmpts_ - 1); i++)
-            {
-                os << fe[i] << token::SPACE;
-            }
-
-            os << fe[nCmpts_ - 1] << token::END_LIST;
-        }
-        else // single scalar
-        {
-            os  << fe[0];
-        }
+        uListProxyPtr_->writeFirstElement
+        (
+            os,
+            tag_.firstElement().cdata()
+        );
     }
     else
     {

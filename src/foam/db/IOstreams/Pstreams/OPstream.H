@@ -38,6 +38,7 @@ SourceFiles
 #define OPstream_H
 
 #include "Ostream.H"
+#include "uListProxyBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -168,7 +169,7 @@ public:
             Ostream& write(const char*, std::streamsize);
 
             //- Write binary block into second stream
-            Ostream& parwrite(const char*, std::streamsize, label);
+            virtual Ostream& parwrite(uListProxyBase*);
 
             Ostream& stringStream();
 

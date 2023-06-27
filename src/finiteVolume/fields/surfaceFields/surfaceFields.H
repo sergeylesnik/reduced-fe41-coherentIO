@@ -50,8 +50,41 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-void OFCstream<fvsPatchField, surfaceMesh>::removeProcPatchesFromDict();
+template<class Type>
+class OFCstream<Type, fvsPatchField, surfaceMesh>
+:
+public OFCstreamBase
+{
+
+    // Private data
+
+        //- Internal field of the coherent format with processor patch fields
+        //  mapped into it
+        List<Type> consolidatedData_;
+
+
+    // Private member functions
+
+        void combineCoherentInternal();
+
+
+public:
+
+    //- Constructor
+    OFCstream
+    (
+        const fileName& pathname,
+        const objectRegistry& registry,
+        ios_base::openmode mode = ios_base::out|ios_base::trunc,
+        IOstream::streamFormat format = IOstream::ASCII,
+        IOstream::versionNumber version = IOstream::currentVersion,
+        IOstream::compressionType compression = IOstream::UNCOMPRESSED
+    );
+
+
+    //- Destructor
+    virtual ~OFCstream();
+};
 
 template<>
 label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>();
@@ -65,6 +98,10 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "surfaceFieldsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

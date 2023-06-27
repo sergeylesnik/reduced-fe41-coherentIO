@@ -44,6 +44,7 @@ using std::ofstream;
 
 template<class T> class SLList;
 #include "LIFOStack.H"
+#include "uListProxyBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -188,7 +189,7 @@ public:
             //- Write field with the scalar primitive type
             virtual Ostream& write(const char*, std::streamsize);
 
-            virtual Ostream& parwrite(const char*, std::streamsize, label);
+            virtual Ostream& parwrite(uListProxyBase*);
 
             virtual Ostream& stringStream();
 

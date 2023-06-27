@@ -42,6 +42,7 @@ SourceFiles
 #include <memory>
 
 #include "className.H"
+#include "uListProxyBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -168,7 +169,7 @@ public:
             virtual Ostream& write(const char*, std::streamsize);
 
             //- Write binary block into paros_
-            virtual Ostream& parwrite(const char*, std::streamsize, label);
+            virtual Ostream& parwrite(uListProxyBase*);
 
             virtual Ostream& stringStream();
 

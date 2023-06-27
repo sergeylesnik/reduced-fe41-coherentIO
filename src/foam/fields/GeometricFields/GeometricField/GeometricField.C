@@ -1026,7 +1026,7 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::writeToStream
         return regIOobject::writeToStream(pathname, mode, fmt, ver, cmp);
     }
 
-    OFCstream<PatchField, GeoMesh> os
+    OFCstream<Type, PatchField, GeoMesh> os
     (
         pathname,
         this->mesh().thisDb(),

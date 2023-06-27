@@ -33,6 +33,7 @@ License
 #include "prefixOSstream.H"
 
 #include "adiosWritePrimitives.H"
+#include "UListProxy.H"
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
@@ -198,12 +199,8 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             Pout<< "L = " << L << endl;
         }
 
-        os.parwrite
-        (
-            reinterpret_cast<const char*>(L.v_),
-            L.byteSize(),
-            L.size()
-        );
+
+        os.parwrite(new UListProxy<T>(L));
     }
 
     // Check state of IOstream

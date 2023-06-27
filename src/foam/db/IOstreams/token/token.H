@@ -272,7 +272,6 @@ public:
             {
                 return 1;
             }
-
         }
 
         void resize(const label newSize)

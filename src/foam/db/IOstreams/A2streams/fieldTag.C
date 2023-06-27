@@ -40,31 +40,31 @@ Foam::fieldTag::uniformityCompareOp
     {
         if
         (
-            x[i].uniformity_ == NONUNIFORM
-         || y[i].uniformity_ == NONUNIFORM
+            x[i].uniformity_ == uListProxyBase::NONUNIFORM
+         || y[i].uniformity_ == uListProxyBase::NONUNIFORM
         )
         {
-            res[i].uniformity_ = NONUNIFORM;
+            res[i].uniformity_ = uListProxyBase::NONUNIFORM;
         }
-        else if (x[i].uniformity_ == EMPTY)
+        else if (x[i].uniformity_ == uListProxyBase::EMPTY)
         {
             res[i] = y[i];
         }
         else if
         (
-            x[i].uniformity_ == UNIFORM
+            x[i].uniformity_ == uListProxyBase::UNIFORM
         )
         {
-            if (y[i].uniformity_ == UNIFORM)
+            if (y[i].uniformity_ == uListProxyBase::UNIFORM)
             {
                 if (x[i].firstElement_ != y[i].firstElement_)
                 {
-                    res[i].uniformity_ = NONUNIFORM;
+                    res[i].uniformity_ = uListProxyBase::NONUNIFORM;
                 }
             }
-            else if (y[i].uniformity_ == NONUNIFORM)
+            else if (y[i].uniformity_ == uListProxyBase::NONUNIFORM)
             {
-                res[i].uniformity_ = NONUNIFORM;
+                res[i].uniformity_ = uListProxyBase::NONUNIFORM;
             }
         }
     }
@@ -82,7 +82,7 @@ Foam::fieldTag::fieldTag()
 {}
 
 
-Foam::fieldTag::fieldTag(uniformity u, const scalarList& l)
+Foam::fieldTag::fieldTag(uListProxyBase::uniformity u, const scalarList& l)
 :
     uniformity_(u),
     firstElement_(l)
@@ -145,6 +145,6 @@ Foam::Istream& Foam::operator>>
     is >> d.firstElement();
     label lfu;
     is >> lfu;
-    d.uniformityState() = static_cast<fieldTag::uniformity>(lfu);
+    d.uniformityState() = static_cast<uListProxyBase::uniformity>(lfu);
     return is;
 }
