@@ -54,7 +54,6 @@ class UListProxy
     public uListProxyBase,
     public UList<T>
 {
-
 public:
 
     // Constructors
@@ -64,8 +63,8 @@ public:
 
 
     //- Destructor
-        virtual ~UListProxy()
-        {}
+    virtual ~UListProxy()
+    {}
 
 
     // Member Functions
@@ -76,6 +75,23 @@ public:
             Ostream& os,
             const scalar* data
         ) const override;
+
+
+    // Byte-wise Access
+
+        //- Return pointer to the underlying array serving as data storage,
+        //  reinterpreted as byte data
+        //  \note Only meaningful for contiguous data
+        virtual inline const char* cdata_bytes() const override;
+
+        //- Return pointer to the underlying array serving as data storage,
+        //  reinterpreted as byte data
+        //  \note Only meaningful for contiguous data
+        virtual inline char* data_bytes() override;
+
+        //- Number of contiguous bytes for the List data.
+        //  \note Only meaningful for contiguous data
+        virtual inline std::streamsize size_bytes() const override;
 
 
         // Access

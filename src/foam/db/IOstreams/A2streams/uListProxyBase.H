@@ -37,6 +37,7 @@ SourceFiles
 
 #include "label.H"
 #include "scalar.H"
+#include <ios>  // std::streamsize
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +53,6 @@ class Ostream;
 
 class uListProxyBase
 {
-
 public:
 
     // Public types
@@ -66,20 +66,37 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         uListProxyBase()
         {}
 
 
     //- Destructor
     virtual ~uListProxyBase()
-    {};
+    {}
 
 
     // Member Functions
 
         //- Write the first element of UList.
         virtual void writeFirstElement(Ostream&, const scalar*) const = 0;
+
+
+    // Byte-wise Access
+
+        //- Return pointer to the underlying array serving as data storage,
+        //  reinterpreted as byte data
+        //  \note Only meaningful for contiguous data
+        virtual inline const char* cdata_bytes() const = 0;
+
+        //- Return pointer to the underlying array serving as data storage,
+        //  reinterpreted as byte data
+        //  \note Only meaningful for contiguous data
+        virtual inline char* data_bytes() = 0;
+
+        //- Number of contiguous bytes for the List data.
+        //  \note Only meaningful for contiguous data
+        virtual inline std::streamsize size_bytes() const = 0;
 
 
         // Access

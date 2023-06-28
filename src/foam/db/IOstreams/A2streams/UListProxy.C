@@ -26,7 +26,6 @@ License
 #include "UListProxy.H"
 #include "primitives_traits.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -48,6 +47,53 @@ void Foam::UListProxy<T>::writeFirstElement
     UList<T> fe(reinterpret_cast<T*>(const_cast<scalar*>(data)), 1);
     os << fe[0];
 }
+
+
+#if (OPENFOAM >= 2206)
+
+template<class T>
+const char* Foam::UListProxy<T>::cdata_bytes() const
+{
+    return UList<T>::cdata_bytes();
+}
+
+
+template<class T>
+char* Foam::UListProxy<T>::data_bytes()
+{
+    return UList<T>::data_bytes();
+}
+
+
+template<class T>
+std::streamsize Foam::UListProxy<T>::size_bytes() const
+{
+    return UList<T>::size_bytes();
+}
+
+#else
+
+template<class T>
+const char* Foam::UListProxy<T>::cdata_bytes() const
+{
+    return reinterpret_cast<const char*>(UList<T>::cdata());
+}
+
+
+template<class T>
+char* Foam::UListProxy<T>::data_bytes()
+{
+    return reinterpret_cast<char*>(UList<T>::data());
+}
+
+
+template<class T>
+std::streamsize Foam::UListProxy<T>::size_bytes() const
+{
+    return std::streamsize(UList<T>::size())*sizeof(T);
+}
+
+#endif
 
 
 template<class T>
