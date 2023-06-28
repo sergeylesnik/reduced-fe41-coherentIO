@@ -24,6 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fieldDataEntry.H"
+#include "ITstream.H"
+
+static Foam::ITstream dummyITstream_("dummy", Foam::UList<Foam::token>());
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -88,6 +92,8 @@ Foam::ITstream& Foam::fieldDataEntry::stream() const
         << "Attempt to return field data entry " << keyword()
         << " as a primitive"
         << abort(FatalError);
+
+    return dummyITstream_;
 }
 
 
