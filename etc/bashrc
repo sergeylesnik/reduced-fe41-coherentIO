@@ -39,32 +39,30 @@ export WM_PROJECT_VERSION=4.1r
 # helps to easily write #ifdefs to detect a dev-version
 export FOAM_DEV=1
 
-###############################################################################
-# USER EDITABLE PART
+#------------------------------------------------------------------------------
+# (advanced / legacy)
+
+# [projectDir] - directory containing this OpenFOAM version.
+# \- When this file is located as $WM_PROJECT_DIR/etc/bashrc, the next lines
+#    should work when sourced by BASH or ZSH shells. If this however fails,
+#    set one of the fallback values to an appropriate path.
 #
-# either set $FOAM_INST_DIR before sourcing this file or set
-#    $foamInstall below to where FOAM is installed
-#
-# Location of FOAM installation
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-foamInstall=~/git/exaFoam/wp3-refactoring/io
-# foamInstall=$HOME/$WM_PROJECT
-# foamInstall=~$WM_PROJECT
-# foamInstall=/usr/local/$WM_PROJECT
-# foamInstall=/opt/$WM_PROJECT
-# foamInstall=/usr/lib
-#
-# END OF (NORMAL) USER EDITABLE PART
+#    This can be removed if an absolute path is provided for WM_PROJECT_DIR
+#    later on in this file
+# --
+projectDir="${BASH_SOURCE:-${ZSH_NAME:+$0}}";
+[ -n "$projectDir" ] && projectDir="$(\cd $(dirname $projectDir)/.. && \pwd -L)" ||\
+projectDir="$HOME/openfoam/foam-extend-$WM_PROJECT_VERSION"
 ################################################################################
 
 # Set $USER if it has not been set (eg. on Windows/MSYS systems)
-if [ -z $USER ]
+if [ -z "$USER" ]
 then
-    export USER=`whoami`
+    export USER="$(whoami)"
 fi
 
 # note the location for later use (eg, in job scripts)
-: ${FOAM_INST_DIR:=$foamInstall}; export FOAM_INST_DIR
+: ${FOAM_INST_DIR:=$(dirname $projectDir)}; export FOAM_INST_DIR
 
 # The old dirs to be cleaned from the various environment variables
 # - remove anything under top-level directory.
@@ -75,12 +73,10 @@ then
     foamOldDirs="$WM_PROJECT_INST_DIR $foamOldDirs"
 fi
 
-
 # Location of site/user files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 export WM_PROJECT_INST_DIR=$FOAM_INST_DIR
-export WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/reduced-foam-extend
-#export WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/WM_PROJECT-$WM_FORK-$WM_PROJECT_VERSION
+export WM_PROJECT_DIR="$projectDir"
 export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 # Location of third-party software
@@ -613,7 +609,7 @@ fi
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset cleanEnv cleanProg foamInstall foamOldDirs
+unset cleanEnv cleanProg projectDir foamInstall foamOldDirs
 unset _foamSource
 
 # -----------------------------------------------------------------------------
