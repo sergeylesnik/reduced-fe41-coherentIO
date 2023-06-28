@@ -55,7 +55,7 @@ class IndexComponent
 
     OffsetStrategy calc_count_{nullptr};
 
-    std::unique_ptr<InitStrategy> init_strategy_{nullptr};
+    std::unique_ptr<InitStrategy> init_strategy_;
 
     bool initialized_{false};
 

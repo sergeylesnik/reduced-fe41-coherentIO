@@ -43,7 +43,7 @@ protected:
     class Impl;
 
     // Bridge instance to implementation
-    std::unique_ptr<Impl> pimpl_{nullptr};
+    std::unique_ptr<Impl> pimpl_;
 
     // Instance on file name manager
     adiosPaths paths_{};

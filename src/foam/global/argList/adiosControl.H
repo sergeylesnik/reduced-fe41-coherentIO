@@ -49,8 +49,7 @@ class adiosRepo;
 
 class adiosControl
 {
-    //std::unique_ptr<adiosCore> adiosCorePtr_;
-    std::unique_ptr<adiosRepo> repoPtr_{ nullptr };
+    std::unique_ptr<adiosRepo> repoPtr_;
 
 public:
 

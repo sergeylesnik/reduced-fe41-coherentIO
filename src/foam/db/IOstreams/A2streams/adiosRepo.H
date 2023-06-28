@@ -38,7 +38,7 @@ class adiosRepo
     class Impl;
 
     // Bridge instance to ADIOS2 implementation
-    std::unique_ptr<Impl> pimpl_{nullptr};
+    std::unique_ptr<Impl> pimpl_;
 
     label boundaryCounter_{0};
 

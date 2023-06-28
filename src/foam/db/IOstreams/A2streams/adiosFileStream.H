@@ -15,7 +15,7 @@ class adiosFileStream
     public adiosStream
 {
 
-    std::unique_ptr<adiosFeatures> adiosFile_{nullptr};
+    std::unique_ptr<adiosFeatures> adiosFile_;
 
     virtual void v_open() final;
 
