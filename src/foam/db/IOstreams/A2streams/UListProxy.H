@@ -73,7 +73,7 @@ public:
         virtual void writeFirstElement
         (
             Ostream& os,
-            const scalar* data
+            const char* data
         ) const override;
 
 

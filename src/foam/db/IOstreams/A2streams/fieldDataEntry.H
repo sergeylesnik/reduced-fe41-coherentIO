@@ -69,11 +69,6 @@ class fieldDataEntry
         //- Field tag needed for global communication
         fieldTag tag_;
 
-    // Private member functions
-
-        //- Return first element of the data list. If size 0, return empty
-        //  element.
-        scalarList firstElement() const;
 
 public:
 
@@ -97,6 +92,7 @@ public:
     //-Destructor
     virtual ~fieldDataEntry()
     {}
+
 
     // Member functions
 

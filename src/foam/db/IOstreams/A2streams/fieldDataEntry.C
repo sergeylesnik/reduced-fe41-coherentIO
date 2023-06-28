@@ -29,26 +29,38 @@ License
 static Foam::ITstream dummyITstream_("dummy", Foam::UList<Foam::token>());
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::scalarList Foam::fieldDataEntry::firstElement() const
+namespace Foam
 {
-    if (uListProxyPtr_->size())
+
+// Capture the first element and save as a scalarList
+static inline scalarList getFirstElement(const uListProxyBase* uListProxyPtr)
+{
+    if (uListProxyPtr && uListProxyPtr->size())
     {
-        label nCmpts = uListProxyPtr_->nComponents();
+        // Could also return a SubList or UList
 
-        scalarList L(uListProxyPtr_->nComponents());
+        // Needs reworking for labels etc (should save char data)
+        const scalar* scalarData =
+            reinterpret_cast<const scalar*>(uListProxyPtr->cdata_bytes());
 
-        for(label i = 0; i < nCmpts; i++)
+        const label nCmpts = uListProxyPtr->nComponents();
+
+        scalarList list(nCmpts);
+
+        for (label i = 0; i < nCmpts; i++)
         {
-            L[i] = uListProxyPtr_->cdata()[i];
+            list[i] = scalarData[i];
         }
 
-        return L;
+        return list;
     }
 
-    return scalarList(0);
+    return scalarList();
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -65,7 +77,11 @@ Foam::fieldDataEntry::fieldDataEntry
     compoundTokenName_(compoundTokenName),
     uListProxyPtr_(uListProxyPtr),
     nGlobalElems_(0),
-    tag_(uListProxyPtr->determineUniformity(), firstElement())
+    tag_
+    (
+        uListProxyPtr->determineUniformity(),
+        getFirstElement(uListProxyPtr)
+    )
 {}
 
 
@@ -135,7 +151,7 @@ void Foam::fieldDataEntry::write(Ostream& os) const
         uListProxyPtr_->writeFirstElement
         (
             os,
-            tag_.firstElement().cdata()
+            reinterpret_cast<const char*>(tag_.firstElement().cdata())
         );
     }
     else

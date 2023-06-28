@@ -79,7 +79,7 @@ public:
     // Member Functions
 
         //- Write the first element of UList.
-        virtual void writeFirstElement(Ostream&, const scalar*) const = 0;
+        virtual void writeFirstElement(Ostream&, const char*) const = 0;
 
 
     // Byte-wise Access

@@ -41,11 +41,19 @@ template<class T>
 void Foam::UListProxy<T>::writeFirstElement
 (
     Ostream& os,
-    const scalar* data
+    const char* data
 ) const
 {
-    UList<T> fe(reinterpret_cast<T*>(const_cast<scalar*>(data)), 1);
-    os << fe[0];
+    if (data)
+    {
+        const T* dataT = reinterpret_cast<const T*>(data);
+        os << *dataT;
+    }
+    else
+    {
+        // OR:  pTraits<T>::zero
+        os  << T();
+    }
 }
 
 
