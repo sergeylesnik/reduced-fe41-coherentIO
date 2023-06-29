@@ -149,45 +149,28 @@ Foam::Istream& Foam::regIOobject::readStream(const word& expectName)
 
 Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
 {
-    // Get the file name relative to the root directory
-    fileName objPath = objectPath().caseName("");
+    const word writeFormat(time().controlDict().lookup("writeFormat"));
+    const bool isCoherentFormat =
+        (IOstream::formatEnum(writeFormat) == IOstream::PARALLEL);
 
-    bool isMeshFile = objPath.find("polyMesh") != std::string::npos;
-
-    // Fall back to the standard readStream if the ADIOS data directory is not
-    // present
-    adiosPaths paths;
-    fileName adiosDir = paths.dataPathname();
-    if (isMeshFile)
+    if (!isCoherentFormat)
     {
-        if (paths.meshPresent())
-        {
-            adiosDir = paths.meshPathname();
-        }
-        else
-        {
-            Info<< "No ADIOS mesh data found at " << paths.meshPathname()
-                << nl
-                << "Continuing with the standard IO for file " << objPath
-                << endl;
-            return readStream(expectName);
-        }
-    }
-    else if (!paths.dataPresent())
-    {
-        Info<< "No ADIOS data found at " << adiosDir << nl
-            << "Continuing with the standard IO for file " << objPath
-            << endl;
         return readStream(expectName);
-    };
+    }
 
-    Info<< "Reading " << objPath << " via ADIOS from " << adiosDir << endl;
+    fileName objPath = objectPath();
+
+    Info<< "Reading from " << objPath << nl
+        << "    via coherent format, since writeFormat is set to '"
+        << writeFormat << "'" << nl
+        << "    and format mixing is not allowed."
+        << endl;
 
     if (IFstream::debug)
     {
         Info<< "regIOobject::readStreamPar(const word&) : "
             << "reading object " << name()
-            << " from ADIOS variable " << objPath
+            << " from " << objPath
             << endl;
     }
 
