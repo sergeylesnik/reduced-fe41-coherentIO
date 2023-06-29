@@ -51,8 +51,9 @@ void Foam::UListProxy<T>::writeFirstElement
     }
     else
     {
-        // OR:  pTraits<T>::zero
-        os  << T();
+        FatalErrorInFunction
+            << "Given data pointer is nullptr."
+            << abort(FatalError);
     }
 }
 
