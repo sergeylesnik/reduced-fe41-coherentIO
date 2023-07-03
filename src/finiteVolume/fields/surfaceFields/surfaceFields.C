@@ -61,6 +61,21 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     const word& fieldTypeName
 )
 {
+    // Fill the dictionary with the stream
+    dict_.read(*this);
+
+    readNonProcessorBoundaryFields();
+
+
+    // Take care internal and processor fields. Internal surface field in
+    // coherent format includes processor boundaries. If it is uniform, the
+    // processor patches need to be created with the same uniform entry.
+    // Otherwise, the coherent internal field needs to be mapped to FOAM's
+    // internal and processor fields.
+
+    const polyMesh& mesh = sliceableMesh_.mesh();
+    const polyBoundaryMesh& bm = mesh.boundaryMesh();
+
     // Internal field data
     UList<scalar> internalData;
 
@@ -68,22 +83,25 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     // fields
     scalarList coherentData;
 
-    // Fill the dictionary with the stream
-    dict_.read(*this);
-
-    dictionary& bfDict = dict_.subDict("boundaryField");
     ITstream& is = dict_.lookup("internalField");
-    const polyMesh& mesh = sliceableMesh_.mesh();
+    dictionary& bfDict = dict_.subDict("boundaryField");
 
     // Traverse the tokens of the internal field entry
-    while (!is.eof())
+    while (true)
     {
+        if (is.eof())
+        {
+            FatalErrorInFunction
+                << "Expected 'uniform' or compoundToken in " << is
+                << nl << "    in file " << pathname_
+                << abort(FatalError);
+        }
+
         token currToken(is);
 
-        if (currToken.isCompound())
+        if (currToken.isCompound()) // non-uniform
         {
-            // Resize the compoundToken according to the mesh of the proc and
-            // read the corresponding slice of the data.
+            // Resize the compoundToken according to the mesh of the proc
             token::compound& compToken = currToken.compoundToken();
             compToken.resize(mesh.nInternalFaces());
 
@@ -99,6 +117,8 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             const label globalSize = is[is.tokenIndex()++].labelToken();
             const string id = is[is.tokenIndex()++].stringToken();
 
+            // Internal surface field in coherent format includes processor
+            // boundaries. Thus, find out the corresponding size.
             const label localSize =
                 coherentFieldSize<fvsPatchField, surfaceMesh>();
             const globalIndex gi(localSize);
@@ -116,46 +136,46 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
                 List<label>({nCmpts*elemOffset}),
                 List<label>({nCmpts*nElems})
             );
+
+            // Closing the IO engine ensures that the data is read from storage
+            adiosStreamPtr_->close();
+
+            break;
         }
-        else if (currToken.isWord())
+        else if (currToken.isWord() && currToken.wordToken() == "uniform")
         {
-            if (currToken.wordToken() == "uniform")
+            // Create processor patch fields with the same uniform entry as the
+            // internal field.
+
+            forAll(bm, i)
             {
-                // Both field types are uniform. Create processor patch fields
-                // with the same value entry as the internal field.
+                const polyPatch& patch = bm[i];
+                const word& patchName = patch.name();
 
-                forAll(mesh.boundaryMesh(), i)
+                if (patch.type() == processorPolyPatch::typeName)
                 {
-                    const polyPatch& patch = mesh.boundaryMesh()[i];
-                    const word& patchName = patch.name();
-
-                    if (patch.type() != processorPolyPatch::typeName)
-                    {
-                        dictionary& patchDict = bfDict.subDict(patchName);
-                        readCompoundTokenData(patchDict, patch.size());
-                    }
-                    else
-                    {
-                        dictionary dict;
-                        dict.add("type", "processor");
-                        dict.add("value", is.xfer());
-                        bfDict.add(patchName, dict);
-                    }
+                    dictionary dict;
+                    dict.add("type", "processor");
+                    dict.add("value", is);
+                    bfDict.add(patchName, dict);
                 }
-
-                return dict_;
             }
+
+            // Closing the IO engine ensures that the data is read from storage
+            adiosStreamPtr_->close();
+            return dict_;
         }
     }
 
 
+    // The internal coherent field is non-uniform.
+
     // Create dictionary entries for the processor patch fields with the
-    // correctly sized compound tokens
+    // correctly sized compound tokens.
 
-    const label nAllPatches = mesh.boundaryMesh().size();
-
+    const label nAllPatches = bm.size();
+    // ToDoIO Make it work with any type
     List<UList<scalar> > procPatchData(nAllPatches);
-    const polyBoundaryMesh& bm = sliceableMesh_.mesh().boundaryMesh();
     label nProcPatches = 0;
 
     forAll(bm, patchI)
@@ -175,7 +195,11 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
 
             // Store the data pointer for the later mapping
             procPatchData[nProcPatches++] =
-                UList<scalar>(reinterpret_cast<scalar*>(ctPtr().data()), patchSize);
+                UList<scalar>
+                (
+                    reinterpret_cast<scalar*>(ctPtr().data()),
+                    patchSize
+                );
 
             // autoPtr is invalid after calling ptr()
             entryTokens[1] = ctPtr.ptr();
@@ -191,11 +215,11 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
         }
     }
 
-    procPatchData.resize(nProcPatches);
-    const label nNonProcPatches = nAllPatches - nProcPatches;
-
 
     // Map from the coherent format to the internal and processor patch fields
+
+    procPatchData.resize(nProcPatches);
+    const label nNonProcPatches = nAllPatches - nProcPatches;
 
     // processorFaces
     const labelList& pf = sliceableMesh_.internalFaceIDsFromBoundaries();
@@ -222,7 +246,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     {
         forAll(coherentData, i)
         {
-            if (i < pf.size() && i == pf[pfI])  // Processor field
+            if (pfI < pf.size() && i == pf[pfI])  // Processor field
             {
                 const label patchI = pfpi[pfI++] - nNonProcPatches;
                 procPatchData[patchI][patchFaceI[patchI]++] = coherentData[i];
@@ -230,6 +254,54 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             else  // Internal field
             {
                 internalData[internalFaceI++] = coherentData[i];
+            }
+        }
+    }
+
+    // In coherent format only the lower neighbour procs have the processor
+    // faces and the corresponding fields. Get their values to the procs
+    // above.
+
+    // Send
+    forAll(bm, patchI)
+    {
+        const polyPatch& patch = bm[patchI];
+
+        if (isA<processorPolyPatch>(patch))
+        {
+            const processorPolyPatch& procPp =
+                refCast<const processorPolyPatch>(patch);
+
+            if (procPp.neighbProcNo() > procPp.myProcNo())
+            {
+                OPstream toProcNbr(Pstream::blocking, procPp.neighbProcNo());
+                toProcNbr << procPatchData[patchI - nNonProcPatches];
+            }
+        }
+    }
+
+    // Receive
+    forAll(bm, patchI)
+    {
+        const polyPatch& patch = bm[patchI];
+
+        if (isA<processorPolyPatch>(patch))
+        {
+            const processorPolyPatch& procPp =
+                refCast<const processorPolyPatch>(patch);
+
+            if (procPp.neighbProcNo() < procPp.myProcNo())
+            {
+                const label patchDataI = patchI - nNonProcPatches;
+                IPstream fromProcNbr(Pstream::blocking, procPp.neighbProcNo());
+                fromProcNbr >> procPatchData[patchDataI];
+
+                // Flip the sign since the faces are oriented in the opposite
+                // direction
+                forAll(procPatchData[patchDataI], faceI)
+                {
+                    procPatchData[patchDataI][faceI] *= -1;
+                }
             }
         }
     }

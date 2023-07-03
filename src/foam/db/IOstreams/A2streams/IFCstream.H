@@ -136,18 +136,26 @@ class IFCstream
         template<template<class> class PatchField, class GeoMesh>
         label coherentFieldSize();
 
-        //- Find (recursively) all compound tokens in dictionary and populate
-        //  them with data
-        void readCompoundTokenData(dictionary& dict, const label size);
+        // Read
 
-        //- Find all compound tokens in ITstream and populate them with data
-        void readCompoundTokenData(ITstream& is, const label localSize);
+            //- Find (recursively) all compound tokens in dictionary and
+            //  populate them with data
+            void readCompoundTokenData(dictionary& dict, const label size);
+
+            //- Find all compound tokens in ITstream and populate them with
+            //  data
+            void readCompoundTokenData(ITstream& is, const label localSize);
+
+            //- Read field data of all boundary patches that are not of
+            //  processor type
+            void readNonProcessorBoundaryFields();
+
 
 protected:
 
     // Protected Member Functions
 
-        //- Read a word token and identify and handle compound tokens if
+        //- Read a word token, identify and handle compound tokens if
         //  discovered
         virtual void readWordToken(token&);
 

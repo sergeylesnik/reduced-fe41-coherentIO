@@ -51,10 +51,13 @@ Foam::label Foam::IFCstream::coherentFieldSize()
 template<template<class> class PatchField, class GeoMesh>
 Foam::dictionary& Foam::IFCstream::readToDict(const word& fieldTypeName)
 {
-    // Lists aka compoundTokens are constructed zero-sized.
+    // Fill the dictionary with the stream
     dict_.read(*this);
+
     ITstream& is = dict_.lookup("internalField");
     readCompoundTokenData(is, coherentFieldSize<PatchField, GeoMesh>());
+
+    readNonProcessorBoundaryFields();
 
     dictionary& bfDict = dict_.subDict("boundaryField");
 
@@ -63,12 +66,7 @@ Foam::dictionary& Foam::IFCstream::readToDict(const word& fieldTypeName)
         const polyPatch& patch = sliceableMesh_.mesh().boundaryMesh()[i];
         const word& patchName = patch.name();
 
-        if (patch.type() != processorPolyPatch::typeName)
-        {
-            dictionary& patchDict = bfDict.subDict(patchName);
-            readCompoundTokenData(patchDict, patch.size());
-        }
-        else
+        if (patch.type() == processorPolyPatch::typeName)
         {
             addProcessorPatchField<PatchField, GeoMesh>
             (
@@ -77,9 +75,8 @@ Foam::dictionary& Foam::IFCstream::readToDict(const word& fieldTypeName)
         }
     }
 
-    // Closing the IO engine ensures that the data is read from disk
+    // Closing the IO engine ensures that the data is read from storage
     adiosStreamPtr_->close();
-
     return dict_;
 }
 

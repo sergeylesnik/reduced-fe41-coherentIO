@@ -235,6 +235,24 @@ void Foam::IFCstream::readCompoundTokenData
 }
 
 
+void Foam::IFCstream::readNonProcessorBoundaryFields()
+{
+    const polyMesh& mesh = sliceableMesh_.mesh();
+    const polyBoundaryMesh& bm = mesh.boundaryMesh();
+    dictionary& bfDict = dict_.subDict("boundaryField");
+
+    forAll(bm, i)
+    {
+        const polyPatch& patch = bm[i];
+        if (patch.type() != processorPolyPatch::typeName)
+        {
+            dictionary& patchDict = bfDict.subDict(patch.name());
+            readCompoundTokenData(patchDict, patch.size());
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::IFCstream::readWordToken(token& t)
