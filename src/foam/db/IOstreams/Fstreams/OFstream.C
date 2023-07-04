@@ -329,14 +329,21 @@ Foam::Ostream& Foam::OFstream::write
     std::streamsize byteSize
 )
 {
-    adiosWritePrimitives
-    (
-        "fields",
-        "",
-        this->getBlockId(),
-        byteSize/sizeof(scalar),
-        reinterpret_cast<const scalar*>(data)
-    );
+    if (format() == COHERENT)
+    {
+        adiosWritePrimitives
+        (
+            "fields",
+            "",
+            this->getBlockId(),
+            byteSize/sizeof(scalar),
+            reinterpret_cast<const scalar*>(data)
+        );
+    }
+    else
+    {
+        OSstream::write(data, byteSize);
+    }
 
     return *this;
 }
