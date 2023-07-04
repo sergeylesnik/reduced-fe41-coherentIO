@@ -605,6 +605,14 @@ void Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 {
     os.writeKeyword(keyword);
 
+    if (os.format() == IOstream::COHERENT)
+    {
+        // Trigger write, the uniformity check will be performed later
+        List<Type>::writeEntry(os);
+
+        return;
+    }
+
     bool uniform = false;
 
     if (this->size() && contiguous<Type>())
@@ -619,14 +627,6 @@ void Field<Type>::writeEntry(const word& keyword, Ostream& os) const
                 break;
             }
         }
-    }
-
-    if (os.format() == IOstream::COHERENT)
-    {
-        // Trigger write, the uniformity check will be performed later
-        List<Type>::writeEntry(os);
-
-        return;
     }
 
     if (uniform)
