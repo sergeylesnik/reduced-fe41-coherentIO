@@ -1651,12 +1651,6 @@ bool Foam::polyMesh::write() const
 
         adiosStreamPtr->close();
 
-        Foam::List<Foam::scalar> linearizedPoints( 3*allPoints_.size(), 0.0 );
-        forAll( adiosPoints, i ) {
-           linearizedPoints[i*3] = adiosPoints[i][0];
-           linearizedPoints[i*3+1] = adiosPoints[i][1];
-           linearizedPoints[i*3+2] = adiosPoints[i][2];
-        }
         adiosWritePrimitives( "mesh", "points", adiosPoints.size(), adiosPoints.cdata() );
     }
 
