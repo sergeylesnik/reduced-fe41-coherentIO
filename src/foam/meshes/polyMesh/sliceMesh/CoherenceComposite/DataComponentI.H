@@ -30,6 +30,7 @@ Foam::DataComponentPtr Foam::DataComponent::add
 (
     const Foam::string type,
     const Foam::string name,
+    std::unique_ptr<InitStrategy> init_strategy,
     Foam::OffsetStrategy calc_start,
     Foam::OffsetStrategy calc_count
 )
@@ -38,6 +39,7 @@ Foam::DataComponentPtr Foam::DataComponent::add
                      (
                          type,
                          name,
+                         std::move(init_strategy),
                          calc_start,
                          calc_count,
                          this

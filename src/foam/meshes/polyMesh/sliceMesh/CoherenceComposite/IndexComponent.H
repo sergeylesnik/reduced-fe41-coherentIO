@@ -41,7 +41,7 @@ namespace Foam
 {
 
 // Forward declaration
-class InitStrategy;
+//class InitStrategy;
 
 class IndexComponent
 :
@@ -95,6 +95,16 @@ public:
     (
         const Foam::string type,
         const Foam::string name,
+        OffsetStrategy calc_start = nullptr,
+        OffsetStrategy calc_count = nullptr,
+        base_raw_ptr const parent_component = nullptr
+    );
+
+    IndexComponent
+    (
+        const Foam::string type,
+        const Foam::string name,
+        std::unique_ptr<InitStrategy> init_strategy,
         OffsetStrategy calc_start = nullptr,
         OffsetStrategy calc_count = nullptr,
         base_raw_ptr const parent_component = nullptr

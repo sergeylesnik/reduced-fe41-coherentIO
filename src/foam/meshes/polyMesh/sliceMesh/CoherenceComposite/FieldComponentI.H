@@ -32,6 +32,7 @@ Foam::FieldComponent<FieldType>::FieldComponent
 (
     const Foam::string type,
     const Foam::string name,
+    std::unique_ptr<InitStrategy> init_strategy,
     Foam::OffsetStrategy calc_start,
     Foam::OffsetStrategy calc_count,
     Foam::DataComponent* const parent_component

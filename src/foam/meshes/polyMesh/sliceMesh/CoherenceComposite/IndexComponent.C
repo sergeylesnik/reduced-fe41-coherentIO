@@ -27,7 +27,7 @@ License
 
 #include "DataComponentFree.H" // head_of_composition
 
-#include "InitStrategies.H"
+//#include "InitStrategies.H"
 
 #include <utility>
 
@@ -53,6 +53,27 @@ Foam::IndexComponent::IndexComponent
     },
     initialized_{false}
 {}
+
+
+Foam::IndexComponent::IndexComponent
+(
+    const Foam::string type,
+    const Foam::string name,
+    std::unique_ptr<InitStrategy> init_strategy,
+    Foam::OffsetStrategy calc_start,
+    Foam::OffsetStrategy calc_count,
+    Foam::DataComponent* const parent_component
+)
+:
+    DataComponent(type, name, parent_component),
+    components_map_{},
+    data_{},
+    calc_start_{calc_start},
+    calc_count_{calc_count},
+    init_strategy_{std::move(init_strategy)},
+    initialized_{false}
+{}
+
 
 // * * * * * * * * * * * * * Public Member Functions  * * * * * * * * * * * //
 

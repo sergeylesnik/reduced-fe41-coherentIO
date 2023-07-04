@@ -1587,6 +1587,7 @@ bool Foam::polyMesh::write() const
     if (time().writeFormat() == IOstream::COHERENT)
     {
         // Write mesh to a separate file
+        auto path = pointsInstance()/meshDir();
         auto adiosStreamPtr = adiosWriting{}.createStream();
         adiosStreamPtr->open( "mesh" );
 

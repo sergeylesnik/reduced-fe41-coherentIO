@@ -50,84 +50,116 @@ defineTypeNameAndDebug(Foam::sliceMesh, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::sliceMesh::readMesh()
+void Foam::sliceMesh::readMesh(const fileName& pathname)
 {
+    using InitStrategyPtr = std::unique_ptr<InitStrategy>;
+    using InitIndexComp = InitFromADIOS<labelList>;
+
     Foam::IndexComponent meshSlice{};
     if (Pstream::parRun())
     {
+        InitStrategyPtr init_partitionStarts
+        (
+            new InitIndexComp("mesh", "partitionStarts")
+        );
         meshSlice.add
         (
             "mesh",
             "partitionStarts",
+            std::move(init_partitionStarts),
             Foam::start_from_myProcNo,
             Foam::count_two
+        );
+
+        InitStrategyPtr init_ownerStarts
+        (
+            new InitIndexComp("mesh", "ownerStarts")
         );
         meshSlice.node("partitionStarts")->add
         (
             "mesh",
             "ownerStarts",
+            std::move(init_ownerStarts),
             Foam::start_from_front,
             Foam::count_from_front_plus_one
         );
     }
     else
     {
-        meshSlice.add("mesh", "ownerStarts");
+        InitStrategyPtr init_ownerStarts
+        (
+            new InitIndexComp("mesh", "ownerStarts")
+        );
+        meshSlice.add("mesh", "ownerStarts", std::move(init_ownerStarts));
     }
 
+    InitStrategyPtr init_cellOffsets(new InitOffsets(true));
     meshSlice.node("ownerStarts")->add
     (
         "offsets",
         "cellOffsets",
+        std::move(init_cellOffsets),
         nullptr,
         Foam::offset_by_size_minus_one
     );
     meshSlice.decorate<Foam::SliceDecorator>("cellOffsets");
 
+    InitStrategyPtr init_neighbours(new InitIndexComp("mesh", "neighbours"));
     meshSlice.node("ownerStarts")->add
     (
         "mesh",
         "neighbours",
+        std::move(init_neighbours),
         Foam::start_from_front,
         Foam::count_from_front
     );
 
+    InitStrategyPtr init_faceOffsets(new InitOffsets(true));
     meshSlice.node("neighbours")->add
     (
         "offsets",
         "faceOffsets",
+        std::move(init_faceOffsets),
         nullptr,
         Foam::count_from_size
     );
 
+    InitStrategyPtr init_internalFaceOffsets(new InitOffsets(true));
     meshSlice.node("neighbours")->add
     (
         "offsets",
         "internalFaceOffsets",
+        std::move(init_internalFaceOffsets),
         nullptr,
         Foam::count_geq(0)
     );
 
+    InitStrategyPtr init_faceStarts(new InitIndexComp("mesh", "faceStarts"));
     meshSlice.node("ownerStarts")->add
     (
         "mesh",
         "faceStarts",
+        std::move(init_faceStarts),
         Foam::start_from_front,
         Foam::count_from_front_plus_one
     );
 
+    InitStrategyPtr init_faces(new InitIndexComp("mesh", "faces"));
     meshSlice.node("faceStarts")->add
     (
         "mesh",
         "faces",
+        std::move(init_faces),
         Foam::start_from_front,
         Foam::count_from_front
     );
 
+    InitStrategyPtr init_pointOffsets(new InitOffsets(false));
     meshSlice.node("faces")->add
     (
         "offsets",
         "pointOffsets",
+        std::move(init_pointOffsets),
         Foam::offset_by_max_plus_one,
         nullptr
     );
@@ -137,6 +169,7 @@ void Foam::sliceMesh::readMesh()
     (
         "mesh",
         "points",
+        nullptr,
         Foam::start_from_front,
         Foam::count_from_front
     );
@@ -166,11 +199,13 @@ void Foam::sliceMesh::readMesh()
     for (Foam::label patchi = 0; patchi<numBoundaries_; ++patchi)
     {
         auto slicePatchId = Foam::encodeSlicePatchId(patchi);
+        InitStrategyPtr init_boundaryFaceOffsets(new InitOffsets(true));
         meshSlice.node("neighbours")
                  ->add
                  (
                      "offsets",
                      "boundaryFaceOffsets" + std::to_string(patchi),
+                     std::move(init_boundaryFaceOffsets),
                      nullptr,
                      Foam::count_eq(slicePatchId)
                  );
@@ -549,7 +584,8 @@ Foam::sliceMesh::sliceMesh(const Foam::polyMesh& pm)
 :
     MeshObject<polyMesh, sliceMesh>(pm)
 {
-    readMesh();
+    Foam::fileName path = pm.pointsInstance()/pm.meshDir();
+    readMesh(path);
 }
 
 

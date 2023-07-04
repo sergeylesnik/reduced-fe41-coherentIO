@@ -42,6 +42,8 @@ SourceFiles
 #include "Offsets.H"
 #include "Slice.H"
 
+#include "InitStrategies.H"
+
 #include <memory>
 #include <map>
 
@@ -104,6 +106,7 @@ struct DataComponent
     (
         const Foam::string type,
         const Foam::string name,
+        std::unique_ptr<InitStrategy> init_strategy,
         OffsetStrategy calc_start = nullptr,
         OffsetStrategy calc_count = nullptr
     );

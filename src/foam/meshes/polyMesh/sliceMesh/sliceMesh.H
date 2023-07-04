@@ -126,7 +126,7 @@ class sliceMesh
     Foam::labelList procBoundaryIDs_;
 
     // Private Member Functions
-    void readMesh();
+    void readMesh(const fileName&);
 
     // De-serialize faces
     faceList

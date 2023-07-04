@@ -35,7 +35,6 @@ SourceFiles
 #ifndef InitStrategies_H
 #define InitStrategies_H
 
-#include "DataComponent.H"
 #include "Offsets.H"
 #include "adiosStream.H"
 
@@ -52,7 +51,7 @@ struct InitStrategy
 {
     virtual ~InitStrategy() = default;
 
-    using index_container = DataComponent::index_container;
+    using index_container = labelList;
     using labelPair = std::pair<Foam::label, Foam::label>;
 
     template<typename Container>

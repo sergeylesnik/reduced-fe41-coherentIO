@@ -81,6 +81,7 @@ public:
     (
         const Foam::string type,
         const Foam::string name,
+        std::unique_ptr<InitStrategy> init_strategy,
         OffsetStrategy calc_start = nullptr,
         OffsetStrategy calc_count = nullptr,
         base_raw_ptr const parent_component = nullptr
