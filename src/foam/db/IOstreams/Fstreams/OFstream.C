@@ -386,10 +386,9 @@ void Foam::OFstream::writeLocalString
     if (Foam::Pstream::master())
     {
         std::ofstream outFile;
-        Foam::mkDir("fields/");
         outFile.open
         (
-            "fields/" + varName.name(), ios_base::out|ios_base::trunc
+            varName, ios_base::out|ios_base::trunc
         );
         outFile << str;
         outFile.close();
