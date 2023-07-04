@@ -532,10 +532,10 @@ writeEntry(const word& keyword, Ostream& os) const
     {
         os  << incrBlock(this->operator[](patchi).patch().name())
             << this->operator[](patchi)
-            << decrBlock;
+            << decrBlock << endl;
     }
 
-    os << decrBlock;
+    os << decrBlock << endl;
     // os  << decrIndent << token::END_BLOCK << endl;
 
     // Check state of IOstream
