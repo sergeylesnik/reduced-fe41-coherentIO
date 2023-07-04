@@ -34,6 +34,7 @@ template<typename T>
 void _implReadPrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     T* buf,
     const Foam::List<Foam::label>& start,
@@ -41,7 +42,7 @@ void _implReadPrimitives
 )
 {
     auto adiosStreamPtr = Foam::adiosReading{}.createStream();
-    adiosStreamPtr->open(type);
+    adiosStreamPtr->open(type, pathname);
     if (start.size()>0 && count.size()>0)
     {
         adiosStreamPtr->transfer(blockId, buf, start, count);
@@ -57,39 +58,42 @@ void _implReadPrimitives
 void Foam::adiosReadPrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     Foam::scalar* buf,
     const Foam::List<Foam::label>& start,
     const Foam::List<Foam::label>& count
 )
 {
-    _implReadPrimitives(type, blockId, buf, start, count);
+    _implReadPrimitives(type, pathname, blockId, buf, start, count);
 }
 
 
 void Foam::adiosReadPrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     Foam::label* buf,
     const Foam::List<Foam::label>& start,
     const Foam::List<Foam::label>& count
 )
 {
-    _implReadPrimitives(type, blockId, buf, start, count);
+    _implReadPrimitives(type, pathname, blockId, buf, start, count);
 }
 
 
 void Foam::adiosReadPrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     char* buf,
     const Foam::List<Foam::label>& start,
     const Foam::List<Foam::label>& count
 )
 {
-    _implReadPrimitives(type, blockId, buf, start, count);
+    _implReadPrimitives(type, pathname, blockId, buf, start, count);
 }
 
 // ************************************************************************* //

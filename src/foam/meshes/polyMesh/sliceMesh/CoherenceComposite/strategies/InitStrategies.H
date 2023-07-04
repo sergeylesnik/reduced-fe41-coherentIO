@@ -37,6 +37,7 @@ SourceFiles
 
 #include "Offsets.H"
 #include "adiosStream.H"
+#include "adiosReadPrimitives.H"
 
 #include "labelList.H"
 #include "scalarField.H"
@@ -83,10 +84,12 @@ struct InitFromADIOS
     explicit InitFromADIOS
     (
         const Foam::string& type,
+        const Foam::string& pathname,
         const Foam::string& name
     )
     :
         type_{type},
+        pathname_{pathname},
         name_{name}
     {}
 
@@ -107,6 +110,7 @@ private:
         Foam::adiosReadToContainer
         (
             type_,
+            pathname_,
             name_,
             data,
             start,
@@ -115,6 +119,8 @@ private:
     }
 
     Foam::string type_{};
+
+    Foam::string pathname_{};
 
     Foam::string name_{};
 
@@ -140,6 +146,61 @@ private:
     bool accumulate_{};
 
 };
+
+
+template<typename FieldType = InitStrategy::index_container>
+struct InitPrimitivesFromADIOS
+:
+    public InitStrategy
+{
+    InitPrimitivesFromADIOS() = default;
+
+    explicit InitPrimitivesFromADIOS
+    (
+        const Foam::string& type,
+        const Foam::string& pathname,
+        const Foam::string& name
+    )
+    :
+        type_{type},
+        pathname_{pathname},
+        name_{name}
+    {}
+
+private:
+
+    void execute
+    (
+        FieldType& data,
+        Foam::InitStrategy::labelPair& start_count
+    ) final
+    {
+        auto start = (start_count.first != -1) ?
+                     labelList({start_count.first}) :
+                     labelList({});
+        auto count = (start_count.second != -1) ?
+                     labelList({start_count.second}) :
+                     labelList({});
+        data.resize(count[0]);
+        Foam::adiosReadPrimitives
+        (
+            type_,
+            pathname_,
+            name_,
+            data.data(),
+            start,
+            count
+        );
+    }
+
+    Foam::string type_{};
+
+    Foam::string pathname_{};
+
+    Foam::string name_{};
+
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

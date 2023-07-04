@@ -32,7 +32,6 @@ License
 
 #include "prefixOSstream.H"
 
-#include "adiosWritePrimitives.H"
 #include "UListProxy.H"
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //

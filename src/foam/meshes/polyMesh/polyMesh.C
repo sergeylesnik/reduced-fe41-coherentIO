@@ -37,8 +37,6 @@ License
 #include "adiosWriting.H"
 #include "adiosFileStream.H"
 #include "adiosWritePrimitives.H"
-#include "adiosReadPrimitives.H"
-//#include "SortableList.H"
 
 #include "DynamicList.H"
 #include <numeric>
@@ -1589,7 +1587,7 @@ bool Foam::polyMesh::write() const
         // Write mesh to a separate file
         auto path = pointsInstance()/meshDir();
         auto adiosStreamPtr = adiosWriting{}.createStream();
-        adiosStreamPtr->open( "mesh" );
+        adiosStreamPtr->open("mesh", path);
 
         slicePermutation sliceablePermutation{ *this };
 
@@ -1652,7 +1650,14 @@ bool Foam::polyMesh::write() const
 
         adiosStreamPtr->close();
 
-        adiosWritePrimitives( "mesh", "points", adiosPoints.size(), adiosPoints.cdata() );
+        adiosWritePrimitives
+        (
+            "mesh",
+            path,
+            "points",
+            adiosPoints.size(),
+            adiosPoints.cdata()
+        );
     }
 
     return regIOobject::write();

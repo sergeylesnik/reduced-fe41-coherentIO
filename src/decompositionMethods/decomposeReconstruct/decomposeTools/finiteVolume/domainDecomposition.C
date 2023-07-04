@@ -38,6 +38,7 @@ License
 
 #include "sliceMeshHelper.H"
 #include "slicePermutation.H"
+#include "adiosWritePrimitives.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -115,7 +116,15 @@ Foam::autoPtr<Foam::fvMesh> Foam::domainDecomposition::parallelMesh
             ++gCellI;
         }
     }
-    adiosWritePrimitives( "mesh", "partitionStarts", partitionStarts.size(), partitionStarts.cdata() );
+    auto path = mesh_.pointsInstance()/mesh_.meshDir();
+    adiosWritePrimitives
+    (
+        "mesh",
+        path,
+        "partitionStarts",
+        partitionStarts.size(),
+        partitionStarts.cdata()
+    );
 
     // Get complete owner-neighour addressing in the mesh
     const labelList& own = mesh_.faceOwner();

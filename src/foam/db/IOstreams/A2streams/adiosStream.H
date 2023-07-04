@@ -26,6 +26,7 @@ template<typename Container>
 void adiosReadToContainer
 (
     const Foam::string& type,
+    const Foam::string& pathname,
     const Foam::string& blockId,
     Container& container,
     const labelList& start = {},
@@ -185,6 +186,7 @@ template<typename Container>
 void Foam::adiosReadToContainer
 (
     const Foam::string& type,
+    const Foam::string& pathname,
     const Foam::string& blockId,
     Container& container,
     const Foam::labelList& start,
@@ -192,7 +194,7 @@ void Foam::adiosReadToContainer
 )
 {
     auto adiosStreamPtr = adiosReading{}.createStream();
-    adiosStreamPtr->open(type);
+    adiosStreamPtr->open(type, pathname);
     adiosStreamPtr->transfer(blockId, container, start, count);
     adiosStreamPtr->close();
 }

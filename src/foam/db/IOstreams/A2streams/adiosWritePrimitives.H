@@ -44,6 +44,7 @@ template<typename T> class List;
 void adiosWritePrimitives
 (
     const string type,
+    const string pathname,
     const string blockId,
     const label count,
     const scalar* buf
@@ -53,6 +54,7 @@ void adiosWritePrimitives
 void adiosWritePrimitives
 (
     const string type,
+    const string pathname,
     const string blockId,
     const label count,
     const label* buf
@@ -62,6 +64,7 @@ void adiosWritePrimitives
 void adiosWritePrimitives
 (
     const string type,
+    const string pathname,
     const string blockId,
     const List<label> shape,
     const List<label> start,
@@ -73,6 +76,7 @@ void adiosWritePrimitives
 void adiosWritePrimitives
 (
     const string type,
+    const string pathname,
     const string blockId,
     const label shape,
     const label start,
@@ -92,6 +96,7 @@ template
 void Foam::adiosWritePrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string name,
     const Foam::label count,
     const T* buf
@@ -112,6 +117,7 @@ template
 void Foam::adiosWritePrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string name,
     const Foam::label count,
     const T* buf
@@ -123,6 +129,7 @@ void Foam::adiosWritePrimitives
     adiosWritePrimitives
     (
         type,
+        pathname,
         name,
         shapeList,
         startList,
@@ -141,6 +148,7 @@ template
 void Foam::adiosWritePrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string name,
     const Foam::label shape,
     const Foam::label start,
@@ -154,6 +162,7 @@ void Foam::adiosWritePrimitives
     adiosWritePrimitives
     (
         type,
+        pathname,
         name,
         shapeList,
         startList,

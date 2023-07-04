@@ -33,9 +33,10 @@ License
 #include <iostream>
 #include <memory>
 
-#include "adiosWriting.H"
-#include "adiosFileStream.H"
+//#include "adiosWriting.H"
+//#include "adiosFileStream.H"
 #include "adiosStream.H"
+#include "adiosWritePrimitives.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -331,6 +332,7 @@ Foam::Ostream& Foam::OFstream::write
     adiosWritePrimitives
     (
         "fields",
+        "",
         this->getBlockId(),
         byteSize/sizeof(scalar),
         reinterpret_cast<const scalar*>(data)

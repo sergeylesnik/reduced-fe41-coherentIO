@@ -33,27 +33,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::IndexComponent::IndexComponent
-(
-    const Foam::string type,
-    const Foam::string name,
-    Foam::OffsetStrategy calc_start,
-    Foam::OffsetStrategy calc_count,
-    Foam::DataComponent* const parent_component
-)
-:
-    DataComponent(type, name, parent_component),
-    components_map_{},
-    data_{},
-    calc_start_{calc_start},
-    calc_count_{calc_count},
-    init_strategy_
-    {
-        Foam::create_component_initializer(type, name, !calc_start_)
-    },
-    initialized_{false}
-{}
-
 
 Foam::IndexComponent::IndexComponent
 (
@@ -68,9 +47,9 @@ Foam::IndexComponent::IndexComponent
     DataComponent(type, name, parent_component),
     components_map_{},
     data_{},
+    init_strategy_{std::move(init_strategy)},
     calc_start_{calc_start},
     calc_count_{calc_count},
-    init_strategy_{std::move(init_strategy)},
     initialized_{false}
 {}
 
@@ -124,10 +103,10 @@ void Foam::IndexComponent::init()
 {
     auto parent = !parent_component_ ? this : parent_component_;
     Foam::InitStrategy::labelPair start_count
-                                  (
-                                      parent->accept(calc_start_),
-                                      parent->accept(calc_count_)
-                                  );
+    (
+        parent->accept(calc_start_),
+        parent->accept(calc_count_)
+    );
     init_strategy_->operator()(data_, start_count);
     initialized_ = true;
 }

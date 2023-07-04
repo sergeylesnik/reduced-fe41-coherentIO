@@ -45,6 +45,7 @@ class string;
 void adiosReadPrimitives
 (
     const string type,
+    const string pathname,
     const string name,
     scalar* buf,
     const List<label>& start = {},
@@ -54,6 +55,7 @@ void adiosReadPrimitives
 void adiosReadPrimitives
 (
     const string type,
+    const string pathname,
     const string name,
     label* buf,
     const List<label>& start = {},
@@ -63,6 +65,7 @@ void adiosReadPrimitives
 void adiosReadPrimitives
 (
     const string type,
+    const string pathname,
     const string name,
     char* buf,
     const List<label>& start = {},
@@ -80,6 +83,7 @@ template
 void Foam::adiosReadPrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string name,
     T* buf,
     const Foam::List<Foam::label>& start = {},
@@ -100,6 +104,7 @@ template
 void Foam::adiosReadPrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string name,
     T* buf,
     const Foam::List<Foam::label>& start = {},
@@ -116,6 +121,7 @@ void Foam::adiosReadPrimitives
     Foam::adiosReadPrimitives
     (
         type,
+        pathname,
         name,
         reinterpret_cast<scalar*>( buf ),
         startList,
@@ -135,6 +141,7 @@ template
 void Foam::adiosReadPrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string name,
     T* buf,
     Integral start = -1,
@@ -148,7 +155,7 @@ void Foam::adiosReadPrimitives
         startList = Foam::List<Foam::label>({start});
         countList = Foam::List<Foam::label>({count});
     }
-    Foam::adiosReadPrimitives(type, name, buf, startList, countList);
+    Foam::adiosReadPrimitives(type, pathname, name, buf, startList, countList);
 }
 
 
@@ -163,6 +170,7 @@ template
 void Foam::adiosReadPrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string name,
     T* buf,
     Integral start = -1,
@@ -171,7 +179,7 @@ void Foam::adiosReadPrimitives
 {
     Foam::List<Integral> startList({start});
     Foam::List<Integral> countList({count});
-    Foam::adiosReadPrimitives(type, name, buf, startList, countList);
+    Foam::adiosReadPrimitives(type, pathname, name, buf, startList, countList);
 }
 
 

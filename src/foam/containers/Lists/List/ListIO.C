@@ -30,8 +30,6 @@ License
 #include "contiguous.H"
 #include <iostream>
 
-#include "adiosReadPrimitives.H"
-
 #include "Ostream.H"
 #include "prefixOSstream.H"
 
@@ -200,20 +198,6 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
             {
                 Pout<< "Reading via COHERENT id = " << id << endl;
             }
-
-            //ToDoIO Check the string read from the stream
-            /*
-            is.parread
-            (
-                reinterpret_cast<parIOType*>(list.data()),
-                id.replace("\"","")
-            );
-            */
-            // Foam::string type = "fields";
-            // if ( is.name().find("polyMesh") != std::string::npos ) {
-            //     type = "mesh";
-            // }
-            // adiosReadPrimitives( type, id, list.data() );
 
             if (UList<T>::debug > 1)
             {

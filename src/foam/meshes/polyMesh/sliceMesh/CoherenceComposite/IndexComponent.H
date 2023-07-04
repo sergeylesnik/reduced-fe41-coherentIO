@@ -51,11 +51,11 @@ class IndexComponent
 
     index_container data_{};
 
+    std::unique_ptr<InitStrategy> init_strategy_{nullptr};
+
     OffsetStrategy calc_start_{nullptr};
 
     OffsetStrategy calc_count_{nullptr};
-
-    std::unique_ptr<InitStrategy> init_strategy_;
 
     bool initialized_{false};
 
@@ -90,15 +90,6 @@ class IndexComponent
 public:
 
     IndexComponent() = default;
-
-    IndexComponent
-    (
-        const Foam::string type,
-        const Foam::string name,
-        OffsetStrategy calc_start = nullptr,
-        OffsetStrategy calc_count = nullptr,
-        base_raw_ptr const parent_component = nullptr
-    );
 
     IndexComponent
     (

@@ -27,10 +27,6 @@ License
 #include "sliceMeshHelper.H"
 #include "nonblockConsensus.H"
 
-#include "adiosFileStream.H"
-#include "adiosWritePrimitives.H"
-#include "adiosReadPrimitives.H"
-
 #include "processorPolyPatch.H"
 
 #include "DataComponent.H"
@@ -60,7 +56,7 @@ void Foam::sliceMesh::readMesh(const fileName& pathname)
     {
         InitStrategyPtr init_partitionStarts
         (
-            new InitIndexComp("mesh", "partitionStarts")
+            new InitIndexComp("mesh", pathname, "partitionStarts")
         );
         meshSlice.add
         (
@@ -73,7 +69,7 @@ void Foam::sliceMesh::readMesh(const fileName& pathname)
 
         InitStrategyPtr init_ownerStarts
         (
-            new InitIndexComp("mesh", "ownerStarts")
+            new InitIndexComp("mesh", pathname, "ownerStarts")
         );
         meshSlice.node("partitionStarts")->add
         (
@@ -88,7 +84,7 @@ void Foam::sliceMesh::readMesh(const fileName& pathname)
     {
         InitStrategyPtr init_ownerStarts
         (
-            new InitIndexComp("mesh", "ownerStarts")
+            new InitIndexComp("mesh", pathname, "ownerStarts")
         );
         meshSlice.add("mesh", "ownerStarts", std::move(init_ownerStarts));
     }
@@ -104,7 +100,10 @@ void Foam::sliceMesh::readMesh(const fileName& pathname)
     );
     meshSlice.decorate<Foam::SliceDecorator>("cellOffsets");
 
-    InitStrategyPtr init_neighbours(new InitIndexComp("mesh", "neighbours"));
+    InitStrategyPtr init_neighbours
+    (
+        new InitIndexComp("mesh", pathname, "neighbours")
+    );
     meshSlice.node("ownerStarts")->add
     (
         "mesh",
@@ -134,7 +133,10 @@ void Foam::sliceMesh::readMesh(const fileName& pathname)
         Foam::count_geq(0)
     );
 
-    InitStrategyPtr init_faceStarts(new InitIndexComp("mesh", "faceStarts"));
+    InitStrategyPtr init_faceStarts
+    (
+        new InitIndexComp("mesh", pathname, "faceStarts")
+    );
     meshSlice.node("ownerStarts")->add
     (
         "mesh",
@@ -144,7 +146,10 @@ void Foam::sliceMesh::readMesh(const fileName& pathname)
         Foam::count_from_front_plus_one
     );
 
-    InitStrategyPtr init_faces(new InitIndexComp("mesh", "faces"));
+    InitStrategyPtr init_faces
+    (
+        new InitIndexComp("mesh", pathname, "faces")
+    );
     meshSlice.node("faceStarts")->add
     (
         "mesh",
@@ -165,11 +170,15 @@ void Foam::sliceMesh::readMesh(const fileName& pathname)
     );
     meshSlice.decorate<Foam::SliceDecorator>("pointOffsets");
 
+    InitStrategyPtr init_points
+    (
+        new InitPrimitivesFromADIOS<pointField>("mesh", pathname, "points")
+    );
     meshSlice.node("pointOffsets")->add<FieldComponent<pointField>>
     (
         "mesh",
         "points",
-        nullptr,
+        std::move(init_points),
         Foam::start_from_front,
         Foam::count_from_front
     );

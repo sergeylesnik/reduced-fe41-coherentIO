@@ -35,6 +35,7 @@ template< typename T >
 void _implWritePrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     const Foam::labelList& shape,
     const Foam::labelList& start,
@@ -43,7 +44,7 @@ void _implWritePrimitives
 )
 {
     auto adiosStreamPtr = Foam::adiosWriting{}.createStream();
-    adiosStreamPtr->open( type );
+    adiosStreamPtr->open( type, pathname );
     adiosStreamPtr->transfer( blockId, shape, start, count, buf );
     adiosStreamPtr->close();
 }
@@ -52,6 +53,7 @@ void _implWritePrimitives
 void Foam::adiosWritePrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     const Foam::label count,
     const Foam::scalar* buf
@@ -60,6 +62,7 @@ void Foam::adiosWritePrimitives
     _implWritePrimitives
     (
         type,
+        pathname,
         blockId,
         { count },
         { 0 },
@@ -72,6 +75,7 @@ void Foam::adiosWritePrimitives
 void Foam::adiosWritePrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     const Foam::label count,
     const Foam::label* buf
@@ -80,6 +84,7 @@ void Foam::adiosWritePrimitives
     _implWritePrimitives
     (
         type,
+        pathname,
         blockId,
         { count },
         { 0 },
@@ -92,6 +97,7 @@ void Foam::adiosWritePrimitives
 void Foam::adiosWritePrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     const Foam::List<label> shape,
     const Foam::List<label> start,
@@ -102,6 +108,7 @@ void Foam::adiosWritePrimitives
     _implWritePrimitives
     (
         type,
+        pathname,
         blockId,
         shape,
         start,
@@ -114,6 +121,7 @@ void Foam::adiosWritePrimitives
 void Foam::adiosWritePrimitives
 (
     const Foam::string type,
+    const Foam::string pathname,
     const Foam::string blockId,
     const Foam::label shape,
     const Foam::label start,
@@ -124,6 +132,7 @@ void Foam::adiosWritePrimitives
     _implWritePrimitives
     (
         type,
+        pathname,
         blockId,
         { shape },
         { start },

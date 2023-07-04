@@ -41,7 +41,7 @@ class adiosPaths
 {
 
     // Mesh data file name
-    const Foam::fileName meshPathname_{"constant/polyMesh/data.bp"};
+    const Foam::fileName meshPathname_{"data.bp"};
 
     // Field data file name
     const Foam::fileName dataPathname_{"data.bp"};

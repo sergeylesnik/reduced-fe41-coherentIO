@@ -50,6 +50,8 @@ class FieldComponent
 {
     FieldType data_;
 
+    std::unique_ptr<InitStrategy> init_strategy_{nullptr};
+
     OffsetStrategy calc_start_{nullptr};
 
     OffsetStrategy calc_count_{nullptr};
