@@ -621,7 +621,7 @@ void Field<Type>::writeEntry(const word& keyword, Ostream& os) const
         }
     }
 
-    if (os.format() == IOstream::PARALLEL)
+    if (os.format() == IOstream::COHERENT)
     {
         // Trigger write, the uniformity check will be performed later
         List<Type>::writeEntry(os);

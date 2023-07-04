@@ -450,7 +450,7 @@ Foam::Istream* Foam::IOobject::objectStreamPar(const fileName& fName)
 {
     if (fName.size())
     {
-        IFstream* isPtr = new IFstream(fName, IOstream::PARALLEL);
+        IFstream* isPtr = new IFstream(fName, IOstream::COHERENT);
 
         if (isPtr->good())
         {
@@ -514,7 +514,7 @@ bool Foam::IOobject::headerOkPar()
 {
     const word writeFormat(time().controlDict().lookup("writeFormat"));
     const bool isCoherentFormat =
-        (IOstream::formatEnum(writeFormat) == IOstream::PARALLEL);
+        (IOstream::formatEnum(writeFormat) == IOstream::COHERENT);
 
     if (isCoherentFormat)
     {

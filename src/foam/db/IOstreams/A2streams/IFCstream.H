@@ -175,7 +175,7 @@ public:
         (
             const fileName& pathname,
             const objectRegistry& registry,
-            streamFormat format = PARALLEL,
+            streamFormat format = COHERENT,
             versionNumber version = currentVersion
         );
 

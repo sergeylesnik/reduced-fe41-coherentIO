@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
 
     Info<< endl;
 
-    if ( mesh.time().writeFormat() == IOstream::PARALLEL ) {
+    if ( mesh.time().writeFormat() == IOstream::COHERENT ) {
 
         Time myDb( Time::controlDictName,
                    mesh.time().rootPath(),
@@ -453,7 +453,7 @@ int main(int argc, char *argv[])
                 processorDb
             )
         );
-        
+
         labelIOList pointProcAddressing
         (
             IOobject
@@ -585,7 +585,7 @@ int main(int argc, char *argv[])
         }
     }
     } // for-loop on procI
-    } // if ( IOstream::PARALLEL )
+    } // if ( IOstream::COHERENT )
 
     Info<< "\nEnd.\n" << endl;
 

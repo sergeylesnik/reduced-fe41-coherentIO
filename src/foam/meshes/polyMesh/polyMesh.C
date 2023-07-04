@@ -361,7 +361,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
-    if (time().writeFormat() == IOstream::PARALLEL)
+    if (time().writeFormat() == IOstream::COHERENT)
     {
         this->checkOut( allPoints_ );
         this->checkOut( allFaces_ );
@@ -464,7 +464,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     }
 
     // if (exists(owner_.objectPath()))
-    if (owner_.headerOkPar() || (time().writeFormat() == IOstream::PARALLEL))
+    if (owner_.headerOkPar() || (time().writeFormat() == IOstream::COHERENT))
     {
         initMesh();
     }
@@ -655,7 +655,7 @@ Foam::polyMesh::polyMesh
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
-    if (time().writeFormat() == IOstream::PARALLEL)
+    if (time().writeFormat() == IOstream::COHERENT)
     {
         this->checkOut( allPoints_ );
         this->checkOut( allFaces_ );
@@ -825,7 +825,7 @@ Foam::polyMesh::polyMesh
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
-    if (time().writeFormat() == IOstream::PARALLEL)
+    if (time().writeFormat() == IOstream::COHERENT)
     {
         this->checkOut( allPoints_ );
         this->checkOut( allFaces_ );
@@ -1584,7 +1584,7 @@ Foam::labelList determineOffsets2D( const T& input2DList )
 
 bool Foam::polyMesh::write() const
 {
-    if (time().writeFormat() == IOstream::PARALLEL)
+    if (time().writeFormat() == IOstream::COHERENT)
     {
         // Write mesh to a separate file
         auto adiosStreamPtr = adiosWriting{}.createStream();

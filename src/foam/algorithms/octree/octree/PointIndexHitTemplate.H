@@ -212,7 +212,7 @@ public:
                     sizeof(PointIndexHit)
                 );
             }
-            else if (os.format() == IOstream::PARALLEL)
+            else if (os.format() == IOstream::COHERENT)
             { cout << "Parallel IO not yet implemented in PointIndexHitTemplate.H"; }
 
             // Check state of Ostream
@@ -235,7 +235,7 @@ public:
                     sizeof(PointIndexHit)
                 );
             }
-            else if (is.format() == IOstream::PARALLEL)
+            else if (is.format() == IOstream::COHERENT)
             { cout << "Parallel IO not yet implemented in PointIndexHitTemplate.H"; }
 
             // Check state of Istream

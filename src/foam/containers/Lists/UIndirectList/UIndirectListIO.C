@@ -114,7 +114,7 @@ Foam::Ostream& Foam::operator<<
             );
         }
     }
-    else if (os.format() == IOstream::PARALLEL)
+    else if (os.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in UIndirectedListIO.C\n"; }
 
     // Check state of IOstream

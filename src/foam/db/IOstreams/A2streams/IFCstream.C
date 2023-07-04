@@ -61,10 +61,10 @@ Foam::IFCstreamAllocator::IFCstreamAllocator
         }
     }
 
-    if (format != IOstream::PARALLEL)
+    if (format != IOstream::COHERENT)
     {
         FatalErrorInFunction
-            << "IO Format is not PARALLEL" << endl;
+            << "IO Format is not COHERENT" << endl;
     }
 
     ifPtr_ = new std::istringstream();

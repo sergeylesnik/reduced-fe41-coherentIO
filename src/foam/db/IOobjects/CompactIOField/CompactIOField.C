@@ -185,7 +185,7 @@ bool Foam::CompactIOField<T, BaseType>::writeObject
     {
         return regIOobject::writeObject(fmt, ver, cmp);
     }
-    else if (fmt == IOstream::PARALLEL)
+    else if (fmt == IOstream::COHERENT)
     {
         cout << "Parallel IO not yet implemented in CompactIOField.C\n";
         return false;

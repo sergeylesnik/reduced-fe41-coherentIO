@@ -126,7 +126,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
             "reading the binary block"
         );
     }
-    else if (is.format() == IOstream::PARALLEL)
+    else if (is.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in FixedListIO.C\n"; }
 
     return is;
@@ -234,7 +234,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
     {
         os.write(reinterpret_cast<const char*>(L.cdata()), Size*sizeof(T));
     }
-    else if (os.format() == IOstream::PARALLEL)
+    else if (os.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in FixedListIO.C\n"; }
 
     // Check state of IOstream

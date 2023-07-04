@@ -121,7 +121,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token::punctuationToken& pt)
     if
     (
         (pt == token::END_STATEMENT || pt == token::NL)
-     && os.format() == Ostream::streamFormat::PARALLEL
+     && os.format() == Ostream::streamFormat::COHERENT
     )
     {
         if (Ostream::debug)

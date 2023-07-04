@@ -46,9 +46,9 @@ Foam::IOstream::formatEnum(const word& format)
     {
         return IOstream::BINARY;
     }
-    else if (format == "parallel")
+    else if (format == "coherent")
     {
-        return IOstream::PARALLEL;
+        return IOstream::COHERENT;
     }
     else
     {
@@ -145,8 +145,8 @@ void Foam::IOstream::print(Ostream& os) const
             os  << "BINARY";
         break;
 
-        case PARALLEL:
-            os  << "PARALLEL";
+        case COHERENT:
+            os  << "COHERENT";
         break;
     }
 
@@ -223,9 +223,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const IOstream::streamFormat& sf)
     {
         os << "binary";
     }
-    else if (sf == IOstream::PARALLEL)
+    else if (sf == IOstream::COHERENT)
     {
-        os << "parallel";
+        os << "coherent";
     }
 
     return os;

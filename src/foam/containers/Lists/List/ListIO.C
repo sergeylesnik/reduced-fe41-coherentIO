@@ -102,7 +102,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
             Pout<< "ListIO: operator>>, reading a list of size " << len << endl;
         }
 
-        if (is.format() != IOstream::PARALLEL)
+        if (is.format() != IOstream::COHERENT)
         {
             // Resize to length read
             list.resize(len);
@@ -112,7 +112,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
 
         if (is.format() == IOstream::ASCII || !contiguous<T>())
         {
-            if (is.format() == IOstream::PARALLEL)
+            if (is.format() == IOstream::COHERENT)
             {
                 // Read the id of list contents
                 string id;
@@ -132,7 +132,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 //}
                 if (List<T>::debug > 1)
                 {
-                    Pout<< "List read via PARALLEL = " << nl << list << endl;
+                    Pout<< "List read via COHERENT = " << nl << list << endl;
                 }
             }
             else
@@ -191,14 +191,14 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 "reading the binary block"
             );
         }
-        else if (len && is.format() == IOstream::PARALLEL)
+        else if (len && is.format() == IOstream::COHERENT)
         {
             string id;
             is >> id;
 
             if (List<T>::debug)
             {
-                Pout<< "Reading via PARALLEL id = " << id << endl;
+                Pout<< "Reading via COHERENT id = " << id << endl;
             }
 
             //ToDoIO Check the string read from the stream
@@ -217,7 +217,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
 
             if (UList<T>::debug > 1)
             {
-                Pout<< "List read via PARALLEL = " << nl << list << endl;
+                Pout<< "List read via COHERENT = " << nl << list << endl;
             }
 
         }

@@ -147,7 +147,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::domainDecomposition::parallelMesh
         ++counter;
     }
 
-    
+
     Foam::labelList coherentFaceAddressing{};
     Foam::labelList indices{};
     indexIota( coherentFaceAddressing, procFaces.size(), 0 );
@@ -703,7 +703,7 @@ bool Foam::domainDecomposition::writeDecomposition()
         }
     }
 
-    if ( mesh_.time().writeFormat() == IOstream::PARALLEL ) {
+    if ( mesh_.time().writeFormat() == IOstream::COHERENT ) {
         Time myDb( Time::controlDictName,
                    mesh_.time().rootPath(),
                    mesh_.time().caseName(),

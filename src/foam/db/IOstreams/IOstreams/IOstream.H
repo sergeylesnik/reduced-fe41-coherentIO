@@ -96,7 +96,7 @@ public:
         {
             ASCII,
             BINARY,
-            PARALLEL
+            COHERENT
         };
 
         //- Ostream operator

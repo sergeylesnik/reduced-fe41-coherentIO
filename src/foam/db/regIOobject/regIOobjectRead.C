@@ -151,7 +151,7 @@ Foam::Istream& Foam::regIOobject::readStreamPar(const word& expectName)
 {
     const word writeFormat(time().controlDict().lookup("writeFormat"));
     const bool isCoherentFormat =
-        (IOstream::formatEnum(writeFormat) == IOstream::PARALLEL);
+        (IOstream::formatEnum(writeFormat) == IOstream::COHERENT);
 
     if (!isCoherentFormat)
     {

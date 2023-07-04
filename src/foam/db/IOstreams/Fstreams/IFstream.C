@@ -79,7 +79,7 @@ Foam::IFstreamAllocator::IFstreamAllocator
         }
     }
 
-    if (format == IOstream::PARALLEL)
+    if (format == IOstream::COHERENT)
     {
         ifPtr_ = new std::istringstream();
 
@@ -217,7 +217,7 @@ std::istream& Foam::IFstream::stdStream()
 // read binary block from second stream
 Foam::Istream& Foam::IFstream::parread(parIOType* buf, const string& blockId)
 {
-    if (format() != PARALLEL)
+    if (format() != COHERENT)
     {
         FatalIOErrorIn("ISstream::parread(parIOType*, std::streamsize)", *this)
             << "stream format not parallel"

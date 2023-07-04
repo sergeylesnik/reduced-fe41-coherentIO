@@ -125,7 +125,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
             sizeof(boundBox)
         );
     }
-    else if (os.format() == IOstream::PARALLEL)
+    else if (os.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in boundBox.C\n"; }
 
     // Check state of Ostream
@@ -148,7 +148,7 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
             sizeof(boundBox)
         );
     }
-    else if (is.format() == IOstream::PARALLEL)
+    else if (is.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in boundBox.C\n"; }
 
     // Check state of Istream

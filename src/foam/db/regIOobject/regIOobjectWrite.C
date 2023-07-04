@@ -113,7 +113,7 @@ bool Foam::regIOobject::write() const
 {
     addProfile2(io, "Foam::regIOobject::write()");
 
-    if (time().writeFormat() == IOstream::PARALLEL)
+    if (time().writeFormat() == IOstream::COHERENT)
     {
         //auto type = Foam::adiosStreamType( objectPath() );
         //Foam::adiosBeginStep< Foam::adiosWriting >( std::move( type ) );
@@ -126,7 +126,7 @@ bool Foam::regIOobject::write() const
         time().writeCompression()
     );
 
-    if (time().writeFormat() == IOstream::PARALLEL)
+    if (time().writeFormat() == IOstream::COHERENT)
     {
         //auto type = Foam::adiosStreamType( objectPath() );
         //Foam::adiosEndStep< Foam::adiosWriting >( std::move( type ) );

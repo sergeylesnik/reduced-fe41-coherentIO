@@ -82,7 +82,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
             rm(pathname + ".gz");
         }
 
-        if (format == IOstream::PARALLEL)
+        if (format == IOstream::COHERENT)
         {
             // The file pointer is a buffer pointer in this case.
             // The buffer is written to ADIOS in the destructor.
@@ -160,7 +160,7 @@ Foam::OFstream::OFstream
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 Foam::OFstream::~OFstream()
 {
-    if (isA<std::ostringstream>(*ofPtr_) && format() == IOstream::PARALLEL)
+    if (isA<std::ostringstream>(*ofPtr_) && format() == IOstream::COHERENT)
     {
         std::ostringstream& os = dynamic_cast<std::ostringstream&>(*ofPtr_);
 
@@ -342,7 +342,7 @@ Foam::Ostream& Foam::OFstream::write
 
 Foam::Ostream& Foam::OFstream::parwrite(uListProxyBase* uListProxyPtr)
 {
-    if (format() != PARALLEL)
+    if (format() != COHERENT)
     {
         FatalIOErrorIn("Ostream::parwrite(const parIOType*, const label)", *this)
             << "stream format not parallel"
@@ -357,7 +357,7 @@ Foam::Ostream& Foam::OFstream::parwrite(uListProxyBase* uListProxyPtr)
 
 Foam::Ostream& Foam::OFstream::stringStream()
 {
-    if (format() != PARALLEL)
+    if (format() != COHERENT)
     {
         FatalIOErrorIn("Ostream::stringStream()", *this)
             << " stream format not parallel"

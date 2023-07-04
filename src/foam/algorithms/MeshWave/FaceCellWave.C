@@ -86,7 +86,7 @@ Foam::Ostream& Foam::FaceCellWave<Type>::writeFaces
             os << faceInfo[i];
         }
     }
-    else if (os.format() == IOstream::PARALLEL)
+    else if (os.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in FaceCellWave.C\n"; }
 
     return os;

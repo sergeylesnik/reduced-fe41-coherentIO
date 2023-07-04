@@ -146,12 +146,12 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             // Write end delimiter
             os << token::END_LIST;
         }
-        else if (os.format() == IOstream::PARALLEL) // is also non-contiguous
+        else if (os.format() == IOstream::COHERENT) // is also non-contiguous
         {
             if (UList<T>::debug && !isA<class prefixOSstream>(os))
             {
                 Pout<< "UListIO: writing non-contiguous data as string via"
-                    << " PARALLEL" << endl;
+                    << " COHERENT" << endl;
             }
 
             // Write size and identifier
@@ -188,13 +188,13 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             os.write(reinterpret_cast<const char*>(L.v_), L.byteSize());
         }
     }
-    else if (os.format() == IOstream::PARALLEL)
+    else if (os.format() == IOstream::COHERENT)
     {
         if(UList<T>::debug)
         {
             const string id = os.getBlockId();
             Pout<< "Writing a field of size " << L.byteSize()
-                << " via PARALLEL IO with identifier:\n    "
+                << " via COHERENT IO with identifier:\n    "
                 << id << endl;
             Pout<< "L = " << L << endl;
         }
@@ -323,7 +323,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
                 );
             }
         }
-        else if (is.format() == IOstream::PARALLEL)
+        else if (is.format() == IOstream::COHERENT)
         { cout << "Parallel IO not yet implemented in UListIO.C\n"; }
     }
     else if (firstToken.isPunctuation())

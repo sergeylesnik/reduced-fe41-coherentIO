@@ -337,7 +337,7 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
                 );
             }
         }
-        else if (is.format() == IOstream::PARALLEL)
+        else if (is.format() == IOstream::COHERENT)
         { cout << "Parallel IO not yet implemented in PackedList.C\n"; }
     }
     else if (firstTok.isPunctuation())
@@ -499,7 +499,7 @@ Foam::Ostream& Foam::PackedList<nBits>::write
             );
         }
     }
-    else if (os.format() == IOstream::PARALLEL)
+    else if (os.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in PackedList.C\n"; }
 
     return os;

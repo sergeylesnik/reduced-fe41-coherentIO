@@ -696,7 +696,7 @@ void Foam::argList::parse
             const dictionary controlDict(controlDictStream);
             const word writeFormat(controlDict.lookup("writeFormat"));
             isCoherentFormat =
-                (IOstream::formatEnum(writeFormat) == IOstream::PARALLEL);
+                (IOstream::formatEnum(writeFormat) == IOstream::COHERENT);
 
             // Distributed data
             if (roots.size())

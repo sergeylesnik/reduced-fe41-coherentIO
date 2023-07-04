@@ -166,7 +166,7 @@ Foam::polyMesh::polyMesh
     oldAllPointsPtr_(nullptr),
     oldPointsPtr_(nullptr)
 {
-    if (time().writeFormat() == IOstream::PARALLEL)
+    if (time().writeFormat() == IOstream::COHERENT)
     {
         this->checkOut( allPoints_ );
         this->checkOut( allFaces_ );

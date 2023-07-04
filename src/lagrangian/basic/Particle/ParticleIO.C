@@ -88,7 +88,7 @@ Foam::Particle<ParticleType>::Particle
             );
         }
     }
-    else if (is.format() == IOstream::PARALLEL)
+    else if (is.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in ParticleIO.C\n"; }
 
     if (celli_ == -1)
@@ -217,7 +217,7 @@ void Foam::Particle<ParticleType>::write(Ostream& os, bool writeFields) const
             );
         }
     }
-    else if (os.format() == IOstream::PARALLEL)
+    else if (os.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in ParticleIO.C\n"; }
 
     // Check state of Ostream

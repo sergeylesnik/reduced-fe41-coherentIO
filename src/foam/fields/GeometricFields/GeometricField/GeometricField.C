@@ -121,7 +121,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::readField(Istream& is)
             << exit(FatalIOError);
     }
 
-    if (is.format() == IOstream::PARALLEL)
+    if (is.format() == IOstream::COHERENT)
     {
         IFCstream& ifc = dynamic_cast<IFCstream&>(is);
         return readField
@@ -1021,7 +1021,7 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::writeToStream
     IOstream::compressionType cmp
 ) const
 {
-    if (fmt != IOstream::PARALLEL)
+    if (fmt != IOstream::COHERENT)
     {
         return regIOobject::writeToStream(pathname, mode, fmt, ver, cmp);
     }
@@ -1083,12 +1083,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::objectStreamPar
             << endl << this->info() << endl;
     }
 
-    // Forbid format mixing, i.e. no reading with PARALLEL when the write
+    // Forbid format mixing, i.e. no reading with COHERENT when the write
     // format is different
-    if (fName.size() && this->mesh().time().writeFormat() == IOstream::PARALLEL)
+    if (fName.size() && this->mesh().time().writeFormat() == IOstream::COHERENT)
     {
         IFCstream* isPtr =
-            new IFCstream(fName, this->mesh().thisDb(), IOstream::PARALLEL);
+            new IFCstream(fName, this->mesh().thisDb(), IOstream::COHERENT);
 
         if (isPtr->good())
         {

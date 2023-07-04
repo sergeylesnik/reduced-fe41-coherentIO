@@ -186,7 +186,7 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
     {
         return regIOobject::writeObject(fmt, ver, cmp);
     }
-    else if (fmt == IOstream::PARALLEL)
+    else if (fmt == IOstream::COHERENT)
     {
         cout << "Parallel IO not yet implemented in CompactIOList.C\n";
         return false;
@@ -290,7 +290,7 @@ Foam::Ostream& Foam::operator<<
         }
         os << start << elems;
     }
-    else if (os.format() == IOstream::PARALLEL)
+    else if (os.format() == IOstream::COHERENT)
     { cout << "Parallel IO not yet implemented in CompactIOList.C\n"; }
 
     return os;
