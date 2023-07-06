@@ -123,14 +123,24 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::readField(Istream& is)
 
     if (is.format() == IOstream::COHERENT)
     {
-        IFCstream& ifc = dynamic_cast<IFCstream&>(is);
-        return readField
-        (
-            ifc.readToDict<PatchField, GeoMesh>
+        if (isA<IFCstream>(is))
+        {
+            IFCstream& ifc = dynamic_cast<IFCstream&>(is);
+            return readField
             (
-                pTraits<PrimitiveType>::typeName
-            )
-        );
+                ifc.readToDict<PatchField, GeoMesh>
+                (
+                    pTraits<PrimitiveType>::typeName
+                )
+            );
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "Stream is set to IO Format COHERENT but " << is.name()
+                << " is initialized with a different format"
+                << exit(FatalError);
+        }
     }
     else
     {
