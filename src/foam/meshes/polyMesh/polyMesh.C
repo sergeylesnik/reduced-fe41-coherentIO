@@ -1649,7 +1649,7 @@ bool Foam::polyMesh::write() const
                                   { sliceNeighbours.size() },
                                   sliceNeighbours.cdata() );
 
-        sliceStreamPtr->close();
+        sliceStreamPtr->sync();
 
         sliceWritePrimitives
         (

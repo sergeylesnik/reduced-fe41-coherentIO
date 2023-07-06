@@ -146,7 +146,7 @@ public:
         const bool masked = false
     );
 
-    void close();
+    void sync();
 
 };
 
@@ -191,7 +191,7 @@ void Foam::sliceReadToContainer
     auto SliceStreamPtr = SliceReading{}.createStream();
     SliceStreamPtr->open(type, pathname);
     SliceStreamPtr->transfer(blockId, container, start, count);
-    SliceStreamPtr->close();
+    SliceStreamPtr->sync();
 }
 
 

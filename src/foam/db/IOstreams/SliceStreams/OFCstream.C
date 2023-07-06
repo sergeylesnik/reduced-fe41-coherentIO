@@ -358,7 +358,7 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
                 {nCmpts*nElems},
                 reinterpret_cast<const scalar*>(fde.uList().cdata())
             );
-            sliceStreamPtr->close();
+            sliceStreamPtr->sync();
 
             fde.nGlobalElems() = nGlobalElems;
         }

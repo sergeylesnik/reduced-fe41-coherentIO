@@ -257,7 +257,7 @@ private:
         data.resize(count[0]);
 
         sliceStreamPtr->transfer(name_, data, start, count);
-        sliceStreamPtr->close();
+        sliceStreamPtr->sync();
     }
 
     Foam::string type_{};

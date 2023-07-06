@@ -76,7 +76,7 @@ Foam::dictionary& Foam::IFCstream::readToDict(const word& fieldTypeName)
     }
 
     // Closing the IO engine ensures that the data is read from storage
-    sliceStreamPtr_->close();
+    sliceStreamPtr_->sync();
     return dict_;
 }
 

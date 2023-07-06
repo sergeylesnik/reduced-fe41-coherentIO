@@ -138,7 +138,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             );
 
             // Closing the IO engine ensures that the data is read from storage
-            sliceStreamPtr_->close();
+            sliceStreamPtr_->sync();
 
             break;
         }
@@ -162,7 +162,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             }
 
             // Closing the IO engine ensures that the data is read from storage
-            sliceStreamPtr_->close();
+            sliceStreamPtr_->sync();
             return dict_;
         }
     }
@@ -232,7 +232,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     label pfI = 0;
 
     // Closing the IO engine ensures that the data is read from disk
-    sliceStreamPtr_->close();
+    sliceStreamPtr_->sync();
 
     if (pf.empty())
     {

@@ -57,7 +57,7 @@ void Foam::SliceStream::open(const Foam::string& type, const Foam::string& path)
 }
 
 
-void Foam::SliceStream::close()
+void Foam::SliceStream::sync()
 {
     if (enginePtr_)
     {

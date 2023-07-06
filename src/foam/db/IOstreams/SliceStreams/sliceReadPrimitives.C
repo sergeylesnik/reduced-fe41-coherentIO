@@ -51,7 +51,7 @@ void _implReadPrimitives
     {
         sliceStreamPtr->transfer(blockId, buf);
     }
-    sliceStreamPtr->close();
+    sliceStreamPtr->sync();
 }
 
 
