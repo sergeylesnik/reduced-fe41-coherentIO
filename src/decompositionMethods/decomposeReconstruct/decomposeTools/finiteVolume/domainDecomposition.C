@@ -38,7 +38,7 @@ License
 
 #include "sliceMeshHelper.H"
 #include "slicePermutation.H"
-#include "adiosWritePrimitives.H"
+#include "sliceWritePrimitives.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -117,7 +117,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::domainDecomposition::parallelMesh
         }
     }
     auto path = mesh_.pointsInstance()/mesh_.meshDir();
-    adiosWritePrimitives
+    sliceWritePrimitives
     (
         "mesh",
         path,

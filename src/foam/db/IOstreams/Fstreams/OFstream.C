@@ -33,10 +33,8 @@ License
 #include <iostream>
 #include <memory>
 
-//#include "adiosWriting.H"
-//#include "adiosFileStream.H"
-#include "adiosStream.H"
-#include "adiosWritePrimitives.H"
+#include "SliceStreamRepo.H"
+#include "sliceWritePrimitives.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,8 +51,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
     IOstream::compressionType compression
 )
 :
-    ofPtr_(nullptr),
-    adiosStreamPtr_(nullptr)
+    ofPtr_(nullptr)
 {
     if (pathname.empty())
     {
@@ -88,14 +85,6 @@ Foam::OFstreamAllocator::OFstreamAllocator
             // The file pointer is a buffer pointer in this case.
             // The buffer is written to ADIOS in the destructor.
             ofPtr_ = new std::ostringstream();
-
-            adiosWriting adiosCreator{};
-            adiosStreamPtr_ = adiosCreator.createStream();
-            Foam::string type = "fields";
-            if ( pathname.find("polyMesh") != std::string::npos ) {
-                type = "mesh";
-            }
-            //adiosStreamPtr_->open( std::move( type ), pathname );
         }
         else
         {
@@ -291,10 +280,10 @@ Foam::Ostream& Foam::OFstream::writeKeyword(const keyType& kw)
     }
 
     blockNamesStack_.push(kw);
-    // Inform adiosRepo that n'th boundary is being written.
+    // Inform SliceStreamRepo that n'th boundary is being written.
     if( kw == "type" ) {
        ++boundaryCounter_;
-       Foam::adiosRepo* repo = Foam::adiosRepo::instance();
+       Foam::SliceStreamRepo* repo = Foam::SliceStreamRepo::instance();
        repo->push( boundaryCounter_ );
     }
 
@@ -331,7 +320,7 @@ Foam::Ostream& Foam::OFstream::write
 {
     if (format() == COHERENT)
     {
-        adiosWritePrimitives
+        sliceWritePrimitives
         (
             "fields",
             "",

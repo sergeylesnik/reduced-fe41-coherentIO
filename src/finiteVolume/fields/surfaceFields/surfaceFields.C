@@ -128,8 +128,8 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
 
             coherentData.resize(localSize);
 
-            adiosStreamPtr_->open("fields", pathname_.path());
-            adiosStreamPtr_->transfer
+            sliceStreamPtr_->open("fields", pathname_.path());
+            sliceStreamPtr_->transfer
             (
                 id,
                 reinterpret_cast<scalar*>(coherentData.data()),
@@ -138,7 +138,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             );
 
             // Closing the IO engine ensures that the data is read from storage
-            adiosStreamPtr_->close();
+            sliceStreamPtr_->close();
 
             break;
         }
@@ -162,7 +162,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
             }
 
             // Closing the IO engine ensures that the data is read from storage
-            adiosStreamPtr_->close();
+            sliceStreamPtr_->close();
             return dict_;
         }
     }
@@ -232,7 +232,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     label pfI = 0;
 
     // Closing the IO engine ensures that the data is read from disk
-    adiosStreamPtr_->close();
+    sliceStreamPtr_->close();
 
     if (pf.empty())
     {

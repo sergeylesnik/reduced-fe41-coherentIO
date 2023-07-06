@@ -26,7 +26,7 @@ License
 #include "objectRegistry.H"
 #include "foamTime.H"
 
-#include "adiosRepo.H"
+#include "SliceStreamRepo.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -407,7 +407,7 @@ bool Foam::objectRegistry::writeObject
             ok = iter()->writeObject(fmt, ver, cmp) && ok;
         }
     }
-    auto repo = adiosRepo::instance();
+    auto repo = SliceStreamRepo::instance();
     repo->close();
 
     return ok;

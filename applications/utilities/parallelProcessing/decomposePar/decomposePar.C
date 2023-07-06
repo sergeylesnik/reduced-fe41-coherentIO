@@ -284,7 +284,7 @@ int main(int argc, char *argv[])
 
         meshDecomp.writeDecomposition();
 
-        adiosRepo::instance()->clear();
+        SliceStreamRepo::instance()->clear();
     }
 
     if (!decomposeMeshOnly)

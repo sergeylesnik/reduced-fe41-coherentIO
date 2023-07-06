@@ -25,7 +25,7 @@ License
 
 #include "InitStrategies.H"
 
-#include "adiosStream.H"
+#include "SliceStream.H"
 
 
 void Foam::InitOffsets::execute

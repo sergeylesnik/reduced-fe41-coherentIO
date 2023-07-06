@@ -23,23 +23,55 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "adiosControl.H"
-#include "SliceStreamRepo.H"
+#include "label.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include <map>
+#include <memory>
 
-Foam::adiosControl::adiosControl()
-:
-    repoPtr_(new SliceStreamRepo())
-{}
+// * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::adiosControl::~adiosControl()
+template<typename FeatureType>
+void Foam::SliceStreamRepo::pull
+(
+    std::shared_ptr<FeatureType>& featurePtr,
+    const Foam::string& id
+)
 {
-    Info<< "Closing ADIOS2 files" << endl;
-    repoPtr_->close();
+    auto featureMap = get(featurePtr);
+    if (featureMap->count(id))
+    {
+        featurePtr = featureMap->at(id);
+    }
 }
 
 
+template<typename FeatureType>
+void Foam::SliceStreamRepo::push
+(
+    const std::shared_ptr<FeatureType>& featurePtr,
+    const Foam::string& id
+)
+{
+    auto featureMap = get(featurePtr);
+    if (featureMap->count(id) == 0)
+    {
+        featureMap->insert({id, featurePtr});
+    }
+}
+
+
+template<typename FeatureType>
+void Foam::SliceStreamRepo::remove
+(
+    const std::shared_ptr<FeatureType>& featurePtr,
+    const Foam::string& id
+)
+{
+    auto featureMap = get(featurePtr);
+    if (featureMap->count(id) == 0)
+    {
+        featureMap->erase(id);
+    }
+}
+
+// ************************************************************************* //

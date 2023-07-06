@@ -30,7 +30,7 @@ Description
 #include "objectRegistry.H"
 #include "OSspecific.H"
 #include "OFstream.H"
-#include "adiosStream.H"
+#include "SliceStream.H"
 
 #include "profiling.H"
 
@@ -113,24 +113,12 @@ bool Foam::regIOobject::write() const
 {
     addProfile2(io, "Foam::regIOobject::write()");
 
-    if (time().writeFormat() == IOstream::COHERENT)
-    {
-        //auto type = Foam::adiosStreamType( objectPath() );
-        //Foam::adiosBeginStep< Foam::adiosWriting >( std::move( type ) );
-    }
-
     bool ok = writeObject
     (
         time().writeFormat(),
         IOstream::currentVersion,
         time().writeCompression()
     );
-
-    if (time().writeFormat() == IOstream::COHERENT)
-    {
-        //auto type = Foam::adiosStreamType( objectPath() );
-        //Foam::adiosEndStep< Foam::adiosWriting >( std::move( type ) );
-    }
 
     return ok;
 }

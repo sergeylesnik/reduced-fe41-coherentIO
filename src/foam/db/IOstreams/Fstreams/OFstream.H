@@ -52,8 +52,6 @@ namespace Foam
 {
 
 class OFstream;
-class adiosWrite;
-class adiosStream;
 
 /*---------------------------------------------------------------------------*\
                       Class OFstreamAllocator Declaration
@@ -65,8 +63,6 @@ class OFstreamAllocator
     friend class OFstream;
 
     ostream* ofPtr_;
-    //std::shared_ptr<adiosWrite> adiosPtr_;
-    std::unique_ptr<adiosStream> adiosStreamPtr_;
 
     // Constructors
 

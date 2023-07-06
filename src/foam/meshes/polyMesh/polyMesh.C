@@ -34,9 +34,9 @@ License
 #include "treeDataCell.H"
 #include "MeshObject.H"
 #include "pointMesh.H"
-#include "adiosWriting.H"
-#include "adiosFileStream.H"
-#include "adiosWritePrimitives.H"
+#include "SliceWriting.H"
+#include "SliceStream.H"
+#include "sliceWritePrimitives.H"
 
 #include "DynamicList.H"
 #include <numeric>
@@ -1587,37 +1587,37 @@ bool Foam::polyMesh::write() const
     {
         // Write mesh to a separate file
         auto path = pointsInstance()/meshDir();
-        auto adiosStreamPtr = adiosWriting{}.createStream();
-        adiosStreamPtr->open("mesh", path);
+        auto sliceStreamPtr = SliceWriting{}.createStream();
+        sliceStreamPtr->open("mesh", path);
 
         slicePermutation sliceablePermutation{ *this };
 
         // Re-order faces
-        faceList adiosFaces( allFaces_ );
-        sliceablePermutation.generateSlice( adiosFaces );
-        Foam::labelList adiosOwner( owner_ );
-        sliceablePermutation.generateSlice( adiosOwner );
-        Foam::pointField adiosPoints( allPoints_ );
-        sliceablePermutation.generateSlice( adiosPoints );
+        faceList sliceFaces( allFaces_ );
+        sliceablePermutation.generateSlice( sliceFaces );
+        Foam::labelList sliceOwner( owner_ );
+        sliceablePermutation.generateSlice( sliceOwner );
+        Foam::pointField slicePoints( allPoints_ );
+        sliceablePermutation.generateSlice( slicePoints );
 
         // Linearize faces and points
         label k = 0;
         Foam::label linearSizeOfFaces = allFaces_.linearSize();
         Foam::List<Foam::label> linearizedAdiosFaces( linearSizeOfFaces, 0 );
-        forAll( adiosFaces, i ) {
-           forAll( adiosFaces[i], j ) {
-               linearizedAdiosFaces[k] = adiosFaces[i][j];
+        forAll( sliceFaces, i ) {
+           forAll( sliceFaces[i], j ) {
+               linearizedAdiosFaces[k] = sliceFaces[i][j];
                ++k;
            }
         }
 
-        auto faceStarts = determineOffsets2D( adiosFaces ); // Generate offsets of linearized face list
-        adiosStreamPtr->transfer( "faceStarts",
+        auto faceStarts = determineOffsets2D( sliceFaces ); // Generate offsets of linearized face list
+        sliceStreamPtr->transfer( "faceStarts",
                                   { faceStarts.size() },
                                   { 0 },
                                   { faceStarts.size() },
                                   faceStarts.cdata() );
-        adiosStreamPtr->transfer( "faces",
+        sliceStreamPtr->transfer( "faces",
                                   { linearizedAdiosFaces.size() },
                                   { 0 },
                                   { linearizedAdiosFaces.size() },
@@ -1626,7 +1626,7 @@ bool Foam::polyMesh::write() const
         // Generate ownerStarts
         // - Takes into account if cell is not owning any faces.
         labelList ownerStarts( cells().size() + 1, 0 );
-        for (auto ownerId : adiosOwner )
+        for (auto ownerId : sliceOwner )
         {
             ownerStarts[ownerId+1] += 1;
         }
@@ -1634,30 +1634,30 @@ bool Foam::polyMesh::write() const
         {
             ownerStarts[ownerId] += ownerStarts[ownerId-1];
         }
-        adiosStreamPtr->transfer( "ownerStarts",
+        sliceStreamPtr->transfer( "ownerStarts",
                                   { ownerStarts.size() },
                                   { 0 },
                                   { ownerStarts.size() },
                                   ownerStarts.cdata() );
 
         // Generate local neighbours
-        Foam::labelList adiosNeighbours;
-        sliceablePermutation.generateSlice( adiosNeighbours, *this );
-        adiosStreamPtr->transfer( "neighbours",
-                                  { adiosNeighbours.size() },
+        Foam::labelList sliceNeighbours;
+        sliceablePermutation.generateSlice( sliceNeighbours, *this );
+        sliceStreamPtr->transfer( "neighbours",
+                                  { sliceNeighbours.size() },
                                   { 0 },
-                                  { adiosNeighbours.size() },
-                                  adiosNeighbours.cdata() );
+                                  { sliceNeighbours.size() },
+                                  sliceNeighbours.cdata() );
 
-        adiosStreamPtr->close();
+        sliceStreamPtr->close();
 
-        adiosWritePrimitives
+        sliceWritePrimitives
         (
             "mesh",
             path,
             "points",
-            adiosPoints.size(),
-            adiosPoints.cdata()
+            slicePoints.size(),
+            slicePoints.cdata()
         );
     }
 

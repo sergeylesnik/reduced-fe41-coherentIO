@@ -36,8 +36,8 @@ SourceFiles
 #define InitStrategies_H
 
 #include "Offsets.H"
-#include "adiosStream.H"
-#include "adiosReadPrimitives.H"
+#include "SliceStream.H"
+#include "sliceReadPrimitives.H"
 
 #include "labelList.H"
 #include "scalarField.H"
@@ -95,10 +95,10 @@ struct InitFromADIOS
 
     label size() const
     {
-        auto adiosStreamPtr = adiosReading{}.createStream();
-        adiosStreamPtr->open(type_, pathname_);
+        auto sliceStreamPtr = SliceReading{}.createStream();
+        sliceStreamPtr->open(type_, pathname_);
         FieldType dummy{};
-        return adiosStreamPtr->getBufferSize(name_, dummy.data());
+        return sliceStreamPtr->getBufferSize(name_, dummy.data());
     }
 
     explicit operator bool() const
@@ -120,7 +120,7 @@ private:
         auto count = (start_count.second != -1) ?
                      labelList({start_count.second}) :
                      labelList({});
-        Foam::adiosReadToContainer
+        Foam::sliceReadToContainer
         (
             type_,
             pathname_,
@@ -195,7 +195,7 @@ private:
                      labelList({start_count.second}) :
                      labelList({});
         data.resize(count[0]);
-        Foam::adiosReadPrimitives
+        Foam::sliceReadPrimitives
         (
             type_,
             pathname_,
@@ -242,11 +242,11 @@ private:
         Foam::InitStrategy::labelPair& start_count
     ) final
     {
-        auto adiosStreamPtr = adiosReading{}.createStream();
-        adiosStreamPtr->open(type_, pathname_);
+        auto sliceStreamPtr = SliceReading{}.createStream();
+        sliceStreamPtr->open(type_, pathname_);
 
         // Naive partitioning based on total size of input data
-        label total_size = adiosStreamPtr->getBufferSize(name_, data.data());
+        label total_size = sliceStreamPtr->getBufferSize(name_, data.data());
         total_size--;
         label partition_size = total_size / Pstream::nProcs();
         labelList start(1, partition_size * Pstream::myProcNo());
@@ -256,8 +256,8 @@ private:
         count[0] += 1;
         data.resize(count[0]);
 
-        adiosStreamPtr->transfer(name_, data, start, count);
-        adiosStreamPtr->close();
+        sliceStreamPtr->transfer(name_, data, start, count);
+        sliceStreamPtr->close();
     }
 
     Foam::string type_{};

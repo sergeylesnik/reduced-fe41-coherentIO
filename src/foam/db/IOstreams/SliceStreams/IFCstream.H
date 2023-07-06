@@ -22,60 +22,63 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::IFstream
+    Foam::IFCstream
 
 Description
-    Input from file stream.
+    Input from file stream and ADIOS for the coherent format. The stream builds
+    a dictionary and alters its entries afterwards, filling the compound tokens
+    (i.e. lists) and creating processorPatchFields since these are not present
+    in the coherent format. GeometricField constructor obtains the ready-to-use
+    dictionary.
 
 SourceFiles
-    IFstream.C
+    IFCstream.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IFstream_H
-#define IFstream_H
+#ifndef IFCstream_H
+#define IFCstream_H
 
 #include "ISstream.H"
 #include "fileName.H"
 #include "className.H"
+#include "gzstream.h"
+#include "SliceStream.H"
+#include "sliceMesh.H"
+#include "processorPolyPatch.H"
 
 #include <fstream>
-#include <memory>
-using std::ifstream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class IFstream;
-class SliceStream;
-
 /*---------------------------------------------------------------------------*\
-                      Class IFstreamAllocator Declaration
+                      Class IFCstreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A std::istream with ability to handle compressed files
-class IFstreamAllocator
+class IFCstreamAllocator
 {
-    friend class IFstream;
+    friend class IFCstream;
 
     // Private data
 
         istream* ifPtr_;
 
-        //- String serves as buffer for ADIOS variable in case the format is
-        //  COHERENT. It is then assigned to isrteam buffer.
-        std::string bufStr_;
+        //- String serves as buffer for file contents which are read only on
+        //  master
+        string bufStr_;
 
-        std::unique_ptr<SliceStream> sliceStreamPtr_;
+        //- Compression, e.g. ".gz"
         IOstream::compressionType compression_;
 
 
     // Constructors
 
         //- Construct from pathname
-        IFstreamAllocator
+        IFCstreamAllocator
         (
             const fileName& pathname,
             const IOstream::streamFormat format
@@ -83,7 +86,7 @@ class IFstreamAllocator
 
 
     //- Destructor
-    ~IFstreamAllocator();
+    ~IFCstreamAllocator();
 
     // Member functions
 
@@ -93,42 +96,93 @@ class IFstreamAllocator
 
 
 /*---------------------------------------------------------------------------*\
-                          Class IFstream Declaration
+                          Class IFCstream Declaration
 \*---------------------------------------------------------------------------*/
 
-class IFstream
+class IFCstream
 :
-    public IFstreamAllocator,
+    public IFCstreamAllocator,
     public ISstream
 {
     // Private data
 
         fileName pathname_;
+        sliceMesh& sliceableMesh_;
         Istream* tmpIssPtr_;
         string tmpIssBuf_;
 
+        //- Field dictionary populated by stream
+        dictionary dict_;
+
+        //- Pointer to the IO engine
+        std::unique_ptr<SliceStream> sliceStreamPtr_;
+
+    // Private Member Functions
+
+        //- Add field of type processorPolyPatch to dictionary. To be
+        //  specialized by PatchField and GeoMesh types
+        template<template<class> class PatchField, class GeoMesh>
+        void addProcessorPatchField
+        (
+            dictionary& bfDict,
+            const word& patchName,
+            const word& fieldTypeName
+        );
+
+        //- Get the field size from the corresponding mesh entity. To be
+        //  specialized by PatchField and GeoMesh types
+        template<template<class> class PatchField, class GeoMesh>
+        label coherentFieldSize();
+
+        // Read
+
+            //- Find (recursively) all compound tokens in dictionary and
+            //  populate them with data
+            void readCompoundTokenData(dictionary& dict, const label size);
+
+            //- Find all compound tokens in ITstream and populate them with
+            //  data
+            void readCompoundTokenData(ITstream& is, const label localSize);
+
+            //- Read field data of all boundary patches that are not of
+            //  processor type
+            void readNonProcessorBoundaryFields();
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Read a word token, identify and handle compound tokens if
+        //  discovered
+        virtual void readWordToken(token&);
+
+
 public:
 
-    // Declare name of the class and its debug switch
-    ClassName("IFstream");
+    // Static data members
+
+        //- Runtime type information
+        TypeName("IFCstream");
 
 
     // Constructors
 
-        //- Construct from pathname
-        IFstream
+        //- Construct from pathname and registry
+        IFCstream
         (
             const fileName& pathname,
-            streamFormat format = ASCII,
+            const objectRegistry& registry,
+            streamFormat format = COHERENT,
             versionNumber version = currentVersion
         );
 
 
     //- Destructor
-    ~IFstream();
+    ~IFCstream();
 
 
-    // Member functions
+    // Public Member Functions
 
         // Access
 
@@ -147,8 +201,11 @@ public:
 
         // Read functions
 
-            //- Read binary block from second stream
-            virtual Istream& parread(parIOType*, const string&);
+            //- Read to dictionary and add the missing subFields (e.g.
+            //  processor patch fields).
+            template<template<class> class PatchField, class GeoMesh>
+            dictionary& readToDict(const word& fieldTypeName);
+
 
         // STL stream
 
@@ -164,20 +221,27 @@ public:
             //- Print description of IOstream to Ostream
             virtual void print(Ostream&) const;
 
+            // ToDoIO Function used for reading of non-contiguous lists.
+            // As is, it works only in serial. Reconsider.
             virtual Istream& readToStringStream(string&);
+
 
     // Member operators
 
-        //- Return a non-const reference to const IFstream
+        //- Return a non-const reference to const IFCstream
         //  Needed for read-constructors where the stream argument is temporary:
-        //  e.g. thing thisThing(IFstream("thingFileName")());
-        IFstream& operator()() const;
+        //  e.g. thing thisThing(IFCstream("thingFileName")());
+        IFCstream& operator()() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "IFCstreamI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
