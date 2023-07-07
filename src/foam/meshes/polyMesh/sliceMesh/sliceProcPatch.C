@@ -133,7 +133,7 @@ void Foam::sliceProcPatch::determinePointIDs
     const Foam::label& bottomPointId
 )
 {
-    auto pred = [bottomPointId](const auto& id)
+    auto pred = [bottomPointId](const Foam::label& id)
                 {
                     return bottomPointId<=id;
                 };
@@ -144,7 +144,7 @@ void Foam::sliceProcPatch::determinePointIDs
         pointIDs.begin(),
         pointIDs.end(),
         localPointIDs_.begin(),
-        [&bottomPointId](const auto& id)
+        [&bottomPointId](const Foam::label& id)
         {
             return id - bottomPointId;
         }
@@ -163,7 +163,7 @@ void Foam::sliceProcPatch::appendOwner
         recvOwner.begin(),
         recvOwner.end(),
         recvOwner.begin(),
-        [this](const auto& id)
+        [this](const Foam::label& id)
         {
             return slice_.convert(id);
         }
@@ -179,7 +179,7 @@ void Foam::sliceProcPatch::encodePatch(Foam::labelList& neighbours)
         std::begin(neighbours),
         std::end(neighbours),
         std::begin(neighbours),
-        [this](const auto& cellId)
+        [this](const Foam::label& cellId)
         {
             return slice_(cellId) ? id_ : cellId;
         }
@@ -219,7 +219,7 @@ Foam::sliceProcPatch::extractPoints(const Foam::pointField& input)
         std::begin(localPointIDs_),
         std::end(localPointIDs_),
         std::begin(output),
-        [&input](const auto& id)
+        [&input](const Foam::label& id)
         {
             return input[id];
         }

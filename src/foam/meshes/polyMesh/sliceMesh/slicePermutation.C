@@ -97,9 +97,9 @@ Foam::slicePermutation::slicePermutation(const Foam::labelList& sliceNeighbours)
         extractNth
         (
             polyNeighboursPermutation_,
-            [](const auto& pair)
+            [](const std::pair<Foam::label, Foam::label>& inputPair)
             {
-                return pair.first;
+                return inputPair.first;
             }
         )
     },
@@ -108,9 +108,9 @@ Foam::slicePermutation::slicePermutation(const Foam::labelList& sliceNeighbours)
         extractNth
         (
             polyNeighboursPermutation_,
-            [](const auto& pair)
+            [](const std::pair<Foam::label, Foam::label>& inputPair)
             {
-                return pair.second;
+                return inputPair.second;
             }
         )
     }
@@ -183,7 +183,7 @@ Foam::slicePermutation::generateSlice
         permutationToSlice_.begin(),
         permutationToSlice_.end(),
         sliceNeighbours.begin(),
-        [&mesh](const auto& fragFaceId)
+        [&mesh](const Foam::label& fragFaceId)
         {
             auto patchId = mesh.boundaryMesh().whichPatch(fragFaceId);
             return (patchId != -1) ? encodeSlicePatchId(patchId)

@@ -88,12 +88,9 @@ void sliceWritePrimitives
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template
-<
-    typename T,
-    std::enable_if_t<!Foam::is_vectorspace<T>::value, void>* = nullptr
->
-void Foam::sliceWritePrimitives
+template<typename T>
+typename std::enable_if<!Foam::is_vectorspace<T>::value, void>::type
+Foam::sliceWritePrimitives
 (
     const Foam::string type,
     const Foam::string pathname,
@@ -109,12 +106,9 @@ void Foam::sliceWritePrimitives
 
 
 //- Write local array
-template
-<
-    typename T,
-    std::enable_if_t<Foam::is_vectorspace<T>::value, void>* = nullptr
->
-void Foam::sliceWritePrimitives
+template<typename T>
+typename std::enable_if<Foam::is_vectorspace<T>::value, void>::type
+Foam::sliceWritePrimitives
 (
     const Foam::string type,
     const Foam::string pathname,
@@ -140,12 +134,9 @@ void Foam::sliceWritePrimitives
 
 
 //- Write global array
-template
-<
-    typename T,
-    std::enable_if_t<Foam::is_vectorspace<T>::value, void>* = nullptr
->
-void Foam::sliceWritePrimitives
+template<typename T>
+typename std::enable_if<Foam::is_vectorspace<T>::value, void>::type
+Foam::sliceWritePrimitives
 (
     const Foam::string type,
     const Foam::string pathname,

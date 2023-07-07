@@ -18,7 +18,7 @@ Foam::generateIndexedPairs(const Container& input)
         input.end(),
         indices.begin(),
         std::back_inserter(indexedPairs),
-        [](const auto& inputId, const auto& index)
+        [](const Foam::label& inputId, const Foam::label& index)
         {
             return std::make_pair(inputId, index);
         }
@@ -57,7 +57,7 @@ Foam::zip(const Container1& container1, const Container2& container2)
         container1.end(),
         container2.begin(),
         std::back_inserter(zipped),
-        [](const auto& value1, const auto& value2)
+        [](const type1& value1, const type2& value2)
         {
             return std::pair<type1, type2>{ value1, value2 };
         }
@@ -69,11 +69,12 @@ Foam::zip(const Container1& container1, const Container2& container2)
 template<typename IndexContainer, typename DataContainer>
 void Foam::indexSort(IndexContainer& indices, const DataContainer& data)
 {
+    typedef typename IndexContainer::value_type index_type;
     std::stable_sort
     (
         indices.begin(),
         indices.end(),
-        [&data](const auto& i, const auto& j)
+        [&data](const index_type& i, const index_type& j)
         {
             return data[i]<data[j];
         }
@@ -82,7 +83,7 @@ void Foam::indexSort(IndexContainer& indices, const DataContainer& data)
 
 
 template<typename ValueType, typename UnaryOperation>
-auto Foam::extractNth
+std::vector<Foam::label> Foam::extractNth
 (
     const std::vector<ValueType>& input,
     UnaryOperation unary_op
@@ -114,7 +115,7 @@ void Foam::findValueExtend
             (
                 begin,
                 fin,
-                [value](const auto& element)
+                [value](const ValType& element)
                 {
                     return element == value;
                 }
@@ -123,7 +124,7 @@ void Foam::findValueExtend
           (
               begin,
               fin,
-              [value](const auto& element)
+              [value](const ValType& element)
               {
                   return element != value;
               }
@@ -186,7 +187,7 @@ Foam::pointSubset(const Foam::faceList& faces, UnaryPredicate unary_predicate)
 template<typename Container>
 std::set<Foam::label> Foam::pointSubset(const Container& data)
 {
-    return Foam::pointSubset(data, [](auto){ return true; });
+    return Foam::pointSubset(data, [](const Foam::label&){ return true; });
 }
 
 // ************************************************************************* //

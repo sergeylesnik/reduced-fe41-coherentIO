@@ -75,12 +75,9 @@ void sliceReadPrimitives
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template
-<
-    typename T,
-    std::enable_if_t<!Foam::is_vectorspace<T>::value, void>* = nullptr
->
-void Foam::sliceReadPrimitives
+template<typename T>
+typename std::enable_if<!Foam::is_vectorspace<T>::value, void>::type
+Foam::sliceReadPrimitives
 (
     const Foam::string type,
     const Foam::string pathname,
@@ -96,12 +93,9 @@ void Foam::sliceReadPrimitives
 }
 
 
-template
-<
-    typename T,
-    std::enable_if_t<Foam::is_vectorspace<T>::value, void>* = nullptr
->
-void Foam::sliceReadPrimitives
+template<typename T>
+typename std::enable_if<Foam::is_vectorspace<T>::value, void>::type
+Foam::sliceReadPrimitives
 (
     const Foam::string type,
     const Foam::string pathname,
@@ -134,11 +128,14 @@ void Foam::sliceReadPrimitives
 template
 <
     typename T,
-    typename Integral,
-    std::enable_if_t<std::is_arithmetic<T>::value, void>* = nullptr,
-    std::enable_if_t<std::is_integral<Integral>::value, void>* = nullptr
+    typename Integral
 >
-void Foam::sliceReadPrimitives
+typename std::enable_if
+<
+    std::is_integral<Integral>::value && std::is_arithmetic<T>::value,
+    void
+>::type
+Foam::sliceReadPrimitives
 (
     const Foam::string type,
     const Foam::string pathname,
@@ -163,11 +160,14 @@ void Foam::sliceReadPrimitives
 template
 <
     typename T,
-    typename Integral,
-    std::enable_if_t<Foam::is_vectorspace<T>::value, void>* = nullptr,
-    std::enable_if_t<std::is_integral<Integral>::value, void>* = nullptr
+    typename Integral
 >
-void Foam::sliceReadPrimitives
+typename std::enable_if
+<
+    Foam::is_vectorspace<T>::value && std::is_integral<Integral>::value,
+    void
+>::type
+Foam::sliceReadPrimitives
 (
     const Foam::string type,
     const Foam::string pathname,

@@ -90,7 +90,8 @@ zip(const Container1&, const Container2&);
 
 // Extract values from input that satisfy the unary condition
 template<typename ValueType, typename UnaryOperation>
-auto extractNth(const std::vector<ValueType>&, UnaryOperation);
+std::vector<Foam::label>
+extractNth(const std::vector<ValueType>&, UnaryOperation);
 
 // Determine extend of repeating value sequence in list
 template<typename IterType, typename ValType>

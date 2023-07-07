@@ -44,38 +44,13 @@ SourceFiles
 #include <algorithm>
 #include <utility> // std::declval
 
+#include "primitives_traits.H"
+
 #include "sliceMap.H"
 #include "sliceMeshHelper.H"
 
 namespace Foam
 {
-
-// Type trait for 'ranges'
-template<typename T, typename _ = void>
-struct is_range : std::false_type {};
-
-template<typename... Ts>
-struct is_range_helper {};
-
-template<typename T>
-struct is_range
-<
-    T,
-    std::conditional_t
-    <
-        false,
-        is_range_helper
-        <
-            decltype(std::declval<T>().begin()),
-            decltype(std::declval<T>().end())
-        >,
-        void
-    >
->
-:
-    public std::true_type
-{};
-
 
 // Forward declaration
 class Offsets;

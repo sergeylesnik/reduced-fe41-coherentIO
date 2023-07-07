@@ -9,7 +9,7 @@ void Foam::partitionByFirst(Foam::pairVector<Foam::label, Foam::label>& input)
     (
         input.begin(),
         input.end(),
-        [](const auto& n)
+        [](const std::pair<Foam::label, Foam::label>& n)
         {
             return n.first>0;
         }
@@ -20,13 +20,17 @@ void Foam::partitionByFirst(Foam::pairVector<Foam::label, Foam::label>& input)
         (
             input.begin(),
             input.end(),
-            [](const auto& n)
+            [](const std::pair<Foam::label, Foam::label>& n)
             {
                 return n.first>0;
             }
         ),
         input.end(),
-        [](const auto& n, const auto& m)
+        []
+        (
+            const std::pair<Foam::label, Foam::label>& n,
+            const std::pair<Foam::label, Foam::label>& m
+        )
         {
             return n.first>m.first;
         }
@@ -41,14 +45,14 @@ Foam::renumberFaces(Foam::faceList& faces, const std::vector<Foam::label>& map)
     (
         faces.begin(),
         faces.end(),
-        [&map](auto& face)
+        [&map](Foam::face& input)
         {
             std::transform
             (
-                face.begin(),
-                face.end(),
-                face.begin(),
-                [&map](const auto& id)
+                input.begin(),
+                input.end(),
+                input.begin(),
+                [&map](const Foam::label& id)
                 {
                     return map[id];
                 }

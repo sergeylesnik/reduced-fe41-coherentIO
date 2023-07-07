@@ -120,7 +120,14 @@ void Foam::IndexComponent::init_children()
     (
         begin(components_map_),
         end(components_map_),
-        [](const auto& named_component)
+        []
+        (
+            const std::pair
+            <
+                std::string,
+                Foam::DataComponent::base_ptr
+            >& named_component
+        )
         {
             named_component.second->initialize();
         }

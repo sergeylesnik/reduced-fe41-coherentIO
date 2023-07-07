@@ -114,17 +114,17 @@ class slicePermutation
     }
 
 
-    auto findPatchBegin()
+    auto findPatchBegin() -> decltype(polyNeighboursAndPatches_.begin())
     {
         return std::find_if
                (
                    polyNeighboursAndPatches_.begin(),
                    polyNeighboursAndPatches_.end(),
-                   [](const auto &id)
+                   [](const Foam::label& id)
                    {
                        return id < 0;
                    }
-               ); //== encodeSlicePatchId( 0 ); } );
+               );
     }
 
 

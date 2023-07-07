@@ -342,16 +342,60 @@ inline void Foam::reverse(UList<T>& ul, const label n)
     }
 }
 
+
 template<class T>
 inline void Foam::reverse(UList<T>& ul)
 {
     reverse(ul, ul.size());
 }
 
+
 template<class T>
 void Foam::swap( UList<T>& a, UList<T>& b )
 {
     a.swap(b);
+}
+
+
+template<typename ValueType>
+typename std::enable_if
+<
+    !has_linearSize_method<ValueType>::value,
+    Foam::label
+>::type
+Foam::calculateLinearSize
+(
+    const Foam::UList<ValueType>* someList,
+    Foam::label& linearSize
+)
+{
+    linearSize += someList->size();
+    return 0;
+}
+
+
+template<typename ValueType>
+typename std::enable_if
+<
+    has_linearSize_method<ValueType>::value,
+    Foam::label
+>::type
+Foam::calculateLinearSize
+(
+    const Foam::UList<ValueType>* someList,
+    Foam::label& linearSize
+)
+{
+    for
+    (
+        auto elementIter = someList->begin();
+        elementIter != someList->end();
+        ++elementIter
+    )
+    {
+        Foam::calculateLinearSize( elementIter, linearSize );
+    }
+    return 0;
 }
 
 

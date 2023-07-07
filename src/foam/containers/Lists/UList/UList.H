@@ -57,8 +57,11 @@ struct has_size_method
 {
 private:
     template<typename T>
-    static constexpr auto check(T*)
-    -> typename std::is_same< decltype( std::declval<T>().size() ), Foam::label >::type;  // attempt to call size()
+    static constexpr auto check(T*)->typename std::is_same
+    <
+        decltype( std::declval<T>().size() ),
+        Foam::label
+    >::type;  // attempt to call size()
 
     template<typename>
     static constexpr std::false_type check(...);
@@ -74,8 +77,11 @@ template<typename C>
 class has_linearSize_method
 {
     template<typename T>
-    static constexpr auto check(T*)
-    -> typename std::is_same< decltype( std::declval<T>().linearSize() ), Foam::label >::type;  // attempt to call size()
+    static constexpr auto check(T*)->typename std::is_same
+    <
+        decltype( std::declval<T>().linearSize() ),
+        Foam::label
+    >::type;  // attempt to call size()
 
     template<typename>
     static constexpr std::false_type check(...);
@@ -426,9 +432,29 @@ inline void reverse(UList<T>&);
 template<class T>
 void swap( UList<T>& a, UList<T>& b );
 
-template<typename ElementType>
-Foam::label calculateLinearSize( const Foam::UList<ElementType>*, Foam::label& );
+template<typename ValueType>
+typename std::enable_if
+<
+    !has_linearSize_method<ValueType>::value,
+    label
+>::type
+calculateLinearSize
+(
+    const UList<ValueType>* someList,
+    label& linearSize
+);
 
+template<typename ValueType>
+typename std::enable_if
+<
+    has_linearSize_method<ValueType>::value,
+    label
+>::type
+calculateLinearSize
+(
+    const UList<ValueType>* someList,
+    label& linearSize
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

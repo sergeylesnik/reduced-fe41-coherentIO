@@ -6,15 +6,7 @@
 #include "Pstream.H"
 #include "foamString.H"
 
-Foam::SliceStreamRepo*
-Foam::SliceStreamRepo::repoInstance_ = nullptr;
-
-Foam::SliceStreamRepo::SliceStreamRepo()
-:
-    pimpl_{std::make_unique<Foam::SliceStreamRepo::Impl>()},
-    boundaryCounter_{0}
-{}
-
+Foam::SliceStreamRepo* Foam::SliceStreamRepo::repoInstance_ = nullptr;
 
 struct Foam::SliceStreamRepo::Impl
 {
@@ -28,8 +20,8 @@ struct Foam::SliceStreamRepo::Impl
     Impl()
     :
         adiosPtr_{nullptr},
-        ioMap_{std::make_unique<Foam::SliceStreamRepo::IO_map>()},
-        engineMap_{std::make_unique<Foam::SliceStreamRepo::Engine_map>()}
+        ioMap_{new Foam::SliceStreamRepo::IO_map()},
+        engineMap_{new Foam::SliceStreamRepo::Engine_map()}
     {
         if (!adiosPtr_)
         {
@@ -58,6 +50,13 @@ struct Foam::SliceStreamRepo::Impl
 
     Engine_map_uPtr engineMap_{};
 };
+
+
+Foam::SliceStreamRepo::SliceStreamRepo()
+:
+    pimpl_{new Foam::SliceStreamRepo::Impl{}},
+    boundaryCounter_{0}
+{}
 
 
 Foam::SliceStreamRepo::~SliceStreamRepo() = default;

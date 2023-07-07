@@ -326,9 +326,9 @@ void Foam::recvSliceFaces
     (
         globalFaces,
         recvFaces,
-        [](auto& face)
+        [](Foam::face& input)
         {
-            return face.reverseFace();
+            return input.reverseFace();
         }
     );
 
@@ -339,7 +339,7 @@ void Foam::recvSliceFaces
     (
         localOwner,
         recvOwner,
-        [&cellSlice](const auto& id)
+        [&cellSlice](const Foam::label& id)
         {
             return cellSlice.convert(id);
         }
@@ -530,7 +530,7 @@ void Foam::sliceMesh::renumberFaces()
             face.begin(),
             face.end(),
             face.begin(),
-            [this](const auto& id)
+            [this](const Foam::label& id)
             {
                 return pointSlice_.convert(id);
             }
@@ -552,12 +552,13 @@ void Foam::sliceMesh::initializeSurfaceFieldMappings()
                                     pointOffsets_,
                                     neighbours
                                 );
+    using pair_type = decltype(*procPatchIDsAndSizes.begin());
     Foam::label totalSize = std::accumulate
                             (
                                 procPatchIDsAndSizes.begin(),
                                 procPatchIDsAndSizes.end(),
                                 0,
-                                [](label size, const auto& pair)
+                                [](label size, pair_type& pair)
                                 {
                                     return std::move(size) + pair.second;
                                 }

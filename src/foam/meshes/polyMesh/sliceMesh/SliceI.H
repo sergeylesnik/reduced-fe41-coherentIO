@@ -41,12 +41,13 @@ template<typename Container>
 typename std::enable_if<Foam::is_range<Container>::value, Container>::type
 Foam::Slice::convert(Container& list) const
 {
+    typedef typename Container::value_type index_type;
     std::transform
     (
         std::begin(list),
         std::end(list),
         std::begin(list),
-        [this](const auto& id)
+        [this](const index_type& id)
         {
             return convert(id);
         }

@@ -4,6 +4,7 @@
 template<typename SomeList, typename IndexList>
 SomeList Foam::extractor(const SomeList& input, const IndexList& extractorList)
 {
+    typedef typename IndexList::value_type index_type;
     SomeList output;
     output.resize(extractorList.size());
     std::transform
@@ -11,7 +12,7 @@ SomeList Foam::extractor(const SomeList& input, const IndexList& extractorList)
         std::begin(extractorList),
         std::end(extractorList),
         std::begin(output),
-        [&input](const auto& id)
+        [&input](const index_type& id)
         {
             return input[id];
         }

@@ -8,9 +8,11 @@
 std::unique_ptr<Foam::SliceStream>
 Foam::SliceReading::createStream()
 {
-    std::unique_ptr<Foam::StreamFeatures>
-    file = std::make_unique<Foam::InputFeatures>();
-    return std::make_unique<Foam::FileSliceStream>(file);
+    std::unique_ptr<Foam::StreamFeatures> file(new Foam::InputFeatures{});
+    return std::unique_ptr<Foam::FileSliceStream>
+    (
+        new Foam::FileSliceStream{file}
+    );
 }
 
 

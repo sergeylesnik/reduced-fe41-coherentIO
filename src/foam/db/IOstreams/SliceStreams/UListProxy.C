@@ -122,14 +122,7 @@ Foam::label Foam::UListProxy<T>::size() const
 template<class T>
 Foam::label Foam::UListProxy<T>::nComponents() const
 {
-    if constexpr (is_vectorspace<T>::value)
-    {
-        return T::nComponents;
-    }
-    else
-    {
-        return 1;
-    }
+    return Foam::nComponentsOf<T>();
 }
 
 

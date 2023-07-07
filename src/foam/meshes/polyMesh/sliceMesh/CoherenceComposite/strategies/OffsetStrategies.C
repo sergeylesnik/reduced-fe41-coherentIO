@@ -27,16 +27,18 @@ License
 
 #include "DataComponent.H"
 
+#include <iterator>
 
 Foam::label Foam::count_geq::operator()(const Foam::DataComponent& input)
 {
     using std::begin;
     using std::end;
+    using value_type = decltype(*begin(input));
     return std::count_if
     (
         begin(input),
         end(input),
-        [this](const auto& val)
+        [this](const value_type& val)
         {
             return val>=value_;
         }
@@ -48,11 +50,12 @@ Foam::label Foam::count_eq::operator()(const Foam::DataComponent& input)
 {
     using std::begin;
     using std::end;
+    using value_type = decltype(*begin(input));
     return std::count_if
            (
                begin(input),
                end(input),
-               [this](const auto& val)
+               [this](const value_type& val)
                {
                    return val == value_;
                }
