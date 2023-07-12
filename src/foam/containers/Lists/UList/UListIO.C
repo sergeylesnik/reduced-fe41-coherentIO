@@ -198,8 +198,8 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             Pout<< "L = " << L << endl;
         }
 
-
-        os.parwrite(new UListProxy<T>(L));
+        std::unique_ptr<UListProxy<T>> proxy(new UListProxy<T>(L));
+        os.parwrite(proxy.get());
     }
 
     // Check state of IOstream
