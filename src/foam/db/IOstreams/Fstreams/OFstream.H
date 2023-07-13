@@ -185,7 +185,7 @@ public:
             //- Write field with the scalar primitive type
             virtual Ostream& write(const char*, std::streamsize);
 
-            virtual Ostream& parwrite(uListProxyBase*);
+            virtual Ostream& parwrite(std::unique_ptr<uListProxyBase>);
 
             virtual Ostream& stringStream();
 

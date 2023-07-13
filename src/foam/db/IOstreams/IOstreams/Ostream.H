@@ -42,6 +42,8 @@ SourceFiles
 #include "className.H"
 #include "uListProxyBase.H"
 
+#include <memory>
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -144,7 +146,7 @@ public:
             virtual Ostream& write(const char*, std::streamsize) = 0;
 
             //- Write binary block into second stream
-            virtual Ostream& parwrite(uListProxyBase*) = 0;
+            virtual Ostream& parwrite(std::unique_ptr<uListProxyBase>) = 0;
 
             virtual Ostream& stringStream() = 0;
 

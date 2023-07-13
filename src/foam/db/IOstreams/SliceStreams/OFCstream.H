@@ -129,7 +129,7 @@ public:
         virtual Ostream& write(const word&);
         virtual word incrBlock(const word);
         virtual void decrBlock();
-        virtual Ostream& parwrite(uListProxyBase*);
+        virtual Ostream& parwrite(std::unique_ptr<uListProxyBase>);
 
         //- Put current stream buffer to a dictionary as an entry
         void moveStreamBufferToDict();

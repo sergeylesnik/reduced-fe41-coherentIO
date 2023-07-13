@@ -199,7 +199,8 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
         }
 
         std::unique_ptr<UListProxy<T>> proxy(new UListProxy<T>(L));
-        os.parwrite(proxy.get());
+        os.parwrite(std::move(proxy));
+        //assert(proxy == nullptr);
     }
 
     // Check state of IOstream

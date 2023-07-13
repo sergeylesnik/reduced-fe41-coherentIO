@@ -338,7 +338,7 @@ Foam::Ostream& Foam::OFstream::write
 }
 
 
-Foam::Ostream& Foam::OFstream::parwrite(uListProxyBase* uListProxyPtr)
+Foam::Ostream& Foam::OFstream::parwrite(std::unique_ptr<uListProxyBase> uListProxyPtr)
 {
     if (format() != COHERENT)
     {

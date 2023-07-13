@@ -206,7 +206,7 @@ void Foam::OFCstreamBase::decrBlock()
 
 
 Foam::Ostream&
-Foam::OFCstreamBase::parwrite(uListProxyBase* uListProxyPtr)
+Foam::OFCstreamBase::parwrite(std::unique_ptr<uListProxyBase> uListProxyPtr)
 {
     currentSubDictPtr_->add
     (
@@ -214,7 +214,7 @@ Foam::OFCstreamBase::parwrite(uListProxyBase* uListProxyPtr)
         (
             currentKeyword_,
             currentCompoundTokenName_,
-            uListProxyPtr
+            uListProxyPtr.release()
         )
     );
 
