@@ -1,23 +1,43 @@
 - In this thirdParty-directory get libarchive-library
 (more information in: http://libarchive.orgi/)
 
-git clone git://github.com/libarchive/libarchive
+    git clone git://github.com/libarchive/libarchive
 
-- step into libarchive directory
-cd libarchive
+OR
+
+    git clone https://github.com/libarchive/libarchive
+
+
+- change into libarchive directory
+
+    cd libarchive
 
 - execute autogen.sh
-build/autogen.sh
 
-- type
-pwd
-- to get your path to this build folder
+    build/autogen.sh
 
-- then configure the installation prozess
-./configure --prefix=<yourpathtothisthirdpartydirectory>/thirdParty/libarchive/build
+
+On some systems, may need to use an older release version instead.
+For example,
+
+    cd libarchive
+    git checkout -b release-3.6.2 v3.6.2
+
+
+- then configure the installation process to use this build location
+
+    ./configure --prefix=$(pwd)/build
 
 - compile with
-make 
+
+    make
 
 - and install with
-make install
+
+    make install
+
+- on some systems (eg, openSUSE) the libraries will be installed under
+  'lib64' directory, but various other bits of the code link against a
+  'lib' directory. So it may be necessary to create that directory
+
+   (cd build && ln -s lib64 lib)
