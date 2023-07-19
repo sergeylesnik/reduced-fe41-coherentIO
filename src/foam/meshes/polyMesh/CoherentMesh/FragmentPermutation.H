@@ -22,18 +22,18 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::slicePermutation
+    Foam::FragmentPermutation
 
 Description
-    Permuting fragmented data structure to coherent and sliceable data layout
+    Permuting from coherent and sliceable to fragmented data layout
 
 SourceFiles
-    slicePermutation.C
+    FragmentPermutation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slicePermutation_H
-#define slicePermutation_H
+#ifndef FragmentPermutation_H
+#define FragmentPermutation_H
 
 #include "sliceMeshHelper.H"
 #include "polyMesh.H"
@@ -49,17 +49,11 @@ namespace Foam
 // Forward declaration
 class pointMesh;
 
-// Encoding a patch Id to differentiate from internal face IDs
-label encodeSlicePatchId(const label&);
-
-// Decoding an encoded patch Id to receive an indexing Id for face-ordered lists
-label decodeSlicePatchId(const label&);
-
 /*---------------------------------------------------------------------------*\
-                       Class slicePermutation Declaration
+                       Class FragmentPermutation Declaration
 \*---------------------------------------------------------------------------*/
 
-class slicePermutation
+class FragmentPermutation
 {
     pairVector<label, label> polyNeighboursPermutation_{};
 
@@ -67,28 +61,11 @@ class slicePermutation
 
     // Permutation from sliceable layout to
     // fragmented layout for face-ordered lists
-    std::vector<label> permutationToPoly_{};
-
-    // Permutation from fragmented layout to
-    // sliceable layout for face-ordered lists
-    std::vector<label> permutationToSlice_{};
-
-    // Permutation from fragmented layout
-    // to sliceable layout for point-ordered lists
-    std::vector<label> permutationToSlicePoint_{};
-
-    // Permutation from sliceable layout
-    // sliceable layout for point-ordered lists
-    std::vector<label> permutationToPolyPoint_{};
+    std::vector<label> facePermutation_{};
 
     //
     pairVector<label, label>
     createPolyNeighbourPermutation(const labelList&);
-
-    // Create the point permutation from fragmented to sliceable data layout
-    void createPointPermutation(faceList&, const label&);
-
-    void renumberToSlice(faceList&);
 
     template<typename IterType>
     void resetNextPatch
@@ -131,53 +108,32 @@ class slicePermutation
 public:
 
     // Constructors
-    slicePermutation() = default;
 
-    //- Construct from slicePermutation neighbour and patch list
-    explicit slicePermutation(const labelList&);
+        //- Default constructor
+        FragmentPermutation() = default;
 
-    //- Construct from polyMesh
-    explicit slicePermutation(const polyMesh&);
-
-    //- Construct from faces, owners and number of points
-    slicePermutation(const labelList&, const faceList&, const label&);
+        //- Construct FragmentPermutation from neighbour
+        explicit FragmentPermutation(const labelList&);
 
     // Member Functions
     //
 
-    // Transformations to slicePermutation
+        // Transformations to FragmentPermutation
 
-    template<typename Container>
-    void mapToSlice(Container&);
+        template<typename Container>
+        void permute(Container&);
 
-    void mapToSlice(pointField&);
+        label permute(const label&);
 
-    label mapToSlice(const label&);
+        template<typename Container>
+        void retrieveNeighbours(Container&);
 
-    template<typename MeshElement>
-    MeshElement generateSlice(MeshElement&);
-
-    faceList generateSlice(faceList&);
-
-    // Generate 'sliced' neighbours
-    labelList generateSlice(labelList&, const polyMesh&);
-
-    // Transformations to polyMesh
-
-    template<typename Container>
-    void mapToPoly(Container&);
-
-    label mapToPoly(const label&);
-
-    template<typename Container>
-    void copyPolyNeighbours(Container&);
-
-    template<typename Container>
-    void copyPolyPatches(Container&);
+        template<typename Container>
+        void retrievePatches(Container&);
 
 };
 
-#include "slicePermutationI.H"
+#include "FragmentPermutationI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

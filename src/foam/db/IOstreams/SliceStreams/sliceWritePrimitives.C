@@ -49,6 +49,7 @@ void _implWritePrimitives
     sliceStreamPtr->sync();
 }
 
+
 //- Write local array
 void Foam::sliceWritePrimitives
 (
@@ -71,6 +72,7 @@ void Foam::sliceWritePrimitives
     );
 }
 
+
 //- Write local array
 void Foam::sliceWritePrimitives
 (
@@ -92,6 +94,7 @@ void Foam::sliceWritePrimitives
         buf
     );
 }
+
 
 //- Write global n-dimensional array
 void Foam::sliceWritePrimitives
@@ -117,6 +120,7 @@ void Foam::sliceWritePrimitives
     );
 }
 
+
 //- Write global array
 void Foam::sliceWritePrimitives
 (
@@ -127,6 +131,31 @@ void Foam::sliceWritePrimitives
     const Foam::label start,
     const Foam::label count,
     const Foam::scalar* buf
+)
+{
+    _implWritePrimitives
+    (
+        type,
+        pathname,
+        blockId,
+        { shape },
+        { start },
+        { count },
+        buf
+    );
+}
+
+
+//- Write global array
+void Foam::sliceWritePrimitives
+(
+    const Foam::string type,
+    const Foam::string pathname,
+    const Foam::string blockId,
+    const Foam::label shape,
+    const Foam::label start,
+    const Foam::label count,
+    const Foam::label* buf
 )
 {
     _implWritePrimitives

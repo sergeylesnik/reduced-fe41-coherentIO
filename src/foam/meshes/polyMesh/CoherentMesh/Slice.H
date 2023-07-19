@@ -56,9 +56,6 @@ namespace Foam
 class Offsets;
 class Slice;
 
-std::set<label>
-missingPoints(const faceList& faces, const Slice& slice);
-
 template<typename Container>
 label numCellsFromSlice(const Container&, const Slice&);
 
@@ -94,8 +91,14 @@ public:
     // Construct based on partition id and offsets
     Slice(const label&, const Foam::Offsets&);
 
+    // Construct based on two labels for upper and lower bound
+    Slice(const label&, const label&);
+
+    // Construct based on three labels for partition, upper, and lower bound
+    Slice(const label&, const label&, const label&);
+
     // Return partition id
-    label partition();
+    label partition() const;
 
     // Check if input id natively belongs to slice
     bool operator()(const label& id) const;

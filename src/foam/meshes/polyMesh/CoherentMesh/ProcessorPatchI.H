@@ -23,7 +23,7 @@ SomeList Foam::extractor(const SomeList& input, const IndexList& extractorList)
 // * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * //
 
 template<typename FaceList>
-FaceList Foam::sliceProcPatch::extractFaces(const FaceList& input)
+FaceList Foam::ProcessorPatch::extractFaces(const FaceList& input)
 {
     return Foam::extractor(input, localFaceIDs_);
 }

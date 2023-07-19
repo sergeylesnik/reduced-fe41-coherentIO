@@ -23,29 +23,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "slicePermutation.H"
+#include "SlicePermutation.H"
 
 #include <numeric>
 #include <cmath>
 
 
-// * * * * * * * * * * * * * * Free functions  * * * * * * * * * * * * * * //
-
-Foam::label Foam::encodeSlicePatchId(const Foam::label& Id)
-{
-    return -(Id + 1);
-}
-
-
-Foam::label Foam::decodeSlicePatchId(const Foam::label& encodedId)
-{
-    return -(encodedId + 1);
-}
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
-void Foam::slicePermutation::createPointPermutation
+void Foam::SlicePermutation::createPointPermutation
 (
     Foam::faceList& faces,
     const Foam::label& nPoints
@@ -69,19 +56,7 @@ void Foam::slicePermutation::createPointPermutation
 }
 
 
-Foam::pairVector<Foam::label, Foam::label>
-Foam::slicePermutation::createPolyNeighbourPermutation
-(
-    const Foam::labelList& sliceNeighbours
-)
-{
-    auto polySlicePairs{generateIndexedPairs(sliceNeighbours)};
-    partitionByFirst(polySlicePairs);
-    return polySlicePairs;
-}
-
-
-void Foam::slicePermutation::renumberToSlice(Foam::faceList& input)
+void Foam::SlicePermutation::renumberToSlice(Foam::faceList& input)
 {
     renumberFaces(input, permutationToPolyPoint_);
 }
@@ -89,47 +64,17 @@ void Foam::slicePermutation::renumberToSlice(Foam::faceList& input)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::slicePermutation::slicePermutation(const Foam::labelList& sliceNeighbours)
-:
-    polyNeighboursPermutation_{createPolyNeighbourPermutation(sliceNeighbours)},
-    polyNeighboursAndPatches_
-    {
-        extractNth
-        (
-            polyNeighboursPermutation_,
-            [](const std::pair<Foam::label, Foam::label>& inputPair)
-            {
-                return inputPair.first;
-            }
-        )
-    },
-    permutationToPoly_
-    {
-        extractNth
-        (
-            polyNeighboursPermutation_,
-            [](const std::pair<Foam::label, Foam::label>& inputPair)
-            {
-                return inputPair.second;
-            }
-        )
-    }
-{
-    polyNeighboursPermutation_.clear();
-}
-
-
-Foam::slicePermutation::slicePermutation(const polyMesh& mesh)
+Foam::SlicePermutation::SlicePermutation(const polyMesh& mesh)
 :
     permutationToSlice_{permutationOfSorted(mesh.faceOwner())}
 {
     Foam::faceList sliceFaces(mesh.allFaces());
-    mapToSlice(sliceFaces);
+    permute(sliceFaces);
     createPointPermutation(sliceFaces, mesh.nPoints());
 }
 
 
-Foam::slicePermutation::slicePermutation
+Foam::SlicePermutation::SlicePermutation
 (
     const Foam::labelList& faceOwner,
     const Foam::faceList& allFaces,
@@ -139,7 +84,7 @@ Foam::slicePermutation::slicePermutation
     permutationToSlice_{permutationOfSorted(faceOwner)}
 {
     Foam::faceList sliceFaces(allFaces);
-    mapToSlice(sliceFaces);
+    permute(sliceFaces);
     createPointPermutation(sliceFaces, nPoints);
 }
 
@@ -148,30 +93,22 @@ Foam::slicePermutation::slicePermutation
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Transformations to slicePermutation
+// Transformations to SlicePermutation
 
-void Foam::slicePermutation::mapToSlice(Foam::pointField& allPoints)
+void Foam::SlicePermutation::permute(Foam::pointField& allPoints)
 {
     applyPermutation(allPoints, permutationToSlicePoint_);
 }
 
 
-Foam::label Foam::slicePermutation::mapToSlice(const Foam::label& id)
+void Foam::SlicePermutation::apply(Foam::faceList& allFaces)
 {
-    return permutationToSlice_[id];
-}
-
-
-Foam::faceList Foam::slicePermutation::generateSlice(Foam::faceList& allFaces)
-{
-    mapToSlice(allFaces);
+    permute(allFaces);
     renumberToSlice(allFaces);
-    return allFaces;
 }
 
 
-Foam::labelList
-Foam::slicePermutation::generateSlice
+void Foam::SlicePermutation::retrieveNeighbours
 (
     Foam::labelList& sliceNeighbours,
     const Foam::polyMesh& mesh
@@ -190,15 +127,6 @@ Foam::slicePermutation::generateSlice
                                    : mesh.faceNeighbour()[fragFaceId];
         }
     );
-    return sliceNeighbours;
-}
-
-
-// Transformations to polyMesh
-
-Foam::label Foam::slicePermutation::mapToPoly(const Foam::label& id)
-{
-    return permutationToPoly_[id];
 }
 
 // ************************************************************************* //

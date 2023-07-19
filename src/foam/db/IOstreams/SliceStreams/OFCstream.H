@@ -36,7 +36,7 @@ SourceFiles
 #define OFCstream_H
 
 #include "OFstream.H"
-#include "sliceMesh.H"
+#include "CoherentMesh.H"
 #include "dictionary.H"
 #include "fieldDataEntry.H"
 #include "uListProxyBase.H"
@@ -61,7 +61,7 @@ protected:
     // Protected data
 
         fileName pathname_;
-        sliceMesh& sliceableMesh_;
+        CoherentMesh& coherentMesh_;
 
         //- Dictionary holding both entries for the ASCII file and pointer,
         //  size data for the BLOBs.

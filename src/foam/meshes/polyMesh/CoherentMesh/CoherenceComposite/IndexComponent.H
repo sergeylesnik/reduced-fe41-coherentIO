@@ -36,12 +36,10 @@ SourceFiles
 #define IndexComponent_H
 
 #include "DataComponent.H"
+#include "InitStrategies.H"
 
 namespace Foam
 {
-
-// Forward declaration
-//class InitStrategy;
 
 class IndexComponent
 :

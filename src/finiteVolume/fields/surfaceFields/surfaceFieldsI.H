@@ -31,7 +31,7 @@ void Foam::OFCstream<Type, Foam::fvsPatchField, Foam::surfaceMesh>::
 combineCoherentInternal()
 {
 
-    const Offsets& iso = this->sliceableMesh_.internalSurfaceFieldOffsets();
+    const Offsets& iso = this->coherentMesh_.internalSurfaceFieldOffsets();
     const label localCombinedSize = iso.count(Pstream::myProcNo());
 
     this->consolidatedData_.resize(localCombinedSize);
@@ -48,7 +48,7 @@ combineCoherentInternal()
 
 
     // Processor patches
-    const polyBoundaryMesh& bm = sliceableMesh_.mesh().boundaryMesh();
+    const polyBoundaryMesh& bm = coherentMesh_.mesh().boundaryMesh();
     const label nPatches = bm.size();
     dictionary& bfDict = dict_.subDict("boundaryField");
     List<UList<Type> > patchData(nPatches);
@@ -83,11 +83,11 @@ combineCoherentInternal()
     const label nNonProcPatches = nPatches - nProcPatches;
 
     // processorFaces
-    const labelList& pf = this->sliceableMesh_.internalFaceIDsFromBoundaries();
+    const labelList& pf = this->coherentMesh_.internalFaceIDsFromBoundaries();
     const label nProcFaces = pf.size();
 
     // processorFacesPatchIds
-    const labelList& pfpi = this->sliceableMesh_.boundryIDsFromInternalFaces();
+    const labelList& pfpi = this->coherentMesh_.boundryIDsFromInternalFaces();
 
     label internalFaceI = 0;
     label pfI = 0;

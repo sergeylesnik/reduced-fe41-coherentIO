@@ -44,7 +44,7 @@ SourceFiles
 #include "className.H"
 #include "gzstream.h"
 #include "SliceStream.H"
-#include "sliceMesh.H"
+#include "CoherentMesh.H"
 #include "processorPolyPatch.H"
 
 #include <fstream>
@@ -107,7 +107,7 @@ class IFCstream
     // Private data
 
         fileName pathname_;
-        sliceMesh& sliceableMesh_;
+        CoherentMesh& coherentMesh_;
         Istream* tmpIssPtr_;
         string tmpIssBuf_;
 

@@ -175,13 +175,13 @@ void Foam::IFCstream::readCompoundTokenData
             // Delete the coherent format tokens by resizing the tokenList
             is.resize(coherentStartI);
 
-            // ToDoIO Get proper offsets directly from sliceableMesh_
+            // ToDoIO Get proper offsets directly from coherentMesh_
             // elemOffset has to be int64
             //
             // By now:
             // // Internal field
-            // const label elemOffset = sliceableMesh_.cellOffsets().front();
-            // const label nElems = sliceableMesh_.cellOffsets().size();
+            // const label elemOffset = coherentMesh_.cellOffsets().front();
+            // const label nElems = coherentMesh_.cellOffsets().size();
             // const label nCmpts = compToken.nComponents();
             //
             // // Patches - doesn't work (set doReduce flag?)
@@ -237,7 +237,7 @@ void Foam::IFCstream::readCompoundTokenData
 
 void Foam::IFCstream::readNonProcessorBoundaryFields()
 {
-    const polyMesh& mesh = sliceableMesh_.mesh();
+    const polyMesh& mesh = coherentMesh_.mesh();
     const polyBoundaryMesh& bm = mesh.boundaryMesh();
     dictionary& bfDict = dict_.subDict("boundaryField");
 
@@ -308,11 +308,11 @@ Foam::IFCstream::IFCstream
         IFCstreamAllocator::compression_
     ),
     pathname_(pathname),
-    sliceableMesh_
+    coherentMesh_
     (
-        const_cast<sliceMesh&>
+        const_cast<CoherentMesh&>
         (
-            registry.lookupObject<sliceMesh>(sliceMesh::typeName)
+            registry.lookupObject<CoherentMesh>(CoherentMesh::typeName)
         )
     ),
     tmpIssPtr_(nullptr),

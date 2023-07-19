@@ -1,18 +1,17 @@
 
-#include "sliceProcPatch.H"
+#include "ProcessorPatch.H"
 
 #include "Offsets.H"
-#include "slicePermutation.H"
 
 #include <set>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::label Foam::sliceProcPatch::instanceCount_ = 0;
+Foam::label Foam::ProcessorPatch::instanceCount_ = 0;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sliceProcPatch::sliceProcPatch
+Foam::ProcessorPatch::ProcessorPatch
 (
     const Foam::Slice& slice,
     const Foam::labelList& neighbours,
@@ -48,7 +47,7 @@ Foam::sliceProcPatch::sliceProcPatch
 
 
 // Copy constructor
-Foam::sliceProcPatch::sliceProcPatch(const sliceProcPatch& other)
+Foam::ProcessorPatch::ProcessorPatch(const ProcessorPatch& other)
 :
     id_{other.id_},
     slice_{other.slice_},
@@ -61,24 +60,24 @@ Foam::sliceProcPatch::sliceProcPatch(const sliceProcPatch& other)
 
 
 //TODO: Must not be copyable because of instanceCount_ consider move semantics only
-Foam::sliceProcPatch&
-Foam::sliceProcPatch::operator=(Foam::sliceProcPatch const& other)
+Foam::ProcessorPatch&
+Foam::ProcessorPatch::operator=(Foam::ProcessorPatch const& other)
 {
-    Foam::sliceProcPatch tmp(other);
+    Foam::ProcessorPatch tmp(other);
     swap(tmp);
     return *this;
 }
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
-Foam::sliceProcPatch::~sliceProcPatch()
+Foam::ProcessorPatch::~ProcessorPatch()
 {
     --instanceCount_;
 }
 
 // * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * * //
 
-void Foam::sliceProcPatch::swap(Foam::sliceProcPatch& other) noexcept
+void Foam::ProcessorPatch::swap(Foam::ProcessorPatch& other) noexcept
 {
     using std::swap;
     swap( id_, other.id_ );
@@ -90,25 +89,25 @@ void Foam::sliceProcPatch::swap(Foam::sliceProcPatch& other) noexcept
 }
 
 
-Foam::label Foam::sliceProcPatch::id()
+Foam::label Foam::ProcessorPatch::id() const
 {
     return id_;
 }
 
 
-Foam::word Foam::sliceProcPatch::name()
+Foam::word Foam::ProcessorPatch::name() const
 {
     return procBoundaryName_;
 }
 
 
-Foam::label Foam::sliceProcPatch::partner()
+Foam::label Foam::ProcessorPatch::partner() const
 {
     return slice_.partition();
 }
 
 
-void Foam::sliceProcPatch::determineFaceIDs(const Foam::labelList& neighbours)
+void Foam::ProcessorPatch::determineFaceIDs(const Foam::labelList& neighbours)
 {
     auto faceIdIter = localFaceIDs_.begin();
     for
@@ -127,7 +126,7 @@ void Foam::sliceProcPatch::determineFaceIDs(const Foam::labelList& neighbours)
 }
 
 
-void Foam::sliceProcPatch::determinePointIDs
+void Foam::ProcessorPatch::determinePointIDs
 (
     const Foam::faceList& faces,
     const Foam::label& bottomPointId
@@ -137,7 +136,14 @@ void Foam::sliceProcPatch::determinePointIDs
                 {
                     return bottomPointId<=id;
                 };
-    auto pointIDs = Foam::pointSubset(faces, pred);
+    std::set<Foam::label> pointIDs{};
+    Foam::subset
+    (
+        faces.begin(),
+        faces.end(),
+        std::inserter(pointIDs, pointIDs.end()),
+        pred
+    );
     localPointIDs_.resize(pointIDs.size());
     std::transform
     (
@@ -152,7 +158,7 @@ void Foam::sliceProcPatch::determinePointIDs
 }
 
 
-void Foam::sliceProcPatch::appendOwner
+void Foam::ProcessorPatch::appendOwner
 (
     Foam::labelList& owner,
     Foam::labelList& recvOwner
@@ -172,7 +178,7 @@ void Foam::sliceProcPatch::appendOwner
 }
 
 
-void Foam::sliceProcPatch::encodePatch(Foam::labelList& neighbours)
+void Foam::ProcessorPatch::encodePatch(Foam::labelList& neighbours)
 {
     std::transform
     (
@@ -187,7 +193,7 @@ void Foam::sliceProcPatch::encodePatch(Foam::labelList& neighbours)
 }
 
 
-void Foam::sliceProcPatch::encodePatch
+void Foam::ProcessorPatch::encodePatch
 (
     std::vector<Foam::label>& neighbours,
     const Foam::label& numPatchFaces
@@ -197,7 +203,7 @@ void Foam::sliceProcPatch::encodePatch
 }
 
 
-void Foam::sliceProcPatch::encodePatch
+void Foam::ProcessorPatch::encodePatch
 (
     Foam::labelList& neighbours,
     const Foam::label& numPatchFaces
@@ -210,7 +216,7 @@ void Foam::sliceProcPatch::encodePatch
 
 
 Foam::pointField
-Foam::sliceProcPatch::extractPoints(const Foam::pointField& input)
+Foam::ProcessorPatch::extractPoints(const Foam::pointField& input)
 {
     Foam::pointField output;
     output.resize(localPointIDs_.size());
@@ -228,7 +234,7 @@ Foam::sliceProcPatch::extractPoints(const Foam::pointField& input)
 }
 
 
-void Foam::swap(Foam::sliceProcPatch& a, Foam::sliceProcPatch& b) noexcept
+void Foam::swap(Foam::ProcessorPatch& a, Foam::ProcessorPatch& b) noexcept
 {
     a.swap( b );
 }

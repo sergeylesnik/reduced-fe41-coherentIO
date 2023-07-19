@@ -494,17 +494,18 @@ pointZone = $(polyMesh)/zones/pointZone
 $(pointZone)/pointZone.C
 $(pointZone)/newPointZone.C
 
-sliceMesh = $(polyMesh)/sliceMesh
-$(sliceMesh)/Offsets.C
-$(sliceMesh)/sliceMap.C
-$(sliceMesh)/Slice.C
-$(sliceMesh)/sliceMesh.C
-$(sliceMesh)/slicePermutation.C
-$(sliceMesh)/sliceMeshHelper.C
-$(sliceMesh)/sliceProcPatch.C
-$(sliceMesh)/nonblockConsensus.C
+CoherentMesh = $(polyMesh)/CoherentMesh
+$(CoherentMesh)/Offsets.C
+$(CoherentMesh)/sliceMap.C
+$(CoherentMesh)/Slice.C
+$(CoherentMesh)/CoherentMesh.C
+$(CoherentMesh)/SlicePermutation.C
+$(CoherentMesh)/FragmentPermutation.C
+$(CoherentMesh)/sliceMeshHelper.C
+$(CoherentMesh)/ProcessorPatch.C
+$(CoherentMesh)/nonblockConsensus.C
 
-CoherenceComposite = $(sliceMesh)/CoherenceComposite
+CoherenceComposite = $(CoherentMesh)/CoherenceComposite
 $(CoherenceComposite)/DataComponent.C
 $(CoherenceComposite)/IndexComponent.C
 $(CoherenceComposite)/DataComponentFree.C

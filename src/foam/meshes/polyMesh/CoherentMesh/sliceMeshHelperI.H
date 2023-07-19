@@ -1,6 +1,8 @@
 
 #include "sliceMeshHelper.H"
 
+#include "Slice.H"
+
 #include <numeric>
 
 
@@ -154,40 +156,73 @@ void Foam::applyPermutation(Container& data, const IndexContainer& permutation)
 }
 
 
-template<typename Container, typename UnaryPredicate>
-std::set<Foam::label>
-Foam::pointSubset(const Container& list, UnaryPredicate unary_predicate)
+// this only recursively binds to (non-range) arithmetic types, currently.
+template
+<
+    typename ForwardIterator,
+    typename OutputIterator,
+    typename UnaryPredicate
+>
+typename std::enable_if
+<
+    std::is_arithmetic
+    <
+        typename std::iterator_traits<ForwardIterator>::value_type
+    >::value,
+    void
+>::type
+Foam::subset
+(
+    ForwardIterator input_iter,
+    const ForwardIterator input_end,
+    OutputIterator output_iter,
+    UnaryPredicate unary_predicate
+)
 {
-    std::set<Foam::label> pointIDs{};
     std::copy_if
     (
-        list.begin(),
-        list.end(),
-        std::inserter(pointIDs, pointIDs.end()),
+        input_iter,
+        input_end,
+        output_iter,
         unary_predicate
     );
-    return pointIDs;
 }
 
 
-template<typename UnaryPredicate>
-std::set<Foam::label>
-Foam::pointSubset(const Foam::faceList& faces, UnaryPredicate unary_predicate)
+template
+<
+    typename ForwardIterator,
+    typename OutputIterator,
+    typename UnaryPredicate
+>
+typename std::enable_if
+<
+    Foam::is_range
+    <
+        typename std::iterator_traits<ForwardIterator>::value_type
+    >::value,
+    void
+>::type
+Foam::subset
+(
+    ForwardIterator input_iter,
+    const ForwardIterator input_end,
+    OutputIterator output_iter,
+    UnaryPredicate unary_predicate
+)
 {
-    std::set<Foam::label> pointIDs{};
-    for (const auto& face: faces)
+    while(input_iter != input_end)
     {
-        auto tmp = Foam::pointSubset(face, unary_predicate);
-        pointIDs.insert(std::begin(tmp), std::end(tmp));
+        Foam::subset
+        (
+            input_iter->begin(),
+            input_iter->end(),
+            output_iter,
+            unary_predicate
+        );
+        ++input_iter;
     }
-    return pointIDs;
 }
 
 
-template<typename Container>
-std::set<Foam::label> Foam::pointSubset(const Container& data)
-{
-    return Foam::pointSubset(data, [](const Foam::label&){ return true; });
-}
-
-// ************************************************************************* //
+// ***************************************************************** //

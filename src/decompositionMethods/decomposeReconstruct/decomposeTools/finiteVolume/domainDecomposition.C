@@ -37,7 +37,6 @@ License
 #include "globalMeshData.H"
 
 #include "sliceMeshHelper.H"
-#include "slicePermutation.H"
 #include "sliceWritePrimitives.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -198,7 +197,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::domainDecomposition::parallelMesh
     procMesh.addFvPatches( procPatches, false );
     procMesh.write();
 
-    procMesh.checkMesh( true );
+    // TODO: Remove or insert as desired
+    //procMesh.checkMesh( true );
     // REMOVED: "Create processor boundary patches"
     // Because will be identified through extended neighbour list while reading.
 

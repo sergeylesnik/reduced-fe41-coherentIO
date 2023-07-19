@@ -21,63 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Function
-    Foam::nonblockConsensus
-
-Description
-    Implements the nonblocking concensus exchange algorithm.
-    @article
-    {
-        doi = {10.1145/1837853.1693476},
-        author = {Hoefler, Torsten and Siebert, Christian and Lumsdaine, Andrew},
-        title = {Scalable Communication Protocols for Dynamic Sparse Data Exchange},
-        year = {2010},
-        volume = {45},
-        number = {5},
-        journal = {SIGPLAN Not.},
-        pages = {159–168}
-    }
-
-SourceFiles
-    nonblockConsensus.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef nonblockConsensus_H
-#define nonblockConsensus_H
+#include "InitStrategies.H"
 
-#include "label.H"
-#include "labelList.H"
+#include "SliceStream.H"
 
-#include <vector>
-#include <map>
 
-#include "mpi.h"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+void Foam::InitOffsets::execute
+(
+    Foam::InitStrategy::index_container& data,
+    Foam::InitStrategy::labelPair& start_count
+)
 {
-
-// Forward declarations
-class Offsets;
-
-std::map<label, label>
-numFacesToExchange(const Offsets&, const Offsets&, const labelList&);
-
-template<class Type>
-std::map<label, std::vector<Type>>
-nonblockConsensus(const std::map<label, std::vector<Type>>&, MPI_Datatype);
-
-std::map<label, label> nonblockConsensus(const std::map<label, label>&);
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "nonblockConsensusI.H"
-
-#endif
+    auto value = !accumulate_ ?
+                 start_count.first :
+                 start_count.second;
+    offsets_.set(value, accumulate_);
+    data = Foam::labelList
+           (
+               {
+                   offsets_.lowerBound(Pstream::myProcNo()),
+                   offsets_.upperBound(Pstream::myProcNo())
+               }
+           );
+}
 
 // ************************************************************************* //
-

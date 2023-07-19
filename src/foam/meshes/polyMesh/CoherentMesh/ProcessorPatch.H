@@ -22,18 +22,18 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sliceProcPatch
+    Foam::ProcessorPatch
 
 Description
     Required for processor patch construction on coherent mesh layout.
 
 SourceFiles
-    sliceProcPatch.C
+    ProcessorPatch.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sliceProcPatch_H
-#define sliceProcPatch_H
+#ifndef ProcessorPatch_H
+#define ProcessorPatch_H
 
 #include "labelList.H"
 #include "faceList.H"
@@ -56,10 +56,10 @@ SomeList extractor(const SomeList& input, const IndexList& extractorList);
 class Offsets;
 
 /*---------------------------------------------------------------------------* \
-                        Class sliceProcPatch Declaration
+                        Class ProcessorPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class sliceProcPatch
+class ProcessorPatch
 {
     using index_container = labelList;
     using iterator = index_container::iterator;
@@ -88,7 +88,9 @@ class sliceProcPatch
 public:
 
     // Constructors
-    sliceProcPatch
+
+    //- Construct based on slice and neighbour list
+    ProcessorPatch
     (
         const Foam::Slice&,
         const Foam::labelList&,
@@ -96,25 +98,25 @@ public:
     );
 
     // Copy constructor
-    sliceProcPatch(const sliceProcPatch&);
+    ProcessorPatch(const ProcessorPatch&);
 
     // Copy assignment operator
-    sliceProcPatch& operator=(const sliceProcPatch&);
+    ProcessorPatch& operator=(const ProcessorPatch&);
 
     // Destructor
-    ~sliceProcPatch();
+    ~ProcessorPatch();
 
     // Copy-and-swap idiom
-    void swap(sliceProcPatch&) noexcept;
+    void swap(ProcessorPatch&) noexcept;
 
     // Return the processor patch id
-    label id();
+    label id() const;
 
     // Return the processor patch name
-    word name();
+    word name() const;
 
     // Return the neighbouring processor
-    label partner();
+    label partner() const;
 
     // Extract faces IDs from the neighbour list in sliceable data layout
     void determineFaceIDs(const labelList&);
@@ -148,13 +150,13 @@ public:
     iterator end() { return localFaceIDs_.end(); }
 
     // Return size of face ID list
-    label size() { return localFaceIDs_.size(); }
+    label size() const { return localFaceIDs_.size(); }
 };
 
-void swap(sliceProcPatch&, sliceProcPatch&) noexcept;
+void swap(ProcessorPatch&, ProcessorPatch&) noexcept;
 
 }
 
-#include "sliceProcPatchI.H"
+#include "ProcessorPatchI.H"
 
 #endif

@@ -55,6 +55,12 @@ using pairVector = std::vector<std::pair<Type1, Type2>>;
                        Helper Functions Declaration
 \*---------------------------------------------------------------------------*/
 
+// Encoding a patch Id to differentiate from internal face IDs
+label encodeSlicePatchId(const label&);
+
+// Decoding an encoded patch Id to receive an indexing Id for face-ordered lists
+label decodeSlicePatchId(const label&);
+
 // Partition and sort negative key indices (std::pair::first)
 // (creates the permutation from sliceable to fragmented data layout)
 void partitionByFirst(pairVector<label, label>&);
@@ -100,20 +106,6 @@ void findValueExtend(IterType&, IterType&, const IterType&, const ValType&);
 // Permute input data according to the input index list
 template<typename Container, typename IndexContainer>
 void applyPermutation(Container&, const IndexContainer&);
-
-// Return the set of indices in the input container
-// that fulfill the unary predicate
-template<typename Container, typename UnaryPredicate>
-std::set<label> pointSubset(const Container&, UnaryPredicate);
-
-// Return the set of (point) indices in the input face list
-// that fulfill the unary predicate
-template<typename UnaryPredicate>
-std::set<label> pointSubset(const faceList&, UnaryPredicate);
-
-// Return the set of indices in the input container
-template<typename Container>
-std::set<label> pointSubset(const Container&);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

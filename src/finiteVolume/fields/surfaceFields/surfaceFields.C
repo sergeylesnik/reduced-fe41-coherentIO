@@ -52,7 +52,7 @@ defineTemplateTypeNameAndDebug(surfaceTensorField, 0);
 template<>
 label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>()
 {
-    return sliceableMesh_.internalSurfaceFieldOffsets().size();
+    return coherentMesh_.internalSurfaceFieldOffsets().size();
 }
 
 template<>
@@ -73,7 +73,7 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     // Otherwise, the coherent internal field needs to be mapped to FOAM's
     // internal and processor fields.
 
-    const polyMesh& mesh = sliceableMesh_.mesh();
+    const polyMesh& mesh = coherentMesh_.mesh();
     const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
     // Internal field data
@@ -222,10 +222,10 @@ dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
     const label nNonProcPatches = nAllPatches - nProcPatches;
 
     // processorFaces
-    const labelList& pf = sliceableMesh_.internalFaceIDsFromBoundaries();
+    const labelList& pf = coherentMesh_.internalFaceIDsFromBoundaries();
 
     // processorFacesPatchIds
-    const labelList& pfpi = sliceableMesh_.boundryIDsFromInternalFaces();
+    const labelList& pfpi = coherentMesh_.boundryIDsFromInternalFaces();
 
     labelList patchFaceI(nProcPatches, 0);
     label internalFaceI = 0;

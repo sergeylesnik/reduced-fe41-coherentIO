@@ -35,6 +35,7 @@ Description
 
 Info<< "Reading/calculating face flux field phi\n" << endl;
 
+//TODO: Use proper IO modes again once surface fields are ready
 surfaceScalarField phi
 (
     IOobject
@@ -42,8 +43,8 @@ surfaceScalarField phi
         "phi",
         runTime.timeName(),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
+        IOobject::NO_READ,//READ_IF_PRESENT,
+        IOobject::NO_WRITE//AUTO_WRITE
     ),
     linearInterpolate(U) & mesh.Sf()
 );

@@ -3,6 +3,18 @@
 
 // * * * * * * * * * * * * * * Free Functions * * * * * * * * * * * * * * * //
 
+Foam::label Foam::encodeSlicePatchId(const Foam::label& Id)
+{
+    return -(Id + 1);
+}
+
+
+Foam::label Foam::decodeSlicePatchId(const Foam::label& encodedId)
+{
+    return -(encodedId + 1);
+}
+
+
 void Foam::partitionByFirst(Foam::pairVector<Foam::label, Foam::label>& input)
 {
     std::stable_partition

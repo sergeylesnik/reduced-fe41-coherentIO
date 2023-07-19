@@ -62,7 +62,7 @@ void Foam::OFCstreamBase::gatherFieldDataEntries
 
 void Foam::OFCstreamBase::removeProcPatchesFromDict()
 {
-    const polyBoundaryMesh& bm = sliceableMesh_.mesh().boundaryMesh();
+    const polyBoundaryMesh& bm = coherentMesh_.mesh().boundaryMesh();
     dictionary& bfDict = dict_.subDict("boundaryField");
 
     forAll(bm, i)
@@ -91,11 +91,11 @@ Foam::OFCstreamBase::OFCstreamBase
 :
     OFstream(pathname, mode, format, version, compression),
     pathname_(pathname),
-    sliceableMesh_
+    coherentMesh_
     (
-        const_cast<sliceMesh&>
+        const_cast<CoherentMesh&>
         (
-            registry.lookupObject<sliceMesh>(sliceMesh::typeName)
+            registry.lookupObject<CoherentMesh>(CoherentMesh::typeName)
         )
     ),
     dict_(pathname.name()),

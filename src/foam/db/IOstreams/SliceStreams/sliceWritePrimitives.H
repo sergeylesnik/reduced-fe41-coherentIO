@@ -84,6 +84,18 @@ void sliceWritePrimitives
     const scalar* buf
 );
 
+//- Write global array
+void sliceWritePrimitives
+(
+    const string type,
+    const string pathname,
+    const string blockId,
+    const label shape,
+    const label start,
+    const label count,
+    const label* buf
+);
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

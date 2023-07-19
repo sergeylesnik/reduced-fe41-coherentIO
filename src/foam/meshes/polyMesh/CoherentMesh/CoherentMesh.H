@@ -22,26 +22,28 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sliceMesh
+    Foam::CoherentMesh
 
 Description
-    Foam::sliceMesh
+    Foam::CoherentMesh
 
 SourceFiles
-    sliceMesh.C
+    CoherentMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sliceMesh_H
-#define sliceMesh_H
+#ifndef CoherentMesh_H
+#define CoherentMesh_H
 
 #include "Offsets.H"
 #include "Slice.H"
-#include "sliceProcPatch.H"
-#include "slicePermutation.H"
+#include "ProcessorPatch.H"
+#include "FragmentPermutation.H"
 #include "polyMesh.H"
 #include "MeshObject.H"
 #include "globalIndex.H"
+
+#include "IndexComponent.H"
 
 #include <vector>
 #include <algorithm>
@@ -52,41 +54,16 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sliceMesh Declaration
+                       Class CoherentMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-void sendSliceFaces
-(
-    std::pair<label, label> sendPair,
-    Offsets& cellOffsets,
-    Offsets& pointOffsets,
-    labelList& globalNeighbours,
-    faceList& globalFaces,
-    pointField& allPoints_,
-    std::vector<sliceProcPatch>& sliceProcPatches,
-    label numBoundaries
-);
-
-void recvSliceFaces
-(
-    std::pair<label, label> recvPair,
-    faceList& globalFaces,
-    labelList& localOwner,
-    Offsets& cellOffsets,
-    Offsets& pointOffsets,
-    Slice& cellSlice,
-    Slice& pointSlice,
-    pointField& allPoints_,
-    std::vector<sliceProcPatch>& sliceProcPatches,
-    labelList& globalNeighbours,
-    label numBoundaries
-);
-
-
-class sliceMesh
+class CoherentMesh
 :
-    public MeshObject<polyMesh, sliceMesh>
+    public MeshObject<polyMesh, CoherentMesh>
 {
+
+    IndexComponent tree_{};
+
     label numBoundaries_{};
 
     labelList globalNeighbours_{};
@@ -111,9 +88,9 @@ class sliceMesh
 
     Slice pointSlice_{};
 
-    std::vector<sliceProcPatch> slicePatches_{};
+    std::vector<ProcessorPatch> slicePatches_{};
 
-    slicePermutation sliceablePermutation_{};
+    FragmentPermutation splintedPermutation_{};
 
     PtrList<globalIndex> boundaryGlobalIndex_{};
 
@@ -127,6 +104,10 @@ class sliceMesh
 
     // Private Member Functions
     void readMesh(const fileName&);
+
+    void sendSliceFaces(std::pair<label, label> sendPair);
+
+    void recvSliceFaces(std::pair<label, label> recvPair);
 
     // De-serialize faces
     faceList
@@ -147,15 +128,15 @@ class sliceMesh
 
 public:
 
-    TypeName("sliceMesh");
+    TypeName("CoherentMesh");
 
     // Constructors
-    sliceMesh() = default;
+    CoherentMesh() = default;
 
-    sliceMesh(const polyMesh&);
+    CoherentMesh(const polyMesh&);
 
     // Destructor
-    ~sliceMesh() = default;
+    ~CoherentMesh() = default;
 
     // Member Functions
 
@@ -191,7 +172,7 @@ public:
 
     std::vector<label> polyPatches();
 
-    std::vector<sliceProcPatch> procPatches();
+    std::vector<ProcessorPatch> procPatches();
 
     List<polyPatch*> polyPatches(polyBoundaryMesh&);
 

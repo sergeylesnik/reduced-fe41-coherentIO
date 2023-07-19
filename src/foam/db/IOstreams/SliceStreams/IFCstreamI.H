@@ -61,9 +61,9 @@ Foam::dictionary& Foam::IFCstream::readToDict(const word& fieldTypeName)
 
     dictionary& bfDict = dict_.subDict("boundaryField");
 
-    forAll(sliceableMesh_.mesh().boundaryMesh(), i)
+    forAll(coherentMesh_.mesh().boundaryMesh(), i)
     {
-        const polyPatch& patch = sliceableMesh_.mesh().boundaryMesh()[i];
+        const polyPatch& patch = coherentMesh_.mesh().boundaryMesh()[i];
         const word& patchName = patch.name();
 
         if (patch.type() == processorPolyPatch::typeName)

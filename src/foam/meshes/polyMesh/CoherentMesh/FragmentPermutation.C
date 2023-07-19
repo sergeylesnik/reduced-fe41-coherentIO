@@ -23,63 +23,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "globalIndex.H"
+#include "FragmentPermutation.H"
+
+#include <numeric>
+#include <cmath>
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::pairVector<Foam::label, Foam::label>
+Foam::FragmentPermutation::createPolyNeighbourPermutation
+(
+    const Foam::labelList& sliceNeighbours
+)
+{
+    auto polySlicePairs{generateIndexedPairs(sliceNeighbours)};
+    partitionByFirst(polySlicePairs);
+    return polySlicePairs;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::globalIndex::globalIndex(const label localSize, const bool reduce)
+Foam::FragmentPermutation::FragmentPermutation(const Foam::labelList& sliceNeighbours)
 :
-    offsets_(Pstream::nProcs())
-{
-    labelList localSizes(Pstream::nProcs());
-    localSizes[Pstream::myProcNo()] = localSize;
-    Pstream::gatherList(localSizes);
-    Pstream::scatterList(localSizes);   // just to balance out comms
-
-    if (reduce)
+    polyNeighboursPermutation_{createPolyNeighbourPermutation(sliceNeighbours)},
+    polyNeighboursAndPatches_
     {
-        label offset = 0;
-        forAll(offsets_, procI)
-        {
-            label oldOffset = offset;
-            offset += localSizes[procI];
-
-            if (offset < oldOffset)
+        extractNth
+        (
+            polyNeighboursPermutation_,
+            [](const std::pair<Foam::label, Foam::label>& inputPair)
             {
-                FatalErrorIn("globalIndex::globalIndex(const label)")
-                    << "Overflow : sum of sizes " << localSizes
-                    << " exceeds capability of label (" << labelMax
-                    << "). Please recompile with larger datatype for label."
-                    << exit(FatalError);
+                return inputPair.first;
             }
-            offsets_[procI] = offset;
-        }
-    }
-    else
+        )
+    },
+    facePermutation_
     {
-        std::copy(localSizes.begin(), localSizes.end(), offsets_.begin());
+        extractNth
+        (
+            polyNeighboursPermutation_,
+            [](const std::pair<Foam::label, Foam::label>& inputPair)
+            {
+                return inputPair.second;
+            }
+        )
     }
-}
-
-
-Foam::globalIndex::globalIndex(Istream& is)
 {
-    is >> offsets_;
+    polyNeighboursPermutation_.clear();
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, globalIndex& gi)
+// Transformations to FragmentPermutation
+
+Foam::label Foam::FragmentPermutation::permute(const Foam::label& id)
 {
-    return is >> gi.offsets_;
+    return facePermutation_[id];
 }
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const globalIndex& gi)
-{
-    return os << gi.offsets_;
-}
-
 
 // ************************************************************************* //

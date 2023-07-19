@@ -4,37 +4,6 @@
 #include "Offsets.H"
 #include "Slice.H"
 
-std::map<Foam::label, Foam::label>
-Foam::numFacesToExchange
-(
-    const Foam::Offsets& cellOffsets,
-    const Foam::Offsets& pointOffsets,
-    const Foam::labelList& globalNeighbours
-)
-{
-    Foam::label myProcNo = Pstream::myProcNo();
-    std::map<Foam::label, Foam::label> data{};
-    for
-    (
-        Foam::label partition = myProcNo + 1;
-        partition<Pstream::nProcs();
-        ++partition
-    )
-    {
-        Foam::Slice cellSlice(partition, cellOffsets);
-        Foam::label numberOfPartitionFaces = Foam::numCellsFromSlice
-                                             (
-                                                 globalNeighbours,
-                                                 cellSlice
-                                             );
-        if (numberOfPartitionFaces != 0)
-        {
-            data[partition] = numberOfPartitionFaces;
-        }
-    }
-    return data;
-}
-
 
 std::map<Foam::label, Foam::label>
 Foam::nonblockConsensus(const std::map<Foam::label, Foam::label>& data)

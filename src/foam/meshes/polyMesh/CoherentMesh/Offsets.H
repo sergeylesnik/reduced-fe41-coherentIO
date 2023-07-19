@@ -46,12 +46,22 @@ namespace Foam
 
 class Offsets
 {
+    using pair_container = List<std::pair<label,label>>;
 
-    labelList offsets_{labelList(Pstream::nProcs(), 0)};
+    //labelList offsets_{labelList(Pstream::nProcs(), 0)};
 
-    void do_reduce();
+    pair_container offset_pairs_
+                   {
+                       pair_container
+                       (
+                           Pstream::nProcs(),
+                           std::pair<label, label>(0,0)
+                       )
+                   };
 
 public:
+
+    using iterator = pair_container::iterator;
 
     // Default constructor
     Offsets() = default;
@@ -60,7 +70,6 @@ public:
     explicit Offsets
     (
         label value,
-        bool parRun = Pstream::parRun(),
         bool reduce = false
     );
 
@@ -76,14 +85,13 @@ public:
     // Return the difference between lower and upper bound
     label count(label) const;
 
-    // STL-like: Return offset to processor below -- lowerBound()
-    label front() const;
-
-    // STL-like: Return offset to processor above -- upperBound()
-    label back() const;
-
-    // STL-like: Return the difference between lower and upper bound -- count()
     label size() const;
+
+    iterator begin();
+
+    iterator end();
+
+    std::pair<label, label> operator[](label) const;
 
 };
 
