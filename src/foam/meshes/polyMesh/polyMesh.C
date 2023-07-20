@@ -1587,8 +1587,7 @@ bool Foam::polyMesh::write() const
 
         SlicePermutation sliceablePermutation{ *this };
 
-        faceList sliceFaces(allFaces_);
-        sliceablePermutation.apply(sliceFaces);
+        faceList sliceFaces = sliceablePermutation.retrieveFaces();
         // Linearize faces and points
         label k = 0;
         Foam::label linearSizeOfFaces = allFaces_.linearSize();

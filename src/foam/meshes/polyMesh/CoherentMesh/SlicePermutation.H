@@ -67,10 +67,11 @@ class SlicePermutation
     // sliceable layout for point-ordered lists
     std::vector<label> permutationToPolyPoint_{};
 
+    // Readily permuted faces
+    faceList faces_{};
+
     // Create the point permutation from fragmented to sliceable data layout
     void createPointPermutation(faceList&, const label&);
-
-    void renumberToSlice(faceList&);
 
 public:
 
@@ -99,6 +100,8 @@ public:
         void apply(MeshElement&);
 
         void apply(faceList&);
+
+        Foam::faceList retrieveFaces();
 
         // Generate 'sliced' neighbours
         void retrieveNeighbours(labelList&, const polyMesh&);

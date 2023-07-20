@@ -55,23 +55,12 @@ void Foam::SlicePermutation::createPointPermutation
     }
 }
 
-
-void Foam::SlicePermutation::renumberToSlice(Foam::faceList& input)
-{
-    renumberFaces(input, permutationToPolyPoint_);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::SlicePermutation::SlicePermutation(const polyMesh& mesh)
 :
-    permutationToSlice_{permutationOfSorted(mesh.faceOwner())}
-{
-    Foam::faceList sliceFaces(mesh.allFaces());
-    permute(sliceFaces);
-    createPointPermutation(sliceFaces, mesh.nPoints());
-}
+    SlicePermutation(mesh.faceOwner(), mesh.allFaces(), mesh.nPoints())
+{}
 
 
 Foam::SlicePermutation::SlicePermutation
@@ -81,11 +70,18 @@ Foam::SlicePermutation::SlicePermutation
     const Foam::label& nPoints
 )
 :
-    permutationToSlice_{permutationOfSorted(faceOwner)}
+    permutationToSlice_(faceOwner.size()),
+    faces_{allFaces.begin(), allFaces.end()}
 {
-    Foam::faceList sliceFaces(allFaces);
-    permute(sliceFaces);
-    createPointPermutation(sliceFaces, nPoints);
+    permutationOfSorted
+    (
+        permutationToSlice_.begin(),
+        permutationToSlice_.end(),
+        faceOwner
+    );
+    permute(faces_);
+    createPointPermutation(faces_, nPoints);
+    renumberFaces(faces_, permutationToPolyPoint_);
 }
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -104,7 +100,13 @@ void Foam::SlicePermutation::permute(Foam::pointField& allPoints)
 void Foam::SlicePermutation::apply(Foam::faceList& allFaces)
 {
     permute(allFaces);
-    renumberToSlice(allFaces);
+    renumberFaces(allFaces, permutationToPolyPoint_);
+}
+
+
+Foam::faceList Foam::SlicePermutation::retrieveFaces()
+{
+    return faces_;
 }
 
 

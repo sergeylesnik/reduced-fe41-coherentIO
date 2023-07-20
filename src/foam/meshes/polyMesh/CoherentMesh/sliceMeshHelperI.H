@@ -83,6 +83,25 @@ void Foam::indexSort(IndexContainer& indices, const DataContainer& data)
     );
 }
 
+template<typename InputIterator, typename Container>
+void Foam::permutationOfSorted
+(
+    InputIterator begin,
+    InputIterator end,
+    const Container& data
+)
+{
+    std::iota(begin, end, 0);
+    std::stable_sort
+    (
+        begin,
+        end,
+        [&data] (const label& i, const label& j)
+        {
+            return data[i] < data[j];
+        }
+    );
+}
 
 template<typename ValueType, typename UnaryOperation>
 std::vector<Foam::label> Foam::extractNth
