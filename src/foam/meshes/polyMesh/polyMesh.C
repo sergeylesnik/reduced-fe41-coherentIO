@@ -1576,6 +1576,7 @@ Foam::labelList determineOffsets2D( const T& input2DList )
     return offsets;
 }
 
+
 bool Foam::polyMesh::write() const
 {
     if (time().writeFormat() == IOstream::COHERENT)
@@ -1618,14 +1619,13 @@ bool Foam::polyMesh::write() const
             {linearizedFaces.size()},
             linearizedFaces.cdata()
         );
-        sliceFaces.clear();
 
         Foam::labelList sliceOwner(owner_);
         sliceablePermutation.apply(sliceOwner);
         // Generate ownerStarts
         // - Takes into account if cell is not owning any faces.
         labelList ownerStarts( cells().size() + 1, 0 );
-        for (auto ownerId : sliceOwner )
+        for (const auto& ownerId : sliceOwner )
         {
             ownerStarts[ownerId+1] += 1;
         }
@@ -1641,7 +1641,6 @@ bool Foam::polyMesh::write() const
             {ownerStarts.size()},
             ownerStarts.cdata()
         );
-        sliceOwner.clear();
 
         // Generate local neighbours
         Foam::labelList sliceNeighbours;
@@ -1655,7 +1654,6 @@ bool Foam::polyMesh::write() const
             sliceNeighbours.cdata()
         );
         sliceStreamPtr->sync();
-        sliceNeighbours.clear();
 
         Foam::pointField slicePoints( allPoints_ );
         sliceablePermutation.apply( slicePoints );
@@ -1667,7 +1665,6 @@ bool Foam::polyMesh::write() const
             slicePoints.size(),
             slicePoints.cdata()
         );
-        slicePoints.clear();
     }
 
     return regIOobject::write();
