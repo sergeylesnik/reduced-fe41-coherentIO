@@ -156,22 +156,19 @@ void Foam::findValueExtend
 template<typename Container, typename IndexContainer>
 void Foam::applyPermutation(Container& data, const IndexContainer& permutation)
 {
-    typedef typename IndexContainer::value_type size_type;
-    IndexContainer indices{permutation};
-    auto size = static_cast<size_type>(indices.size());
-    for (size_type rootIndex = 0; rootIndex<size; rootIndex++)
+    Container output(data.size());
+    Foam::label size = static_cast<Foam::label>(indices.size());
+    for (Foam::label rootIndex = 0; rootIndex<size; rootIndex++)
     {
-        // Swap data elements and indices until indices match
-        auto currentIndex = rootIndex;
-        while (rootIndex != indices[currentIndex])
-        {
-            using std::swap;
-            auto leafIndex = indices[currentIndex];
-            swap(data[currentIndex], data[leafIndex]);
-            swap(indices[currentIndex], currentIndex);
-        }
-        indices[currentIndex] = currentIndex;
+        output[rootIndex] = std::move(data[indices[rootIndex]]);
     }
+    std::move
+    (
+        data.begin()+size,
+        data.end(),
+        output.begin()+size
+    );
+    data = std::move(output);
 }
 
 
