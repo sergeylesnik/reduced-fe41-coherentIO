@@ -157,10 +157,10 @@ template<typename Container, typename IndexContainer>
 void Foam::applyPermutation(Container& data, const IndexContainer& permutation)
 {
     Container output(data.size());
-    Foam::label size = static_cast<Foam::label>(indices.size());
+    Foam::label size = static_cast<Foam::label>(permutation.size());
     for (Foam::label rootIndex = 0; rootIndex<size; rootIndex++)
     {
-        output[rootIndex] = std::move(data[indices[rootIndex]]);
+        output[rootIndex] = std::move(data[permutation[rootIndex]]);
     }
     std::move
     (
