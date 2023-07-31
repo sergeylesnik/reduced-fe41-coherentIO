@@ -74,7 +74,9 @@ void Foam::FieldComponent<FieldType>::_v_initialize_()
 template<typename FieldType>
 void Foam::FieldComponent<FieldType>::_v_extract_(FieldType& output)
 {
-    output = data_;
+    output = std::move(data_);
+    data_.clear();
+    initialized_ = false;
 }
 
 // ************************************************************************* //

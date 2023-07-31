@@ -199,15 +199,19 @@ void Foam::CoherentMesh::readMesh(const fileName& pathname)
     coherenceTree.initialize();
 
     std::vector<Foam::label> ownerStarts;
+    coherenceTree.node("ownerStarts")->extract(ownerStarts);
+    serializeOwner(ownerStarts); // TODO: has side-effects: filling member localOwner_
+    ownerStarts.clear();
+
     std::vector<Foam::label> faceStarts;
     std::vector<Foam::label> linearizedFaces;
-    coherenceTree.node("ownerStarts")->extract(ownerStarts);
-    coherenceTree.node("neighbours")->extract(globalNeighbours_);
     coherenceTree.node("faceStarts")->extract(faceStarts);
     coherenceTree.node("faces")->extract(linearizedFaces);
+    deserializeFaces(faceStarts, linearizedFaces); // TODO: has side-effects: filling member globalFaces_
+    linearizedFaces.clear();
+    faceStarts.clear();
+
     coherenceTree.node("points")->extract(allPoints_);
-    localOwner_ = serializeOwner(ownerStarts);
-    globalFaces_ = deserializeFaces(faceStarts, linearizedFaces);
 
     numBoundaries_ = *std::min_element
                       (
@@ -232,7 +236,8 @@ void Foam::CoherentMesh::readMesh(const fileName& pathname)
         );
     }
 
-    coherenceTree.initialize();
+    coherenceTree.node("neighbours")->initialize();
+    coherenceTree.node("neighbours")->extract(globalNeighbours_);
 
     coherenceTree.node("cellOffsets")->extract(cellOffsets_);
     coherenceTree.node("faceOffsets")->extract(faceOffsets_);
@@ -282,15 +287,18 @@ void Foam::CoherentMesh::sendSliceFaces
     // Face Stuff
     auto sendFaces = procPatch.extractFaces(globalFaces_);
     toPartition << sendFaces;
+    procPatch.determinePointIDs(sendFaces, pointOffsets_.lowerBound(myProcNo));
+    sendFaces.clear();
 
     // Owner Stuff
     auto sendNeighbours = procPatch.extractFaces(globalNeighbours_);
     toPartition << sendNeighbours;
+    sendNeighbours.clear();
 
     // Point Stuff
-    procPatch.determinePointIDs(sendFaces, pointOffsets_.lowerBound(myProcNo));
     auto sendPoints = procPatch.extractPoints(allPoints_);
     toPartition << sendPoints;
+    sendPoints.clear();
 
     // procBoundary Stuff: Track face swapping indices for processor boundaries;
     procPatch.encodePatch(globalNeighbours_);
@@ -308,12 +316,15 @@ void Foam::CoherentMesh::recvSliceFaces
     IPstream fromPartition(Pstream::blocking, partition, 0, 0);
 
     // Face Communication
-    faceList recvFaces(numberOfPartitionFaces);
+    auto oldNumFaces = globalFaces_.size();
+    globalFaces_.resize(oldNumFaces + numberOfPartitionFaces);
+    SubList<face> recvFaces(globalFaces_, numberOfPartitionFaces, oldNumFaces);
     fromPartition >> recvFaces;
-    Foam::appendTransformed
+    std::transform
     (
-        globalFaces_,
-        recvFaces,
+        recvFaces.begin(),
+        recvFaces.end(),
+        recvFaces.begin(),
         [](Foam::face& input)
         {
             return input.reverseFace();
@@ -321,12 +332,14 @@ void Foam::CoherentMesh::recvSliceFaces
     );
 
     // Owner Communication
-    labelList recvOwner(numberOfPartitionFaces);
+    localOwner_.resize(oldNumFaces + numberOfPartitionFaces);
+    SubList<label> recvOwner(localOwner_, numberOfPartitionFaces, oldNumFaces);
     fromPartition >> recvOwner;
-    Foam::appendTransformed
+    std::transform
     (
-        localOwner_,
-        recvOwner,
+        recvOwner.begin(),
+        recvOwner.end(),
+        recvOwner.begin(),
         [this](const Foam::label& id)
         {
             return cellSlice_.convert(id);
@@ -339,8 +352,8 @@ void Foam::CoherentMesh::recvSliceFaces
     std::set<Foam::label> pointIDs{};
     Foam::subset
     (
-        recvFaces.begin(),
-        recvFaces.end(),
+        globalFaces_.end() - numberOfPartitionFaces,
+        globalFaces_.end(),
         std::inserter(pointIDs, pointIDs.end()),
         recvPointSlice
     );
@@ -349,9 +362,10 @@ void Foam::CoherentMesh::recvSliceFaces
     pointSlice_.append(pointIDs);
 
     // Point Communication
-    pointField recvPoints(pointIDs.size());
+    auto oldNumPoints = allPoints_.size();
+    allPoints_.resize(oldNumPoints + pointIDs.size());
+    SubField<point> recvPoints(allPoints_, pointIDs.size(), oldNumPoints);
     fromPartition >> recvPoints;
-    allPoints_.append(recvPoints);
 
     // ProcBoundary Stuff
     Foam::Slice recvCellSlice(partition, cellOffsets_);
@@ -362,44 +376,43 @@ void Foam::CoherentMesh::recvSliceFaces
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::faceList Foam::CoherentMesh::deserializeFaces
+void Foam::CoherentMesh::deserializeFaces
 (
     const std::vector<Foam::label>& faceStarts,
     const std::vector<Foam::label>& linearizedFaces
 )
 {
-    Foam::faceList globalFaces(faceStarts.size() - 1);
-    for (size_t i = 0; i<globalFaces.size(); ++i)
+    globalFaces_.setSize(faceStarts.size() - 1);
+    for (size_t i = 0; i<globalFaces_.size(); ++i)
     {
-        globalFaces[i].resize(faceStarts[i + 1] - faceStarts[i]);
-        std::copy
+        globalFaces_[i].resize(faceStarts[i + 1] - faceStarts[i]);
+        std::move
         (
             linearizedFaces.begin() + (faceStarts[i] - faceStarts[0]),
             linearizedFaces.begin() + (faceStarts[i + 1] - faceStarts[0]),
-            globalFaces[i].begin()
+            globalFaces_[i].begin()
         );
     }
-    return globalFaces;
 }
 
 
-Foam::labelList
-Foam::CoherentMesh::serializeOwner(const std::vector<Foam::label>& ownerStarts)
+void Foam::CoherentMesh::serializeOwner
+(
+    const std::vector<Foam::label>& ownerStarts
+)
 {
     Foam::label ownerCellID = 0;
-    Foam::labelList localOwner;
-    localOwner.setSize(ownerStarts.back() - ownerStarts.front());
+    localOwner_.setSize(ownerStarts.back() - ownerStarts.front());
     for (size_t i = 0; i<ownerStarts.size() - 1; ++i)
     {
         std::fill
         (
-            localOwner.begin() + ownerStarts[i] - ownerStarts.front(),
-            localOwner.begin() + ownerStarts[i + 1] - ownerStarts.front(),
+            localOwner_.begin() + ownerStarts[i] - ownerStarts.front(),
+            localOwner_.begin() + ownerStarts[i + 1] - ownerStarts.front(),
             ownerCellID
         );
         ++ownerCellID;
     }
-    return localOwner;
 }
 
 
@@ -663,42 +676,30 @@ Foam::CoherentMesh::CoherentMesh(const Foam::polyMesh& pm)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::CoherentMesh::polyNeighbours()
+void Foam::CoherentMesh::polyNeighbours(Foam::labelList& neighbours)
 {
-    // TODO: copy poly neighbours into labelList
-    std::vector<Foam::label> neighbours{};
     splintedPermutation_.retrieveNeighbours(neighbours);
     cellSlice_.convert(neighbours);
-    labelList polyNeighbours(neighbours.size());
-    std::copy
-    (
-        std::begin(neighbours),
-        std::end(neighbours),
-        std::begin(polyNeighbours)
-    );
-    return polyNeighbours;
 }
 
 
-Foam::labelList Foam::CoherentMesh::polyOwner()
+void Foam::CoherentMesh::polyOwner(Foam::labelList& owner)
 {
-    auto owner = localOwner_;
+    owner = localOwner_;
     splintedPermutation_.permute(owner);
-    return owner;
 }
 
 
-Foam::faceList Foam::CoherentMesh::polyFaces()
+void Foam::CoherentMesh::polyFaces(Foam::faceList& faces)
 {
-    auto faces = globalFaces_;
+    faces = globalFaces_;
     splintedPermutation_.permute(faces);
-    return faces;
 }
 
 
-Foam::pointField Foam::CoherentMesh::polyPoints()
+void Foam::CoherentMesh::polyPoints(Foam::pointField& points)
 {
-    return allPoints_;
+    points = allPoints_;
 }
 
 

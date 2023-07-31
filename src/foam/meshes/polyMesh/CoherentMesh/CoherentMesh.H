@@ -110,11 +110,10 @@ class CoherentMesh
     void recvSliceFaces(std::pair<label, label> recvPair);
 
     // De-serialize faces
-    faceList
-    deserializeFaces(const std::vector<label>&, const std::vector<label>&);
+    void deserializeFaces(const std::vector<label>&, const std::vector<label>&);
 
     // Serialize owner list
-    labelList serializeOwner(const std::vector<label>&);
+    void serializeOwner(const std::vector<label>&);
 
     // TODO: lengthy functions that must be refactored
     //       (structure and design still pending)
@@ -162,13 +161,13 @@ public:
         return procBoundaryIDs_;
     }
 
-    labelList polyNeighbours();
+    void polyNeighbours(labelList&);
 
-    labelList polyOwner();
+    void polyOwner(labelList&);
 
-    faceList polyFaces();
+    void polyFaces(faceList&);
 
-    pointField polyPoints();
+    void polyPoints(pointField&);
 
     std::vector<label> polyPatches();
 

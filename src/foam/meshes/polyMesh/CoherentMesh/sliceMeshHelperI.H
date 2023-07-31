@@ -152,23 +152,22 @@ void Foam::findValueExtend
           );
 }
 
+#include <cassert>
 
 template<typename Container, typename IndexContainer>
 void Foam::applyPermutation(Container& data, const IndexContainer& permutation)
 {
-    Container output(data.size());
-    Foam::label size = static_cast<Foam::label>(permutation.size());
-    for (Foam::label rootIndex = 0; rootIndex<size; rootIndex++)
+    Container output(permutation.size());
+    for (Foam::label i = 0; i<permutation.size(); ++i)
     {
-        output[rootIndex] = std::move(data[permutation[rootIndex]]);
+        output[i] = std::move(data[permutation[i]]);
     }
     std::move
     (
-        data.begin()+size,
-        data.end(),
-        output.begin()+size
+        output.begin(),
+        output.end(),
+        data.begin()
     );
-    data = std::move(output);
 }
 
 

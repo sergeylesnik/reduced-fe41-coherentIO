@@ -182,14 +182,18 @@ void Foam::IndexComponent::_v_pull_node_
 void
 Foam::IndexComponent::_v_extract_(Foam::DataComponent::index_container& output)
 {
-    output = data_;
+    output = std::move(data_);
+    data_.clear();
+    initialized_ = false;
 }
 
 
 void Foam::IndexComponent::_v_extract_(std::vector<label>& output)
 {
     output.resize(data_.size());
-    std::copy(data_.begin(), data_.end(), output.begin());
+    std::move(data_.begin(), data_.end(), output.begin());
+    data_.clear();
+    initialized_ = false;
 }
 
 

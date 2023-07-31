@@ -372,10 +372,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         // in order to enable access later on
         const CoherentMesh& coherentMeshConst = CoherentMesh::New(*(this));
         CoherentMesh& coherentMesh = const_cast<CoherentMesh&>(coherentMeshConst);
-        neighbour_ = coherentMesh.polyNeighbours();
-        owner_ = coherentMesh.polyOwner();
-        allFaces_ = coherentMesh.polyFaces();
-        allPoints_ = coherentMesh.polyPoints();
+        coherentMesh.polyNeighbours(neighbour_);
+        coherentMesh.polyOwner(owner_);
+        coherentMesh.polyFaces(allFaces_);
+        coherentMesh.polyPoints(allPoints_);
         faces_.reset( allFaces_, allFaces_.size() );
         points_.reset( allPoints_, allPoints_.size() );
 
@@ -1619,6 +1619,7 @@ bool Foam::polyMesh::write() const
             {linearizedFaces.size()},
             linearizedFaces.cdata()
         );
+        sliceFaces.clear();
 
         Foam::labelList sliceOwner(owner_);
         sliceablePermutation.apply(sliceOwner);
@@ -1641,6 +1642,7 @@ bool Foam::polyMesh::write() const
             {ownerStarts.size()},
             ownerStarts.cdata()
         );
+        sliceOwner.clear();
 
         // Generate local neighbours
         Foam::labelList sliceNeighbours;
@@ -1654,6 +1656,10 @@ bool Foam::polyMesh::write() const
             sliceNeighbours.cdata()
         );
         sliceStreamPtr->sync();
+        sliceNeighbours.clear();
+        ownerStarts.clear();
+        linearizedFaces.clear();
+        faceStarts.clear();
 
         Foam::pointField slicePoints( allPoints_ );
         sliceablePermutation.apply( slicePoints );
@@ -1665,6 +1671,7 @@ bool Foam::polyMesh::write() const
             slicePoints.size(),
             slicePoints.cdata()
         );
+        slicePoints.clear();
     }
 
     return regIOobject::write();
