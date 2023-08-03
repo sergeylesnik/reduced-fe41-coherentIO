@@ -455,6 +455,13 @@ Foam::polyMesh::polyMesh(const IOobject& io)
                 )
             );
         }
+
+        // TODO: Is this what we want, for instance, for dynamic meshes?
+        this->checkOut( allPoints_ );
+        this->checkOut( allFaces_ );
+        this->checkOut( owner_ );
+        this->checkOut( neighbour_ );
+        this->checkOut( boundary_ );
     }
 
     // if (exists(owner_.objectPath()))
