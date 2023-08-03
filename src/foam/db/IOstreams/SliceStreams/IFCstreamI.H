@@ -46,37 +46,51 @@ Foam::label Foam::IFCstream::coherentFieldSize()
 }
 
 
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::IFCstream::reader<Type, PatchField, GeoMesh>::read
+(
+    IFCstream& ifs
+)
+{
+    Info<< "Non-special" << endl;
+    ITstream& its = ifs.dict_.lookup("internalField");
+    ifs.readCompoundTokenData(its, ifs.coherentFieldSize<PatchField, GeoMesh>());
+
+    ifs.readNonProcessorBoundaryFields();
+
+    dictionary& bfDict = ifs.dict_.subDict("boundaryField");
+
+    forAll(ifs.coherentMesh_.mesh().boundaryMesh(), i)
+    {
+        const polyPatch& patch = ifs.coherentMesh_.mesh().boundaryMesh()[i];
+        const word& patchName = patch.name();
+
+        if (patch.type() == processorPolyPatch::typeName)
+        {
+            ifs.addProcessorPatchField<PatchField, GeoMesh>
+            (
+                bfDict, patchName, pTraits<Type>::typeName
+            );
+        }
+    }
+
+    // Ensure that the data is read from storage
+    ifs.sliceStreamPtr_->sync();
+
+    return;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<template<class> class PatchField, class GeoMesh>
+template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::dictionary& Foam::IFCstream::readToDict(const word& fieldTypeName)
 {
     // Fill the dictionary with the stream
     dict_.read(*this);
 
-    ITstream& is = dict_.lookup("internalField");
-    readCompoundTokenData(is, coherentFieldSize<PatchField, GeoMesh>());
+    reader<Type, PatchField, GeoMesh>::read(*this);
 
-    readNonProcessorBoundaryFields();
-
-    dictionary& bfDict = dict_.subDict("boundaryField");
-
-    forAll(coherentMesh_.mesh().boundaryMesh(), i)
-    {
-        const polyPatch& patch = coherentMesh_.mesh().boundaryMesh()[i];
-        const word& patchName = patch.name();
-
-        if (patch.type() == processorPolyPatch::typeName)
-        {
-            addProcessorPatchField<PatchField, GeoMesh>
-            (
-                bfDict, patchName, fieldTypeName
-            );
-        }
-    }
-
-    // Closing the IO engine ensures that the data is read from storage
-    sliceStreamPtr_->sync();
     return dict_;
 }
 

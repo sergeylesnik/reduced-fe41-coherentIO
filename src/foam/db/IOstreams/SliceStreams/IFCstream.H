@@ -104,6 +104,21 @@ class IFCstream
     public IFCstreamAllocator,
     public ISstream
 {
+    // Private classes
+
+        //- Helper to enable partial template specialization for reading on
+        //  specialized geometric field and mesh but templated Type of the
+        //  geometric field.
+        template<class Type, template<class> class PatchField, class GeoMesh>
+        class reader
+        {
+
+        public:
+
+            static void read(IFCstream&);
+        };
+
+
     // Private data
 
         fileName pathname_;
@@ -116,6 +131,7 @@ class IFCstream
 
         //- Pointer to the IO engine
         std::unique_ptr<SliceStream> sliceStreamPtr_;
+
 
     // Private Member Functions
 
@@ -203,7 +219,8 @@ public:
 
             //- Read to dictionary and add the missing subFields (e.g.
             //  processor patch fields).
-            template<template<class> class PatchField, class GeoMesh>
+            // template<template<class> class PatchField, class GeoMesh>
+        template<class Type, template<class> class PatchField, class GeoMesh>
             dictionary& readToDict(const word& fieldTypeName);
 
 

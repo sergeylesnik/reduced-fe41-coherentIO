@@ -89,11 +89,20 @@ public:
 template<>
 label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>();
 
-template<>
-dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
-(
-    const word& fieldTypeName
-);
+// template<>
+// dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
+// (
+//     const word& fieldTypeName
+// );
+
+template<class Type>
+class IFCstream::reader<Type, fvsPatchField, surfaceMesh>
+{
+
+public:
+
+    static void read(IFCstream&);
+};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

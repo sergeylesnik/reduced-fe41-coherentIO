@@ -141,7 +141,7 @@ public:
         void writeGlobalGeometricField();
 };
 
-template<class GeoFieldType, template<class> class PatchField, class GeoMesh>
+template<class Type, template<class> class PatchField, class GeoMesh>
 class OFCstream
 :
 public OFCstreamBase

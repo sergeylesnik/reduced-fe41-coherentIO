@@ -41,6 +41,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// ToDoIO Remove the allocator. Since ifPtr_ is always std::istringstream all
+// the functionality may be moved to the IFCstream constructor
 Foam::IFCstreamAllocator::IFCstreamAllocator
 (
     const fileName& pathname,
