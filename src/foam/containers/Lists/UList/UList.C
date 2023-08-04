@@ -118,23 +118,6 @@ Foam::label Foam::UList<T>::byteSize() const
 
 
 template<class T>
-Foam::label Foam::UList<T>::addToLinearSize( Foam::label size ) const
-{
-    linearSize_ += size;
-    return linearSize_;
-}
-
-
-template<class T>
-Foam::label Foam::UList<T>::linearSize() const
-{
-    linearSize_ = 0;
-    Foam::calculateLinearSize(this, linearSize_);
-    return linearSize_;
-}
-
-
-template<class T>
 void Foam::sort(UList<T>& a)
 {
     std::sort(a.begin(), a.end());
