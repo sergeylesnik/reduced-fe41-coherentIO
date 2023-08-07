@@ -40,15 +40,16 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
     // Otherwise, the coherent internal field needs to be mapped to FOAM's
     // internal and processor fields.
 
+    typedef typename pTraits<Type>::cmptType cmptType;
     const polyMesh& mesh = ifs.coherentMesh_.mesh();
     const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
     // Internal field data
-    UList<scalar> internalData;
+    UList<Type> internalData;
 
     // Field data in the coherent format holding internal and processor patch
     // fields
-    scalarList coherentData;
+    List<Type> coherentData;
 
     ITstream& its = ifs.dict_.lookup("internalField");
     dictionary& bfDict = ifs.dict_.subDict("boundaryField");
@@ -73,9 +74,9 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
             compToken.resize(mesh.nInternalFaces());
 
             // Store the data pointer in a UList for convenience
-            internalData = UList<scalar>
+            internalData = UList<Type>
             (
-                reinterpret_cast<scalar*>(compToken.data()),
+                reinterpret_cast<Type*>(compToken.data()),
                 mesh.nInternalFaces()
             );
 
@@ -103,7 +104,7 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
             ifs.sliceStreamPtr_->transfer
             (
                 id,
-                reinterpret_cast<scalar*>(coherentData.data()),
+                reinterpret_cast<cmptType*>(coherentData.data()),
                 List<label>({nCmpts*elemOffset}),
                 List<label>({nCmpts*nElems})
             );
@@ -123,6 +124,7 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
                 const polyPatch& patch = bm[i];
                 const word& patchName = patch.name();
 
+                // ToDoIO Make all the if(ppPatch) conditions consistent
                 if (patch.type() == processorPolyPatch::typeName)
                 {
                     dictionary dict;
@@ -147,7 +149,7 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
 
     const label nAllPatches = bm.size();
     // ToDoIO Make it work with any type
-    List<UList<scalar> > procPatchData(nAllPatches);
+    List<UList<Type> > procPatchData(nAllPatches);
     label nProcPatches = 0;
 
     forAll(bm, patchI)
@@ -171,9 +173,9 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
 
             // Store the data pointer for the later mapping
             procPatchData[nProcPatches++] =
-                UList<scalar>
+                UList<Type>
                 (
-                    reinterpret_cast<scalar*>(ctPtr().data()),
+                    reinterpret_cast<Type*>(ctPtr().data()),
                     patchSize
                 );
 
