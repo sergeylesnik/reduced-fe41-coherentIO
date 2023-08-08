@@ -50,6 +50,18 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<>
+label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>();
+
+template<class Type>
+class IFCstream::reader<Type, fvsPatchField, surfaceMesh>
+{
+
+public:
+
+    static void read(IFCstream&);
+};
+
 template<class Type>
 class OFCstream<Type, fvsPatchField, surfaceMesh>
 :
@@ -84,24 +96,6 @@ public:
 
     //- Destructor
     virtual ~OFCstream();
-};
-
-template<>
-label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>();
-
-// template<>
-// dictionary& IFCstream::readToDict<fvsPatchField, surfaceMesh>
-// (
-//     const word& fieldTypeName
-// );
-
-template<class Type>
-class IFCstream::reader<Type, fvsPatchField, surfaceMesh>
-{
-
-public:
-
-    static void read(IFCstream&);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

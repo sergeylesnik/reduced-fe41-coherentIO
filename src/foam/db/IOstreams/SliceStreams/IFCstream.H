@@ -154,14 +154,17 @@ class IFCstream
 
             //- Find (recursively) all compound tokens in dictionary and
             //  populate them with data
+            template<class Type>
             void readCompoundTokenData(dictionary& dict, const label size);
 
             //- Find all compound tokens in ITstream and populate them with
             //  data
+            template<class Type>
             void readCompoundTokenData(ITstream& is, const label localSize);
 
             //- Read field data of all boundary patches that are not of
             //  processor type
+            template<class Type>
             void readNonProcessorBoundaryFields();
 
 
@@ -220,8 +223,13 @@ public:
             //- Read to dictionary and add the missing subFields (e.g.
             //  processor patch fields).
             // template<template<class> class PatchField, class GeoMesh>
-        template<class Type, template<class> class PatchField, class GeoMesh>
-            dictionary& readToDict(const word& fieldTypeName);
+            template
+            <
+                class Type,
+                template<class> class PatchField,
+                class GeoMesh
+            >
+            dictionary& readToDict();
 
 
         // STL stream

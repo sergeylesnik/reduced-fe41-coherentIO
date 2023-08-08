@@ -46,6 +46,139 @@ Foam::label Foam::IFCstream::coherentFieldSize()
 }
 
 
+template<class Type>
+void Foam::IFCstream::readCompoundTokenData(dictionary& dict, const label size)
+{
+    forAllIter(IDLList<entry>, dict, pIter)
+    {
+        entry& pEntry = pIter();
+
+        if (pEntry.isDict())
+        {
+            readCompoundTokenData<Type>(pEntry.dict(), size);
+        }
+
+        if (debug)
+        {
+            Pout<< "Reading primitive entry " << nl << tab << pEntry << endl;
+        }
+
+        ITstream& is = pEntry.stream();
+        readCompoundTokenData<Type>(is, size);
+    }
+}
+
+
+template<class Type>
+void Foam::IFCstream::readCompoundTokenData
+(
+    ITstream& is,
+    const label localSize
+)
+{
+    typedef typename pTraits<Type>::cmptType cmptType;
+
+    // Traverse the tokens. If the current token is a compound token, resize
+    // the compound token with the correct size. The id is stored in the next
+    // token.
+    while (!is.eof())
+    {
+        token currToken(is);
+
+        // Resize the compoundTokens according to mesh of the proc and read the
+        // corresponding slice of the data.
+        if (currToken.isCompound())
+        {
+            token::compound& compToken = currToken.compoundToken();
+
+            // Current token index points to the token after the compound
+            // ToDoIO Get rid of globalSize?
+            const label coherentStartI = is.tokenIndex();
+            const label globalSize = is[coherentStartI].labelToken();
+            const string id = is[coherentStartI + 1].stringToken();
+
+            // Delete the coherent format tokens by resizing the tokenList
+            is.resize(coherentStartI);
+
+            // ToDoIO Get proper offsets directly from coherentMesh_
+            // elemOffset has to be int64
+            //
+            // By now:
+            // // Internal field
+            // const label elemOffset = coherentMesh_.cellOffsets().front();
+            // const label nElems = coherentMesh_.cellOffsets().size();
+            // const label nCmpts = compToken.nComponents();
+            //
+            // // Patches - doesn't work (set doReduce flag?)
+            // Offsets patchOffsets(patch.size());
+            // const label elemOffset = patchOffsets.front();
+            // const label nElems = patchOffsets.size();
+
+            const globalIndex gi(localSize);
+            const label elemOffset = gi.offset(Pstream::myProcNo());
+            const label nElems = gi.localSize();
+            const label nCmpts = compToken.nComponents();
+
+            compToken.resize(nElems);
+
+            if (debug)
+            {
+                Pout
+                    << "void Foam::IFCstream::readCompoundTokenData" << nl
+                    << "(" << nl
+                    << "    ITstream& is," << nl
+                    << "    const label localSize" << nl
+                    << ")" << nl
+                    << "Reading compoundToken" << nl
+                    << "    ITstream name = " << is.name() << nl
+                    << "    ITstream globalSize = " << globalSize << nl
+                    << "    ITstream id = " << id << nl
+                    << "    elemOffset = " << elemOffset << nl
+                    << "    nElems = " << nElems << nl
+                    << "    compoundToken nComponents = " << nCmpts << nl
+                    << "    ITstream tokens info:"
+                    << endl;
+
+                forAll(is, i)
+                {
+                    Pout<< tab << tab << is[i].info() << endl;
+                }
+            }
+
+            // ToDoIO Provide a better interface from SliceStream for reading
+            // of fields.
+            sliceStreamPtr_->open("fields", pathname_.path());
+            sliceStreamPtr_->transfer
+            (
+                id,
+                reinterpret_cast<cmptType*>(compToken.data()),
+                List<label>({nCmpts*elemOffset}),
+                List<label>({nCmpts*nElems})
+            );
+        }
+    }
+}
+
+
+template<class Type>
+void Foam::IFCstream::readNonProcessorBoundaryFields()
+{
+    const polyMesh& mesh = coherentMesh_.mesh();
+    const polyBoundaryMesh& bm = mesh.boundaryMesh();
+    dictionary& bfDict = dict_.subDict("boundaryField");
+
+    forAll(bm, i)
+    {
+        const polyPatch& patch = bm[i];
+        if (patch.type() != processorPolyPatch::typeName)
+        {
+            dictionary& patchDict = bfDict.subDict(patch.name());
+            readCompoundTokenData<Type>(patchDict, patch.size());
+        }
+    }
+}
+
+
 template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::IFCstream::reader<Type, PatchField, GeoMesh>::read
 (
@@ -54,9 +187,13 @@ void Foam::IFCstream::reader<Type, PatchField, GeoMesh>::read
 {
     Info<< "Non-special" << endl;
     ITstream& its = ifs.dict_.lookup("internalField");
-    ifs.readCompoundTokenData(its, ifs.coherentFieldSize<PatchField, GeoMesh>());
+    ifs.readCompoundTokenData<Type>
+    (
+        its,
+        ifs.coherentFieldSize<PatchField, GeoMesh>()
+    );
 
-    ifs.readNonProcessorBoundaryFields();
+    ifs.readNonProcessorBoundaryFields<Type>();
 
     dictionary& bfDict = ifs.dict_.subDict("boundaryField");
 
@@ -84,7 +221,7 @@ void Foam::IFCstream::reader<Type, PatchField, GeoMesh>::read
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::dictionary& Foam::IFCstream::readToDict(const word& fieldTypeName)
+Foam::dictionary& Foam::IFCstream::readToDict()
 {
     // Fill the dictionary with the stream
     dict_.read(*this);

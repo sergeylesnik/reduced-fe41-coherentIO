@@ -32,7 +32,7 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
     IFCstream& ifs
 )
 {
-    ifs.readNonProcessorBoundaryFields();
+    ifs.readNonProcessorBoundaryFields<Type>();
 
     // Take care internal and processor fields. Internal surface field in
     // coherent format includes processor boundaries. If it is uniform, the

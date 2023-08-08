@@ -134,10 +134,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::readField(Istream& is)
         IFCstream& ifc = dynamic_cast<IFCstream&>(is);
         return readField
         (
-            ifc.readToDict<Type, PatchField, GeoMesh>
-            (
-                pTraits<PrimitiveType>::typeName
-            )
+            ifc.readToDict<Type, PatchField, GeoMesh>()
         );
     }
     else
