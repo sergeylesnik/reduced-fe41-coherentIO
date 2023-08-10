@@ -31,6 +31,7 @@ Description
 #include "OSspecific.H"
 #include "OFstream.H"
 #include "SliceStream.H"
+#include "Pstream.H"
 
 #include "profiling.H"
 
@@ -73,7 +74,17 @@ bool Foam::regIOobject::writeObject
         const_cast<regIOobject&>(*this).instance() = time().timeName();
     }
 
-    mkDir(path());
+    if (time().writeFormat() == IOstream::COHERENT)
+    {
+        if (Pstream::master())
+        {
+            mkDir(path());
+        }
+    }
+    else
+    {
+        mkDir(path());
+    }
 
     if (OFstream::debug)
     {

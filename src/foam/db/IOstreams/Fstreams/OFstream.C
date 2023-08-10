@@ -62,32 +62,32 @@ Foam::OFstreamAllocator::OFstreamAllocator
         }
     }
 
-    if (compression == IOstream::COMPRESSED)
+    if (format == IOstream::COHERENT)
     {
-        // get identically named uncompressed version out of the way
-        if (isFile(pathname, false))
-        {
-            rm(pathname);
-        }
-
-        ofPtr_ = new ogzstream((pathname + ".gz").c_str(), mode);
+        // The file pointer is a buffer pointer in this case.
+        // The buffer is written to ADIOS in the destructor.
+        ofPtr_ = new std::ostringstream();
     }
     else
     {
-        // get identically named compressed version out of the way
-        if (isFile(pathname + ".gz", false))
+        if (compression == IOstream::COMPRESSED)
         {
-            rm(pathname + ".gz");
-        }
+            // get identically named uncompressed version out of the way
+            if (isFile(pathname, false))
+            {
+                rm(pathname);
+            }
 
-        if (format == IOstream::COHERENT)
-        {
-            // The file pointer is a buffer pointer in this case.
-            // The buffer is written to ADIOS in the destructor.
-            ofPtr_ = new std::ostringstream();
+            ofPtr_ = new ogzstream((pathname + ".gz").c_str(), mode);
         }
         else
         {
+            // get identically named compressed version out of the way
+            if (isFile(pathname + ".gz", false))
+            {
+                rm(pathname + ".gz");
+            }
+
             ofPtr_ = new ofstream(pathname.c_str(), mode);
         }
     }
