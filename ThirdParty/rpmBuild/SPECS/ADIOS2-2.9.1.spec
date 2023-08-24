@@ -22,7 +22,7 @@
 #     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     RPM spec file for ADIOS2-2.8.3
+#     RPM spec file for ADIOS2-2.9.1
 #
 # Description
 #     RPM spec file for creating a relocatable RPM
@@ -62,12 +62,12 @@
 
 %define name		ADIOS2
 %define release		%{_WM_OPTIONS}
-%define version 	2.8.3
+%define version 	2.9.1
 
 %define buildroot       %{_topdir}/BUILD/%{name}-%{version}-root
 
 BuildRoot:	        %{buildroot}
-Summary: 		ADIOS2
+Summary: 		%{name}
 License: 		Unkown
 Name: 			%{name}
 Version: 		%{version}
@@ -126,8 +126,7 @@ Group: 			Development/Tools
 %install
 
     cd buildObj
-    make install DESTDIR=$RPM_BUILD_ROOT
-
+    make install
 
     # Creation of foam-extend specific .csh and .sh files"
 
@@ -137,8 +136,8 @@ Group: 			Development/Tools
     #
     # Generate package specific .sh file for foam-extend
     #
-mkdir -p $RPM_BUILD_ROOT/%{_installPrefix}/etc
-cat << DOT_SH_EOF > $RPM_BUILD_ROOT/%{_installPrefix}/etc/%{name}-%{version}.sh
+mkdir -p %{_installPrefix}/etc
+cat << DOT_SH_EOF > %{_installPrefix}/etc/%{name}-%{version}.sh
 # Load %{name}-%{version} binaries if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -163,7 +162,7 @@ DOT_SH_EOF
     #
     # Generate package specific .csh file for foam-extend
     #
-cat << DOT_CSH_EOF > $RPM_BUILD_ROOT/%{_installPrefix}/etc/%{name}-%{version}.csh
+cat << DOT_CSH_EOF > %{_installPrefix}/etc/%{name}-%{version}.csh
 # Load %{name}-%{version} binaries if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 setenv ADIOS2_DIR \$WM_THIRD_PARTY_DIR/packages/%{name}-%{version}/platforms/\$WM_OPTIONS
