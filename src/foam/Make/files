@@ -130,6 +130,7 @@ $(Streams)/token/tokenIO.C
 
 IOstreams = $(Streams)/IOstreams
 $(IOstreams)/IOstream.C
+$(IOstreams)/IOstreamOption.C
 $(IOstreams)/Istream.C
 $(IOstreams)/Ostream.C
 
