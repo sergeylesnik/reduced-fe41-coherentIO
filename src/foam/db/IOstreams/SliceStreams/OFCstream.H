@@ -100,16 +100,34 @@ public:
 
     // Constructors
 
-        //- Construct from pathname
+        //- Default construct
         OFCstreamBase
         (
             const fileName& pathname,
             const objectRegistry& registry,
             ios_base::openmode mode = ios_base::out|ios_base::trunc,
+            IOstreamOption streamOpt = IOstreamOption()
+        );
+
+        //- Construct from pathname
+        OFCstreamBase
+        (
+            const fileName& pathname,
+            const objectRegistry& registry,
+            ios_base::openmode mode,
             streamFormat format = ASCII,
             versionNumber version = currentVersion,
             compressionType compression = UNCOMPRESSED
-        );
+        )
+        :
+            OFCstreamBase
+            (
+                pathname,
+                registry,
+                mode,
+                IOstreamOption(format, version, compression)
+            )
+        {}
 
 
     //- Destructor
@@ -151,25 +169,35 @@ public:
 
     // Constructors
 
-        //- Construct given path and registry
+        //- Default construct
         OFCstream
         (
             const fileName& pathname,
             const objectRegistry& registry,
             ios_base::openmode mode = ios_base::out|ios_base::trunc,
+            IOstreamOption streamOpt = IOstreamOption()
+        )
+        :
+            OFCstreamBase(pathname, registry, mode, streamOpt)
+        {}
+
+        //- Construct given path and registry
+        OFCstream
+        (
+            const fileName& pathname,
+            const objectRegistry& registry,
+            ios_base::openmode mode,
             IOstream::streamFormat format = IOstream::ASCII,
             IOstream::versionNumber version = IOstream::currentVersion,
             IOstream::compressionType compression = IOstream::UNCOMPRESSED
         )
         :
-            OFCstreamBase
+            OFCstream
             (
                 pathname,
                 registry,
                 mode,
-                format,
-                version,
-                compression
+                IOstreamOption(format, version, compression)
             )
         {}
 

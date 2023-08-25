@@ -305,6 +305,14 @@ combineCoherentInternal()
             this->dict_.lookupEntryPtr("internalField", false, false)
         );
 
+    if (!internalFieldDataEntryPtr)
+    {
+        FatalErrorInFunction
+            << "Entry 'internalField' not found in dictionary "
+            << dict_.name()
+            << abort(FatalError);
+    }
+
     const UList<Type>& internalData =
         dynamic_cast<const UList<Type>&>(internalFieldDataEntryPtr->uList());
 
@@ -397,20 +405,10 @@ Foam::OFCstream<Type, Foam::fvsPatchField, Foam::surfaceMesh>::OFCstream
     const fileName& pathname,
     const objectRegistry& registry,
     ios_base::openmode mode,
-    IOstream::streamFormat format,
-    IOstream::versionNumber version,
-    IOstream::compressionType compression
+    IOstreamOption streamOpt
 )
 :
-    OFCstreamBase
-    (
-        pathname,
-        registry,
-        mode,
-        format,
-        version,
-        compression
-    )
+    OFCstreamBase(pathname, registry, mode, streamOpt)
 {}
 
 

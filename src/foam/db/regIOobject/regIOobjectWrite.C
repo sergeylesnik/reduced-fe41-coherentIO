@@ -44,6 +44,12 @@ bool Foam::regIOobject::writeObject
     IOstream::compressionType cmp
 ) const
 {
+    return writeObject(IOstreamOption(fmt, ver, cmp));
+}
+
+
+bool Foam::regIOobject::writeObject(IOstreamOption streamOpt) const
+{
     if (!good())
     {
         SeriousErrorIn("regIOobject::write()")
@@ -98,9 +104,7 @@ bool Foam::regIOobject::writeObject
     (
         objectPath(),
         ios_base::out|ios_base::trunc,
-        fmt,
-        ver,
-        cmp
+        streamOpt
     );
 
 
@@ -124,14 +128,15 @@ bool Foam::regIOobject::write() const
 {
     addProfile2(io, "Foam::regIOobject::write()");
 
-    bool ok = writeObject
+    IOstreamOption streamOpt
     (
         time().writeFormat(),
         IOstream::currentVersion,
-        time().writeCompression()
+        time().writeCompression(),
+        IOstreamOption::SYNC  // ToDoIO Store this default in foamTime?
     );
 
-    return ok;
+    return writeObject(streamOpt);
 }
 
 
@@ -144,15 +149,24 @@ bool Foam::regIOobject::writeToStream
     IOstream::compressionType cmp
 ) const
 {
+    return writeToStream(pathname, mode, IOstreamOption(fmt, ver, cmp));
+}
+
+
+bool Foam::regIOobject::writeToStream
+(
+    const fileName& pathname,
+    ios_base::openmode mode,
+    IOstreamOption streamOpt
+) const
+{
     // Try opening an OFstream for object
     // Stream open for over-write.  HJ, 17/Aug/2010
     OFstream os
     (
         objectPath(),
         ios_base::out|ios_base::trunc,
-        fmt,
-        ver,
-        cmp
+        streamOpt
     );
 
     // If any of these fail, return (leave error handling to Ostream class)

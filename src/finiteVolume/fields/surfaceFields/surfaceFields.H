@@ -88,9 +88,7 @@ public:
         const fileName& pathname,
         const objectRegistry& registry,
         ios_base::openmode mode = ios_base::out|ios_base::trunc,
-        IOstream::streamFormat format = IOstream::ASCII,
-        IOstream::versionNumber version = IOstream::currentVersion,
-        IOstream::compressionType compression = IOstream::UNCOMPRESSED
+        IOstreamOption streamOpt = IOstreamOption()
     );
 
 

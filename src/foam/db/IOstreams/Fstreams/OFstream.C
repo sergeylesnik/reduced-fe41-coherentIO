@@ -106,13 +106,17 @@ Foam::OFstream::OFstream
 (
     const fileName& pathname,
     ios_base::openmode mode,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression
+    IOstreamOption streamOpt
 )
 :
-    OFstreamAllocator(pathname, mode, format, compression),
-    OSstream(*ofPtr_, "OFstream.sinkFile_", format, version, compression),
+    OFstreamAllocator
+    (
+        pathname,
+        mode,
+        streamOpt.format(),
+        streamOpt.compression()
+    ),
+    OSstream(*ofPtr_, "OFstream.sinkFile_", streamOpt),
     pathname_(pathname),
     blockNamesStack_(),
     tmpOssPtr_(nullptr)
@@ -120,7 +124,8 @@ Foam::OFstream::OFstream
     if (debug)
     {
         InfoInFunction
-            << "Constructing a stream with format " << format << Foam::endl;
+            << "Constructing a stream with format " << streamOpt.format()
+            << Foam::endl;
     }
     setClosed();
     setState(ofPtr_->rdstate());

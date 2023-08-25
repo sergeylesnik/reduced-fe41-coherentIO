@@ -72,7 +72,7 @@ protected:
         static const unsigned short entryIndentation_ = 16;
 
         //- Current indent level
-        unsigned short indentLevel_;
+        unsigned short indentLevel_ = 0;
 
 
 public:
@@ -82,16 +82,21 @@ public:
 
     // Constructors
 
+        //- Default construct
+        Ostream(IOstreamOption streamOpt = IOstreamOption())
+        :
+            IOstream(streamOpt)
+        {}
+
         //- Set stream status
         Ostream
         (
-            streamFormat format = ASCII,
+            streamFormat format,
             versionNumber version = currentVersion,
-            compressionType compression=UNCOMPRESSED
+            compressionType compression = UNCOMPRESSED
         )
         :
-            IOstream(format, version, compression),
-            indentLevel_(0)
+            Ostream(IOstreamOption(format, version, compression))
         {}
 
 

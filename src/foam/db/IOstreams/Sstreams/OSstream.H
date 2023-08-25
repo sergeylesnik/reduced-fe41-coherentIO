@@ -92,15 +92,26 @@ public:
 
     // Constructors
 
+        //- Construct using stream option
+        inline OSstream
+        (
+            std::ostream& os,
+            const string& name,
+            IOstreamOption streamOpt = IOstreamOption()
+        );
+
         //- Set stream status
         OSstream
         (
             ostream& os,
             const string& name,
-            streamFormat format = ASCII,
+            streamFormat format,
             versionNumber version = currentVersion,
-            compressionType compression=UNCOMPRESSED
-        );
+            compressionType compression = UNCOMPRESSED
+        )
+        :
+            OSstream(os, name, IOstreamOption(format, version, compression))
+        {}
 
 
     // Member functions

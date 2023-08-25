@@ -84,12 +84,10 @@ Foam::OFCstreamBase::OFCstreamBase
     const fileName& pathname,
     const objectRegistry& registry,
     ios_base::openmode mode,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression
+    IOstreamOption streamOpt
 )
 :
-    OFstream(pathname, mode, format, version, compression),
+    OFstream(pathname, mode, streamOpt),
     pathname_(pathname),
     coherentMesh_
     (
@@ -327,6 +325,8 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
     globalUniformity =
         returnReduce(globalUniformity, fieldTag::uniformityCompareOp);
 
+    auto sliceStreamPtr = Foam::SliceWriting{}.createStream();
+
     forAll(fieldDataEntries, i)
     {
         fieldDataEntry& fde = *(fieldDataEntries[i]);
@@ -348,9 +348,8 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
             const label elemOffset = bgi.offset(Pstream::myProcNo());
 
             // Write to engine
-            auto sliceStreamPtr = Foam::SliceWriting{}.createStream();
-            sliceStreamPtr->open("fields", pathname_.path());
-            sliceStreamPtr->transfer
+            sliceStreamPtr->open("fields", pathname_.path()); // ToDoIO rename to "access"
+            sliceStreamPtr->transfer  // ToDoIO rename to "stage"
             (
                 fde.id(),
                 {nCmpts*nGlobalElems},
@@ -358,10 +357,17 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
                 {nCmpts*nElems},
                 reinterpret_cast<const scalar*>(fde.uList().cdata())
             );
-            sliceStreamPtr->sync();
 
             fde.nGlobalElems() = nGlobalElems;
         }
+    }
+
+    if (mode() == SYNC)
+    {
+        // sliceStreamPtr->sync(); // ToDoIO rename to "commit"
+                                // ToDoIO introduce "fileSync"
+        auto repo = SliceStreamRepo::instance();
+        repo->close();
     }
 
     if (Pstream::master())
