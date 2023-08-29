@@ -1689,6 +1689,9 @@ bool Foam::polyMesh::write() const
             slicePoints.cdata()
         );
         slicePoints.clear();
+
+        auto repo = SliceStreamRepo::instance();
+        repo->close();
     }
 
     return regIOobject::write();

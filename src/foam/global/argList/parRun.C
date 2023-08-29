@@ -25,11 +25,16 @@ License
 
 #include "parRun.H"
 
+#include "SliceStreamRepo.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::ParRunControl::~ParRunControl()
 {
+    auto repo = SliceStreamRepo::instance();
+    repo->open();
+    repo->close();
     if (RunPar)
     {
         Info<< "Finalising parallel run" << endl;

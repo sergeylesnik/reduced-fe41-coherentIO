@@ -107,6 +107,28 @@ Foam::IOstreamOption::modeEnum(const word& mode)
 }
 
 
+Foam::IOstreamOption::dataDestination
+Foam::IOstreamOption::destinationEnum(const word& destination)
+{
+    if (destination == "time")
+    {
+        return IOstreamOption::TIME;
+    }
+    else if (destination == "case")
+    {
+        return IOstreamOption::CASE;
+    }
+    else
+    {
+        WarningInFunction
+            << "bad data specifier '" << destination << "', using 'sync'"
+            << endl;
+
+        return IOstreamOption::TIME;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<

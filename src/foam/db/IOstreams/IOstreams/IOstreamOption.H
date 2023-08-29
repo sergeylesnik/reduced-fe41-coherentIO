@@ -81,6 +81,13 @@ public:
             DEFERRED
         };
 
+        //- Enumeration for the destination of heavy data files (data.bp)
+        enum dataDestination : char
+        {
+            TIME,
+            CASE
+        };
+
         //- Ostream operator
         friend Ostream& operator<<(Ostream& os, const streamFormat& sf);
 
@@ -206,6 +213,8 @@ private:
         //- I/O stream mode (sync | deferred)
         streamMode mode_;
 
+        //- Heavy data file (data.bp) destination (time | case)
+        dataDestination destination_;
 
 public:
 
@@ -217,13 +226,15 @@ public:
             streamFormat format = streamFormat::ASCII,
             versionNumber version = versionNumber(2.0),
             compressionType compression = compressionType::UNCOMPRESSED,
-            streamMode mode = streamMode::SYNC
+            streamMode mode = streamMode::SYNC,
+            dataDestination destination = dataDestination::TIME
         )
         :
             format_(format),
             version_(version),
             compression_(compression),
-            mode_(mode)
+            mode_(mode),
+            destination_(destination)
         {}
 
 
@@ -231,6 +242,8 @@ public:
 
         //- Return stream mode of given mode name
         static streamMode modeEnum(const word&);
+
+        static dataDestination destinationEnum(const word&);
 
 
     // Member Functions
@@ -298,6 +311,7 @@ public:
             compression_ = compressionEnum(cmp);
             return cmp0;
         }
+
         //- Return current stream mode
         streamMode mode() const
         {
@@ -318,6 +332,28 @@ public:
             streamMode md0 = mode_;
             mode_ = modeEnum(md);
             return md0;
+        }
+
+        //- Return current stream mode
+        dataDestination destination() const
+        {
+            return destination_;
+        }
+
+        //- Set the data destination
+        dataDestination destination(const dataDestination dest)
+        {
+            dataDestination dest0 = destination_;
+            destination_ = dest;
+            return dest0;
+        }
+
+        //- Set the data destination from word
+        dataDestination destination(const word& dest)
+        {
+            dataDestination dest0 = destination_;
+            destination_ = destinationEnum(dest);
+            return dest0;
         }
 };
 

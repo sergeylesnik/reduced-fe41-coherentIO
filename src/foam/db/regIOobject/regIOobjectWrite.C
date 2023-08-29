@@ -128,15 +128,38 @@ bool Foam::regIOobject::write() const
 {
     addProfile2(io, "Foam::regIOobject::write()");
 
+    bool writeBulkData = false;
+    auto destination = IOstreamOption::TIME;
+    if (time().controlDict().lookupOrDefault("writeBulkData", false))
+    {
+        writeBulkData = true;
+        destination = IOstreamOption::CASE;
+    }
+
     IOstreamOption streamOpt
     (
         time().writeFormat(),
         IOstream::currentVersion,
         time().writeCompression(),
-        IOstreamOption::SYNC  // ToDoIO Store this default in foamTime?
+        IOstreamOption::SYNC,  // ToDoIO Store this default in foamTime?
+        destination
     );
 
-    return writeObject(streamOpt);
+    if (time().writeFormat() == IOstream::COHERENT)
+    {
+        auto repo = SliceStreamRepo::instance();
+        repo->open(writeBulkData);
+    }
+
+    bool ok = writeObject(streamOpt);
+
+    if (time().writeFormat() == IOstream::COHERENT)
+    {
+        auto repo = SliceStreamRepo::instance();
+        repo->close(writeBulkData);
+    }
+
+    return ok;
 }
 
 

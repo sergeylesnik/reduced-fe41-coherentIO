@@ -80,8 +80,11 @@ public:
     template<typename FeatureType>
     void remove(const std::shared_ptr<FeatureType>&, const Foam::string&);
 
+    // Initiating engines with Engine::BeginStep
+    void open(const bool atScale = false);
+
     // Closing all engines and clear the engine map
-    void close();
+    void close(const bool atScale = false);
 
     void clear();
 

@@ -393,16 +393,38 @@ bool Foam::objectRegistry::readIfModified()
 
 bool Foam::objectRegistry::write() const
 {
-    return writeObject
+    bool writeBulkData = false;
+    auto destination = IOstreamOption::TIME;
+    if (time().controlDict().lookupOrDefault("writeBulkData", false))
+    {
+        writeBulkData = true;
+        destination = IOstreamOption::CASE;
+    }
+
+    IOstreamOption streamOpt
     (
-        IOstreamOption
-        (
-            time().writeFormat(),
-            IOstream::currentVersion,
-            time().writeCompression(),
-            streamMode_
-        )
+        time().writeFormat(),
+        IOstream::currentVersion,
+        time().writeCompression(),
+        streamMode_,  // ToDoIO Store this default in foamTime?
+        destination
     );
+
+    if (time().writeFormat() == IOstreamOption::COHERENT)
+    {
+        auto repo = SliceStreamRepo::instance();
+        repo->open(writeBulkData);
+    }
+
+    bool ok = writeObject(streamOpt);
+
+    if (time().writeFormat() == IOstreamOption::COHERENT)
+    {
+        auto repo = SliceStreamRepo::instance();
+        repo->close(writeBulkData);
+    }
+
+    return ok;
 }
 
 
@@ -444,8 +466,6 @@ bool Foam::objectRegistry::writeObject
             ok = iter()->writeObject(streamOpt) && ok;
         }
     }
-    auto repo = SliceStreamRepo::instance();
-    repo->close();
 
     return ok;
 }

@@ -99,7 +99,21 @@ void Foam::SliceStreamRepo::push(const Foam::label& input)
 }
 
 
-void Foam::SliceStreamRepo::close()
+void Foam::SliceStreamRepo::open(const bool atScale)
+{
+    for (const auto& enginePair: *(pimpl_->engineMap_))
+    {
+        if (*(enginePair.second))
+        {
+            if (enginePair.second->OpenMode() != adios2::Mode::ReadRandomAccess)
+            {
+                enginePair.second->BeginStep();
+            }
+        }
+    }
+}
+
+void Foam::SliceStreamRepo::close(const bool atScale)
 {
     for (const auto& enginePair: *(pimpl_->engineMap_))
     {
@@ -109,10 +123,17 @@ void Foam::SliceStreamRepo::close()
             {
                 enginePair.second->EndStep();
             }
-            enginePair.second->Close();
+            if (!atScale)
+            {
+                enginePair.second->Close();
+            }
         }
     }
-    pimpl_->engineMap_->clear();
+
+    if (!atScale)
+    {
+        pimpl_->engineMap_->clear();
+    }
 }
 
 void Foam::SliceStreamRepo::clear()
