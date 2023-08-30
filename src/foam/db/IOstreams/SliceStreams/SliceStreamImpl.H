@@ -106,7 +106,7 @@ struct Foam::SliceStream::Impl
     // Reading local/global array
     template<class DataType>
     typename std::enable_if<!std::is_const<DataType>::value, void>::type
-    transfer
+    get
     (
         adios2::IO* const ioPtr,
         adios2::Engine* const enginePtr,
@@ -134,7 +134,7 @@ struct Foam::SliceStream::Impl
     // Reading local/global array
     template<class ContainerType>
     typename std::enable_if<!std::is_const<ContainerType>::value, void>::type
-    transfer
+    get
     (
         adios2::IO* const ioPtr,
         adios2::Engine* const enginePtr,
@@ -163,7 +163,7 @@ struct Foam::SliceStream::Impl
 
     // Writing local/global array
     template<class DataType>
-    void transfer
+    void put
     (
         adios2::IO* const ioPtr,
         adios2::Engine* const enginePtr,

@@ -31,7 +31,7 @@ void sliceReadToContainer
 
 class SliceStream
 {
-    virtual void v_open() = 0;
+    virtual void v_access() = 0;
 
 protected:
 
@@ -65,10 +65,10 @@ public:
     virtual ~SliceStream();
 
     // Open engine according to mesh or field data and path
-    void open(const Foam::string& type, const Foam::string& path = "");
+    void access(const Foam::string& type, const Foam::string& path = "");
 
     // Reading local/global scalar array
-    void transfer
+    void get
     (
         const string& blockId,
         scalar* data,
@@ -77,7 +77,7 @@ public:
     );
 
     // Reading local/global label array
-    void transfer
+    void get
     (
         const string& blockId,
         label* data,
@@ -86,10 +86,21 @@ public:
     );
 
     // Reading local/global char array
-    void transfer
+    void get
     (
         const string& blockId,
         char* data,
+        const labelList& start = {},
+        const labelList& count = {}
+    );
+
+    // Reading local/global array
+    template<class ContainerType>
+    typename std::enable_if<!std::is_const<ContainerType>::value, void>::type
+    get
+    (
+        const string& blockId,
+        ContainerType& data,
         const labelList& start = {},
         const labelList& count = {}
     );
@@ -100,19 +111,8 @@ public:
 
     label getBufferSize(const Foam::string& blockId, const char* const data);
 
-    // Reading local/global array
-    template<class ContainerType>
-    typename std::enable_if<!std::is_const<ContainerType>::value, void>::type
-    transfer
-    (
-        const string& blockId,
-        ContainerType& data,
-        const labelList& start = {},
-        const labelList& count = {}
-    );
-
     // Writing local/global scalar array
-    void transfer
+    void put
     (
         const Foam::string& blockId,
         const Foam::labelList& shape,
@@ -124,7 +124,7 @@ public:
     );
 
     // Writing local/global label array
-    void transfer
+    void put
     (
         const Foam::string& blockId,
         const Foam::labelList& shape,
@@ -135,7 +135,7 @@ public:
         const bool masked = false
     );
 
-    void transfer
+    void put
     (
         const Foam::string& blockId,
         const Foam::labelList& shape,
@@ -146,7 +146,7 @@ public:
         const bool masked = false
     );
 
-    void sync();
+    void bufferSync();
 
 };
 
@@ -156,7 +156,7 @@ public:
 // Reading local/global array
 template<class ContainerType>
 typename std::enable_if<!std::is_const<ContainerType>::value, void>::type
-Foam::SliceStream::transfer
+Foam::SliceStream::get
 (
     const Foam::string& blockId,
     ContainerType& container,
@@ -173,7 +173,7 @@ Foam::SliceStream::transfer
     {
         container.resize(count[0]);
     }
-    transfer(blockId, container.data(), start, count);
+    get(blockId, container.data(), start, count);
 }
 
 
@@ -189,9 +189,9 @@ void Foam::sliceReadToContainer
 )
 {
     auto SliceStreamPtr = SliceReading{}.createStream();
-    SliceStreamPtr->open(type, pathname);
-    SliceStreamPtr->transfer(blockId, container, start, count);
-    SliceStreamPtr->sync();
+    SliceStreamPtr->access(type, pathname);
+    SliceStreamPtr->get(blockId, container, start, count);
+    SliceStreamPtr->bufferSync();
 }
 
 

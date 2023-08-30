@@ -147,8 +147,8 @@ void Foam::IFCstream::readCompoundTokenData
 
             // ToDoIO Provide a better interface from SliceStream for reading
             // of fields.
-            sliceStreamPtr_->open("fields", pathname_.path());
-            sliceStreamPtr_->transfer
+            sliceStreamPtr_->access("fields", pathname_.path());
+            sliceStreamPtr_->get
             (
                 id,
                 reinterpret_cast<cmptType*>(compToken.data()),
@@ -212,7 +212,7 @@ void Foam::IFCstream::reader<Type, PatchField, GeoMesh>::read
     }
 
     // Ensure that the data is read from storage
-    ifs.sliceStreamPtr_->sync();
+    ifs.sliceStreamPtr_->bufferSync();
 
     return;
 }

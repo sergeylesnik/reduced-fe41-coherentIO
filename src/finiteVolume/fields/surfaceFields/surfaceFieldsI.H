@@ -100,8 +100,8 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
 
             coherentData.resize(localSize);
 
-            ifs.sliceStreamPtr_->open("fields", ifs.pathname_.path());
-            ifs.sliceStreamPtr_->transfer
+            ifs.sliceStreamPtr_->access("fields", ifs.pathname_.path());
+            ifs.sliceStreamPtr_->get
             (
                 id,
                 reinterpret_cast<cmptType*>(coherentData.data()),
@@ -109,8 +109,8 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
                 List<label>({nCmpts*nElems})
             );
 
-            // Closing the IO engine ensures that the data is read from storage
-            ifs.sliceStreamPtr_->sync();
+            // Syncronizing IO engine ensures that the data is read from storage
+            ifs.sliceStreamPtr_->bufferSync();
 
             break;
         }
@@ -135,7 +135,7 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
             }
 
             // Closing the IO engine ensures that the data is read from storage
-            ifs.sliceStreamPtr_->sync();
+            ifs.sliceStreamPtr_->bufferSync();
 
             return;
         }
@@ -210,7 +210,7 @@ void Foam::IFCstream::reader<Type, Foam::fvsPatchField, Foam::surfaceMesh>::read
     label pfI = 0;
 
     // Closing the IO engine ensures that the data is read from disk
-    ifs.sliceStreamPtr_->sync();
+    ifs.sliceStreamPtr_->bufferSync();
 
     if (pf.empty())
     {

@@ -16,7 +16,7 @@ Foam::FileSliceStream::FileSliceStream
 {}
 
 
-void Foam::FileSliceStream::v_open()
+void Foam::FileSliceStream::v_access()
 {
     Foam::SliceStreamRepo* repo = Foam::SliceStreamRepo::instance();
     ioPtr_ = sliceFile_->createIO(repo->pullADIOS());

@@ -17,7 +17,7 @@ class FileSliceStream
 
     std::unique_ptr<StreamFeatures> sliceFile_;
 
-    virtual void v_open() final;
+    virtual void v_access() final;
 
 public:
 

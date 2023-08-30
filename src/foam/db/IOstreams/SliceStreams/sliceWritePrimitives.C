@@ -44,9 +44,9 @@ void _implWritePrimitives
 )
 {
     auto sliceStreamPtr = Foam::SliceWriting{}.createStream();
-    sliceStreamPtr->open( type, pathname );
-    sliceStreamPtr->transfer( blockId, shape, start, count, buf );
-    sliceStreamPtr->sync();
+    sliceStreamPtr->access( type, pathname );
+    sliceStreamPtr->put( blockId, shape, start, count, buf );
+    sliceStreamPtr->bufferSync();
 }
 
 

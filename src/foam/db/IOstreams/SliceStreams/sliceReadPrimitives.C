@@ -42,16 +42,16 @@ void _implReadPrimitives
 )
 {
     auto sliceStreamPtr = Foam::SliceReading{}.createStream();
-    sliceStreamPtr->open(type, pathname);
+    sliceStreamPtr->access(type, pathname);
     if (start.size()>0 && count.size()>0)
     {
-        sliceStreamPtr->transfer(blockId, buf, start, count);
+        sliceStreamPtr->get(blockId, buf, start, count);
     }
     else
     {
-        sliceStreamPtr->transfer(blockId, buf);
+        sliceStreamPtr->get(blockId, buf);
     }
-    sliceStreamPtr->sync();
+    sliceStreamPtr->bufferSync();
 }
 
 

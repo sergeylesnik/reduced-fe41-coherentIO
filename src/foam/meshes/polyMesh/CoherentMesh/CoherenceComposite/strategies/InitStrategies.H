@@ -96,7 +96,7 @@ struct InitFromADIOS
     label size() const
     {
         auto sliceStreamPtr = SliceReading{}.createStream();
-        sliceStreamPtr->open(type_, pathname_);
+        sliceStreamPtr->access(type_, pathname_);
         FieldType dummy{};
         return sliceStreamPtr->getBufferSize(name_, dummy.data());
     }
@@ -243,7 +243,7 @@ private:
     ) final
     {
         auto sliceStreamPtr = SliceReading{}.createStream();
-        sliceStreamPtr->open(type_, pathname_);
+        sliceStreamPtr->access(type_, pathname_);
 
         // Naive partitioning based on total size of input data
         label total_size = sliceStreamPtr->getBufferSize(name_, data.data());
@@ -256,8 +256,8 @@ private:
         count[0] += 1;
         data.resize(count[0]);
 
-        sliceStreamPtr->transfer(name_, data, start, count);
-        sliceStreamPtr->sync();
+        sliceStreamPtr->get(name_, data, start, count);
+        sliceStreamPtr->bufferSync();
     }
 
     Foam::string type_{};

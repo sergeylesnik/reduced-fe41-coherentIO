@@ -331,7 +331,7 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
     {
         path = path.path();
     }
-    sliceStreamPtr->open("fields", path); // ToDoIO rename to "access"
+    sliceStreamPtr->access("fields", path);
 
     forAll(fieldDataEntries, i)
     {
@@ -354,7 +354,7 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
             const label elemOffset = bgi.offset(Pstream::myProcNo());
 
             // Write to engine
-            sliceStreamPtr->transfer  // ToDoIO rename to "stage"
+            sliceStreamPtr->put
             (
                 fde.id(),
                 {nCmpts*nGlobalElems},
@@ -366,11 +366,11 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
             fde.nGlobalElems() = nGlobalElems;
         }
     }
-    sliceStreamPtr->sync(); // ToDoIO rename to "commit"
+    sliceStreamPtr->bufferSync();
 
     if (mode() == SYNC)
     {
-        // sliceStreamPtr->sync(); // ToDoIO rename to "commit"
+        // sliceStreamPtr->bufferSync(); // ToDoIO rename to "commit"
                                 // ToDoIO introduce "fileSync"
         //auto repo = SliceStreamRepo::instance();
         //repo->close();

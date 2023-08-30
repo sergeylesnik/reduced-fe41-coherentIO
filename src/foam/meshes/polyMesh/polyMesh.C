@@ -1591,7 +1591,7 @@ bool Foam::polyMesh::write() const
         // Write mesh to a separate file
         auto path = pointsInstance()/meshDir();
         auto sliceStreamPtr = SliceWriting{}.createStream();
-        sliceStreamPtr->open("mesh", path);
+        sliceStreamPtr->access("mesh", path);
 
         SlicePermutation sliceablePermutation{ *this };
 
@@ -1620,7 +1620,7 @@ bool Foam::polyMesh::write() const
         }
 
         auto faceStarts = determineOffsets2D( sliceFaces ); // Generate offsets of linearized face list
-        sliceStreamPtr->transfer
+        sliceStreamPtr->put
         (
             "faceStarts",
             {faceStarts.size()},
@@ -1628,7 +1628,7 @@ bool Foam::polyMesh::write() const
             {faceStarts.size()},
             faceStarts.cdata()
         );
-        sliceStreamPtr->transfer
+        sliceStreamPtr->put
         (
             "faces",
             {linearizedFaces.size()},
@@ -1651,7 +1651,7 @@ bool Foam::polyMesh::write() const
         {
             ownerStarts[ownerId] += ownerStarts[ownerId-1];
         }
-        sliceStreamPtr->transfer
+        sliceStreamPtr->put
         (
             "ownerStarts",
             {ownerStarts.size()},
@@ -1664,7 +1664,7 @@ bool Foam::polyMesh::write() const
         // Generate local neighbours
         Foam::labelList sliceNeighbours;
         sliceablePermutation.retrieveNeighbours( sliceNeighbours, *this );
-        sliceStreamPtr->transfer
+        sliceStreamPtr->put
         (
             "neighbours",
             {sliceNeighbours.size()},
@@ -1672,7 +1672,7 @@ bool Foam::polyMesh::write() const
             {sliceNeighbours.size()},
             sliceNeighbours.cdata()
         );
-        sliceStreamPtr->sync();
+        sliceStreamPtr->bufferSync();
         sliceNeighbours.clear();
         ownerStarts.clear();
         linearizedFaces.clear();

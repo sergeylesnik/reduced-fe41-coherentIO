@@ -49,15 +49,15 @@ Foam::SliceStream::setPath(const Foam::string& type, const Foam::string& path)
 
 // * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
-void Foam::SliceStream::open(const Foam::string& type, const Foam::string& path)
+void Foam::SliceStream::access(const Foam::string& type, const Foam::string& path)
 {
     type_ = type;
     setPath(type, path);
-    v_open();
+    v_access();
 }
 
 
-void Foam::SliceStream::sync()
+void Foam::SliceStream::bufferSync()
 {
     if (enginePtr_)
     {
@@ -123,7 +123,7 @@ Foam::label Foam::SliceStream::getBufferSize
 
 
 // Reading
-void Foam::SliceStream::transfer
+void Foam::SliceStream::get
 (
     const Foam::string& blockId,
     scalar* data,
@@ -131,7 +131,7 @@ void Foam::SliceStream::transfer
     const Foam::labelList& count
 )
 {
-    pimpl_->transfer
+    pimpl_->get
             (
                 ioPtr_.get(),
                 enginePtr_.get(),
@@ -143,7 +143,7 @@ void Foam::SliceStream::transfer
 }
 
 
-void Foam::SliceStream::transfer
+void Foam::SliceStream::get
 (
     const Foam::string& blockId,
     label* data,
@@ -151,7 +151,7 @@ void Foam::SliceStream::transfer
     const Foam::labelList& count
 )
 {
-    pimpl_->transfer
+    pimpl_->get
             (
                 ioPtr_.get(),
                 enginePtr_.get(),
@@ -163,7 +163,7 @@ void Foam::SliceStream::transfer
 }
 
 
-void Foam::SliceStream::transfer
+void Foam::SliceStream::get
 (
     const Foam::string& blockId,
     char* data,
@@ -171,7 +171,7 @@ void Foam::SliceStream::transfer
     const Foam::labelList& count
 )
 {
-    pimpl_->transfer
+    pimpl_->get
             (
                 ioPtr_.get(),
                 enginePtr_.get(),
@@ -184,7 +184,7 @@ void Foam::SliceStream::transfer
 
 
 // Writing
-void Foam::SliceStream::transfer
+void Foam::SliceStream::put
 (
     const Foam::string& blockId,
     const Foam::labelList& shape,
@@ -195,7 +195,7 @@ void Foam::SliceStream::transfer
     const bool masked
 )
 {
-    pimpl_->transfer
+    pimpl_->put
             (
                 ioPtr_.get(),
                 enginePtr_.get(),
@@ -210,7 +210,7 @@ void Foam::SliceStream::transfer
 }
 
 
-void Foam::SliceStream::transfer
+void Foam::SliceStream::put
 (
     const Foam::string& blockId,
     const Foam::labelList& shape,
@@ -221,7 +221,7 @@ void Foam::SliceStream::transfer
     const bool masked
 )
 {
-    pimpl_->transfer
+    pimpl_->put
             (
                 ioPtr_.get(),
                 enginePtr_.get(),
@@ -236,7 +236,7 @@ void Foam::SliceStream::transfer
 }
 
 
-void Foam::SliceStream::transfer
+void Foam::SliceStream::put
 (
     const Foam::string& blockId,
     const Foam::labelList& shape,
@@ -247,7 +247,7 @@ void Foam::SliceStream::transfer
     const bool masked
 )
 {
-    pimpl_->transfer
+    pimpl_->put
             (
                 ioPtr_.get(),
                 enginePtr_.get(),
