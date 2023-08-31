@@ -370,10 +370,7 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
 
     if (mode() == SYNC)
     {
-        // sliceStreamPtr->bufferSync(); // ToDoIO rename to "commit"
-                                // ToDoIO introduce "fileSync"
-        //auto repo = SliceStreamRepo::instance();
-        //repo->close();
+        sliceStreamPtr->flush();
     }
 
     if (Pstream::master())

@@ -33,6 +33,8 @@ class SliceStream
 {
     virtual void v_access() = 0;
 
+    virtual void v_flush() = 0;
+
 protected:
 
     // Forward declaration of bridge to implementation
@@ -147,6 +149,8 @@ public:
     );
 
     void bufferSync();
+
+    void flush();
 
 };
 

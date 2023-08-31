@@ -19,6 +19,8 @@ class FileSliceStream
 
     virtual void v_access() final;
 
+    virtual void v_flush() final;
+
 public:
 
     explicit FileSliceStream(std::unique_ptr<StreamFeatures>&);

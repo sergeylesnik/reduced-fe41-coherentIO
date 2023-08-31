@@ -23,3 +23,10 @@ void Foam::FileSliceStream::v_access()
     enginePtr_ = sliceFile_->createEngine(ioPtr_.get(), paths_.getPathName());
 }
 
+
+void Foam::FileSliceStream::v_flush()
+{
+    Foam::SliceStreamRepo* repo = Foam::SliceStreamRepo::instance();
+    repo->close();
+    v_access();
+}

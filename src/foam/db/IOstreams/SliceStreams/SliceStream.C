@@ -261,4 +261,10 @@ void Foam::SliceStream::put
             );
 }
 
+
+void Foam::SliceStream::flush()
+{
+    v_flush();
+}
+
 // ************************************************************************* //
