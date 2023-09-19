@@ -8,9 +8,9 @@ set -x
 wmakeLnInclude decompositionMethods
 
 wmake libso decompositionMethods
-wmake libso metisDecomp
-wmake libso parMetisDecomp
-wmake libso scotchDecomp
+#wmake libso metisDecomp
+#wmake libso parMetisDecomp
+#wmake libso scotchDecomp
 
 
 # ----------------------------------------------------------------- end-of-file

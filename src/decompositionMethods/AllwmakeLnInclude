@@ -5,6 +5,6 @@ set -x
 wmakeLnInclude decomposeReconstruct
 
 wmakeLnInclude decompositionMethods
-wmakeLnInclude metisDecomp
-wmakeLnInclude parMetisDecomp
-wmakeLnInclude scotchDecomp
+#wmakeLnInclude metisDecomp
+#wmakeLnInclude parMetisDecomp
+#wmakeLnInclude scotchDecomp
