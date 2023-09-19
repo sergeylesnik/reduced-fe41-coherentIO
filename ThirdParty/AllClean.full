@@ -1,4 +1,10 @@
 #!/bin/bash
 
 ./AllClean
-rm -r packages/ rpmBuild/tmp/ rpmBuild/TGZS/ rpmBuild/BUILDROOT/ rpmBuild/rpmDB/* rpmBuild/RPMS/* rpmBuild/BUILD/*
+rm -r packages/
+rm -r rpmBuild/tmp/
+rm -r rpmBuild/TGZS/
+rm -r rpmBuild/BUILDROOT/
+rm -r rpmBuild/rpmDB/
+rm -r rpmBuild/RPMS/
+rm -r rpmBuild/BUILD/

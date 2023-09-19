@@ -27,7 +27,7 @@
 # Description
 #     RPM spec file for creating a relocatable RPM
 #
-# Authors:
+# Author
 #     Gregor Weiss, HLRS (2023)
 #
 #------------------------------------------------------------------------------
@@ -67,7 +67,7 @@
 %define buildroot       %{_topdir}/BUILD/%{name}-%{version}-root
 
 BuildRoot:	        %{buildroot}
-Summary: 		%{name}
+Summary: 		ADIOS2
 License: 		Unkown
 Name: 			%{name}
 Version: 		%{version}
@@ -136,8 +136,8 @@ Group: 			Development/Tools
     #
     # Generate package specific .sh file for foam-extend
     #
-mkdir -p %{_installPrefix}/etc
-cat << DOT_SH_EOF > %{_installPrefix}/etc/%{name}-%{version}.sh
+mkdir -p $RPM_BUILD_ROOT/%{_installPrefix}/etc
+cat << DOT_SH_EOF > $RPM_BUILD_ROOT/%{_installPrefix}/etc/%{name}-%{version}.sh
 # Load %{name}-%{version} binaries if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -162,7 +162,7 @@ DOT_SH_EOF
     #
     # Generate package specific .csh file for foam-extend
     #
-cat << DOT_CSH_EOF > %{_installPrefix}/etc/%{name}-%{version}.csh
+cat << DOT_CSH_EOF > $RPM_BUILD_ROOT/%{_installPrefix}/etc/%{name}-%{version}.csh
 # Load %{name}-%{version} binaries if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 setenv ADIOS2_DIR \$WM_THIRD_PARTY_DIR/packages/%{name}-%{version}/platforms/\$WM_OPTIONS
@@ -187,9 +187,10 @@ setenv ADIOS2_FLAGS $(adios2-config --cxx-flags)
 
 DOT_CSH_EOF
 
+    (cd %{_prefix}; mv $RPM_BUILD_ROOT/%{_installPrefix}/etc %{_installPrefix})
     #finally, generate a .tgz file for systems where using rpm for installing packages
     # as a non-root user might be a problem.
-    (mkdir -p  %{_topdir}/TGZS/%{_target_cpu}; cd $RPM_BUILD_ROOT/%{_prefix}; tar -zcvf %{_topdir}/TGZS/%{_target_cpu}/%{name}-%{version}.tgz  packages/%{name}-%{version})
+    (mkdir -p  %{_topdir}/TGZS/%{_target_cpu}; cd %{_prefix}; tar -zcf %{_topdir}/TGZS/%{_target_cpu}/%{name}-%{version}.tgz  packages/%{name}-%{version})
 
 %clean
 
