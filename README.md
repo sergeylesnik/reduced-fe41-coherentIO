@@ -25,7 +25,7 @@ mpirun -n X icoFoam -parallel
 
 Note that `decomposePar` actually is optional because a *naive* decomposition can be used during start-up phase of `icoFoam`. Also, if the number of processors in `decomposeParDict` does not match the number of ranks in `mpirun -n X`, the *naive* decomposition is used. Hence, `decomposePar` becomes optional and restarts on arbitrary number of MPI ranks is possible.
 
-After the first run the time folder contain a ADIOS2 bp-file. The data can be observed using the bpls command line tool.
+After the first run the time folders contain a ADIOS2 bp-file. The data can be observed using the command line tool `bpls`.
 
 ```
 bpls 0.001/data.bp/
@@ -35,9 +35,9 @@ bpls 0.001/data.bp/
   double   phi/internalField                   {2970000}
 ```
 
-Please also refer to https://adios2.readthedocs.io/en/v2.9.1/ about viewing and extracting data from ADIOS2 files, for instance using the tool `bpls`
+Please also refer to https://adios2.readthedocs.io/en/v2.9.1/ about viewing and extracting data from ADIOS2 files.
 
-If the `system/controlDict` sets `writeBulkData yes;` the the data of all time steps is stored in a case-global ADIOS2 bp-file. The time steps share one common `data.bp` file in the case folder. In that case, asynchronous out can be activate in the `system/config.xml`:
+If the `system/controlDict` sets `writeBulkData yes`, the the data of all time steps is stored in a case-global ADIOS2 bp-file. The time steps share one common `data.bp` file in the case folder. In that case, asynchronous output can be activate in the `system/config.xml`:
 
 ```
 <parameter key="AsyncOpen" value="true"/>
