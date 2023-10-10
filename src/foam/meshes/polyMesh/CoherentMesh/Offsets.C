@@ -80,9 +80,27 @@ Foam::label Foam::Offsets::count(Foam::label myProcNo) const
 }
 
 
-Foam::label Foam::Offsets::size() const
+Foam::label Foam::Offsets::count() const
 {
     return count(Pstream::myProcNo());
+}
+
+
+Foam::label Foam::Offsets::offset(Foam::label myProcNo) const
+{
+    return lowerBound(myProcNo);
+}
+
+
+Foam::label Foam::Offsets::offset() const
+{
+    return offset(Pstream::myProcNo());
+}
+
+
+Foam::label Foam::Offsets::size() const
+{
+    return upperBound(Pstream::nProcs()-1);
 }
 
 

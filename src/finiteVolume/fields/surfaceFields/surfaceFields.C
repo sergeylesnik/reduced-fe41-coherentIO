@@ -52,7 +52,7 @@ defineTemplateTypeNameAndDebug(surfaceTensorField, 0);
 template<>
 label IFCstream::coherentFieldSize<fvsPatchField, surfaceMesh>()
 {
-    return coherentMesh_.internalSurfaceFieldOffsets().size();
+    return coherentMesh_.internalSurfaceFieldOffsets().count();
 }
 
 

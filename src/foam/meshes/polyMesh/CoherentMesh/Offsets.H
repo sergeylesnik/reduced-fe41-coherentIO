@@ -90,6 +90,16 @@ public:
     // Return the difference between lower and upper bound
     label count(label) const;
 
+    // Return the count for this rank
+    label count() const;
+
+    // Return the lower bound
+    label offset(label) const;
+
+    // Return the offset for this rank
+    label offset() const;
+
+    // Return the global size
     label size() const;
 
     iterator begin();
