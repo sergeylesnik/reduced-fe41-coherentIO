@@ -166,6 +166,11 @@ public:
         return procBoundaryIDs_;
     }
 
+    inline const std::vector<Offsets>& patchOffsets() const
+    {
+        return boundarySurfacePatchOffsets_;
+    }
+
     void polyNeighbours(labelList&);
 
     void polyOwner(labelList&);
