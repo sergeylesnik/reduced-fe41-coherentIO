@@ -338,6 +338,13 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
     }
     sliceStreamPtr->access("fields", path);
 
+    std::vector<Offsets> offsets({internalFieldOffsets_});
+    const auto& patchOffsets = coherentMesh_.patchOffsets();
+    for (Offsets off : patchOffsets)
+    {
+        offsets.push_back(off);
+    }
+
     forAll(fieldDataEntries, i)
     {
         fieldDataEntry& fde = *(fieldDataEntries[i]);
@@ -351,12 +358,11 @@ void Foam::OFCstreamBase::writeGlobalGeometricField()
         // processorXX.
         if (!fde.uniform())
         {
-            const label nElems = fde.uList().size(); //nElems();
             const label nCmpts = fde.uList().nComponents();
 
-            const globalIndex bgi(nElems);
-            const label nGlobalElems = bgi.size();
-            const label elemOffset = bgi.offset(Pstream::myProcNo());
+            const label nGlobalElems = offsets[i].size();
+            const label elemOffset = offsets[i].offset();
+            const label nElems = offsets[i].count();
 
             // Write to engine
             sliceStreamPtr->put

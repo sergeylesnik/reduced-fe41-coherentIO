@@ -67,6 +67,7 @@ protected:
 
         fileName pathname_;
         CoherentMesh& coherentMesh_;
+        Offsets internalFieldOffsets_;
 
         //- Dictionary holding both entries for the ASCII file and pointer,
         //  size data for the BLOBs.
@@ -210,6 +211,7 @@ public:
     //- Destructor
     virtual ~OFCstream()
     {
+        internalFieldOffsets_ = coherentMesh_.cellOffsets();
         this->removeProcPatchesFromDict();
         this->writeGlobalGeometricField();
     }

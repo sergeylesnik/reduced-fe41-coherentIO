@@ -417,6 +417,7 @@ Foam::OFCstream<Type, Foam::fvsPatchField, Foam::surfaceMesh>::OFCstream
 template<class Type>
 Foam::OFCstream<Type, Foam::fvsPatchField, Foam::surfaceMesh>::~OFCstream()
 {
+    internalFieldOffsets_ = coherentMesh_.internalSurfaceFieldOffsets();
     combineCoherentInternal();
     this->removeProcPatchesFromDict();
     this->writeGlobalGeometricField();
