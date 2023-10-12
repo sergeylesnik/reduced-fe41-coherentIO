@@ -21,6 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Author
+    Sergey Lesnik, Wikki GmbH, 2023
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 \*---------------------------------------------------------------------------*/
 
 #include "fieldTag.H"

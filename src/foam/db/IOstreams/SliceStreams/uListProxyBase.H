@@ -25,7 +25,12 @@ Class
     Foam::uListProxyBase
 
 Description
-    Interface to UList<T> abstracting type T.
+    Interface to UList<T> abstracting type T
+
+Author
+    Sergey Lesnik, Wikki GmbH, 2023
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Henrik Rusche, Wikki GmbH, 2023
 
 SourceFiles
     uListProxyBase.C

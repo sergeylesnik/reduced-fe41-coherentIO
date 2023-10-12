@@ -177,7 +177,6 @@ $(SliceStreams)/create/InputFeatures.C
 $(SliceStreams)/create/SliceWriting.C
 $(SliceStreams)/create/SliceReading.C
 $(SliceStreams)/buffer/SliceBuffer.C
-$(SliceStreams)/buffer/variableBuffer.C
 $(SliceStreams)/fieldDataEntry.C
 $(SliceStreams)/formattingEntry.C
 $(SliceStreams)/fieldTag.C

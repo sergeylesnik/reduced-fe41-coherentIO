@@ -27,9 +27,14 @@ Class
 Description
     Defining a mesh slice of a cell/face/point list.
 
+Author
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Sergey Lesnik, Wikki GmbH, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 SourceFiles
+    SliceI.H
     Slice.C
-    SliceI.C
 
 \*---------------------------------------------------------------------------*/
 

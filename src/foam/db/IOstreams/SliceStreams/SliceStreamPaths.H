@@ -27,6 +27,11 @@ Class
 Description
     Class to manage and fix file naming for ADIOS2 files
 
+Author
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Sergey Lesnik, Wikki GmbH, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 SourceFiles
     SliceStreamPaths.C
 

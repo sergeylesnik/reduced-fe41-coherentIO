@@ -27,8 +27,10 @@ Class
 Description
     Foam::ComponentDecorator
 
-SourceFiles
-    ComponentDecorator.C
+Author
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Sergey Lesnik, Wikki GmbH, 2023
+    Henrik Rusche, Wikki GmbH, 2023
 
 \*---------------------------------------------------------------------------*/
 

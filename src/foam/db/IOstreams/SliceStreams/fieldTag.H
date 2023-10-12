@@ -28,6 +28,11 @@ Description
     Tag class corresponds to a field and contains properties needed for the
     decision on the global uniformity of the field
 
+Author
+    Sergey Lesnik, Wikki GmbH, 2023
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 SourceFiles
     fieldTag.C
 

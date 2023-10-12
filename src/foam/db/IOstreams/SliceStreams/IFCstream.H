@@ -31,7 +31,13 @@ Description
     in the coherent format. GeometricField constructor obtains the ready-to-use
     dictionary.
 
+Author
+    Sergey Lesnik, Wikki GmbH, 2023
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 SourceFiles
+    IFCstreamI.H
     IFCstream.C
 
 \*---------------------------------------------------------------------------*/

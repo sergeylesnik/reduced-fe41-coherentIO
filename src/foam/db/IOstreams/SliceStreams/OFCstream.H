@@ -27,6 +27,11 @@ Class
 Description
     Output to file stream for coherent mesh and fields.
 
+Author
+    Sergey Lesnik, Wikki GmbH, 2023
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 SourceFiles
     OFCstream.C
 

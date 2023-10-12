@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!-- Config XML file -->
+
+<adios-config>
+
+    <!--====================================
+           Configuration for the Writer 
+        ====================================-->
+
+    <io name="write">
+        <engine type="File">
+            
+            <parameter key="NumAggregators" value="0"/>
+
+            <!-- 
+            <parameter key="AsyncOpen" value="true"/>
+            <parameter key="AsyncWrite" value="true"/>
+             -->
+            
+        </engine>
+
+        <transport type="File">
+            
+            <!-- POSIX, stdio (C FILE*), fstream (C++) -->
+            <parameter key="Library" value="POSIX"/>
+
+        </transport>
+
+    </io>
+
+
+    <!--=======================================
+           Configuration for the Reader
+        =======================================-->
+
+    <io name="reader">
+        <engine type="File">
+
+            <!-- for vectorized memory operations, make sure your system
+                 enables threads-->
+            <parameter key="Threads" value="1"/>
+
+        </engine>
+
+        <transport type="File">
+
+            <!-- POSIX, stdio (C FILE*), fstream (C++) -->
+            <parameter key="Library" value="POSIX"/>
+            
+        </transport>
+        
+    </io>
+
+</adios-config>

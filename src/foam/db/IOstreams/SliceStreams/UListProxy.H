@@ -25,8 +25,13 @@ Class
     Foam::UListProxy
 
 Description
-    A proxy of UList<T> containing type T. It inheriting from UList and
+    A proxy of UList<T> containing type T. It inherits from UList and
     provides additional functionality such as determination of uniformity.
+
+Author
+    Sergey Lesnik, Wikki GmbH, 2023
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Henrik Rusche, Wikki GmbH, 2023
 
 SourceFiles
     UListProxy.C

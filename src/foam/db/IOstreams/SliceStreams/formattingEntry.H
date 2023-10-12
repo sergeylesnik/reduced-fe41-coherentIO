@@ -28,6 +28,11 @@ Description
     A dictionary entry writing only contents by default, used to save
     formatting symbols for the final output
 
+Author
+    Sergey Lesnik, Wikki GmbH, 2023
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 SourceFiles
     formattingEntry.C
 

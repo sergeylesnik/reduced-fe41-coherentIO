@@ -38,7 +38,13 @@ Description
         pages = {159–168}
     }
 
+Author
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Sergey Lesnik, Wikki GmbH, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 SourceFiles
+    nonblockConsensusI.H
     nonblockConsensus.C
 
 \*---------------------------------------------------------------------------*/

@@ -21,6 +21,16 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    A couple of type traits and compile time constructs required
+    in some parallel I/O functionalities. (ToDoIO Should probably go somewhere
+    else in production level, release code)
+
+Author
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Sergey Lesnik, Wikki GmbH, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef primitives_traits_H

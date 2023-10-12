@@ -27,6 +27,11 @@ Class
 Description
     Entry class to store field relevant data in a dictionary
 
+Author
+    Sergey Lesnik, Wikki GmbH, 2023
+    Gregor Weiss, HLRS University of Stuttgart, 2023
+    Henrik Rusche, Wikki GmbH, 2023
+
 SourceFiles
     fieldDataEntry.C
 
