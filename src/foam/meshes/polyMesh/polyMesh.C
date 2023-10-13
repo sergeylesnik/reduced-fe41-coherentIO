@@ -1638,12 +1638,10 @@ bool Foam::polyMesh::write() const
         );
         sliceFaces.clear();
 
-        Foam::labelList sliceOwner(owner_);
-        sliceablePermutation.apply(sliceOwner);
         // Generate ownerStarts
         // - Takes into account if cell is not owning any faces.
         labelList ownerStarts( cells().size() + 1, 0 );
-        for (const auto& ownerId : sliceOwner )
+        for (const auto& ownerId : owner_ )
         {
             ownerStarts[ownerId+1] += 1;
         }
@@ -1659,7 +1657,6 @@ bool Foam::polyMesh::write() const
             {ownerStarts.size()},
             ownerStarts.cdata()
         );
-        sliceOwner.clear();
 
         // Generate local neighbours
         Foam::labelList sliceNeighbours;
